@@ -21,6 +21,8 @@ import logging
 logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
 
+EXPERIMENTS = ['dball', 'dbwins', 'rainbow', 'muesli']
+
 
 def eval_metrics(actual, pred):
     rmse = np.sqrt(mean_squared_error(actual, pred))
@@ -56,7 +58,11 @@ if __name__ == "__main__":
     alpha = float(sys.argv[1]) if len(sys.argv) > 1 else 0.5
     l1_ratio = float(sys.argv[2]) if len(sys.argv) > 2 else 0.5
 
-    with mlflow.start_run():
+    if 'dbwins' not in [elem.name for elem in mlflow.list_experiments()]:
+        _ = mlflow.create_experiment('dbwins')
+    experiment_id = mlflow.get_experiment_by_name('dbwins').experiment_id
+
+    with mlflow.start_run(experiment_id=experiment_id, run_name='see_where_this_goes'):
         lr = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, random_state=42)
         lr.fit(train_x, train_y)
 

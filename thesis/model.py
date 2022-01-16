@@ -1,12 +1,15 @@
+# pylint: disable=unused-variable
 """ This module will contain top level definition of Poker Model"""
+import mlflow
 from rl.agents import DQNAgent
 import pandas as pd
+# import neuron_poker.gym_env.env as env
 
 
 class PokerModel:
     """ class variables to keep track of rmse per estimator """
-    rmse = []
-    estimators = []
+    losses = []
+    networks = []
 
     def __init__(self, params: dict):
         """
@@ -34,3 +37,43 @@ class PokerModel:
 
     def mlflow_run(self, data_frame: pd.DataFrame, run_name: str = "Baseline"):
         """ Training and MLFlow logging will happen here """
+        with mlflow.start_run(run_name=run_name) as run:
+            # get mlflow run metadata
+            run_id = run.info.run_id
+            experiment_id = run.info.experiment_id
+
+            # create train and test data
+            x = data_frame  # pylint: disable=invalid-name
+
+            # preprocessing
+            x_train = x_test = []
+
+            # train model
+            train_fn = self._model.fit
+            y_pred = []  # train_fn(x_test)
+
+            # log model
+            mlflow.keras.log_model(self.model, "PokerDQNModel")
+
+            # log params
+            mlflow.log_params(self.params)
+
+            # compute eval metrics
+            loss = 0
+            acc = 0
+
+            # log metrics
+            mlflow.log_metric("loss", loss)
+            mlflow.log_metric("acc", acc)
+
+            # track rmse and estimators
+            self.losses.append(loss)
+            self.networks.append(self.params)
+
+            # save artifacts
+            plot = "someplot"
+            tmp_dir = "."
+            # # fig.save_fig(tmp_dir)
+            # # mlflow.log_artifact(tmp_dir, f"Current_Model_{0}"
+
+            return experiment_id, run_id
