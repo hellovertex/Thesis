@@ -77,3 +77,25 @@ class PokerModel:
             # # mlflow.log_artifact(tmp_dir, f"Current_Model_{0}"
 
             return experiment_id, run_id
+
+    # def action(self, reward, current_player, legal_actions, observation):
+    #     """Stores observations from last transition and chooses a new action.
+    #
+    #     Notifies the agent of the outcome of the latest transition and stores it
+    #       in the replay memory, selects a new action and applies a training step.
+    #
+    #     Args:
+    #       reward: float, the reward received from its action.
+    #       current_player: int, the player whose turn it is.
+    #       legal_actions: `np.array`, actions which the player can currently take.
+    #       observation: `np.array`, the most recent observation.
+    #
+    #     Returns:
+    #       A legal, int-valued action.
+    #     """
+    #     self._train_step()
+    #
+    #     self.action = self._select_action(observation, legal_actions)
+    #     self._record_transition(current_player, reward, observation, legal_actions,
+    #                             self.action)
+    #     return self.action
