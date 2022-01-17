@@ -1,0 +1,20 @@
+[Outline]
+
+Fr. 21.01 : Thema festgelegt
+Fr. 28.01 : Anmeldung eingereicht
+Fr. 04.02 : DB - Parser implementiert
+Fr. 11.02 : Baseline auf DB training kickoff
+Fr. 18.02 : Rainbow agent impl. fertig
+Fr. 04.03 : Muesli agent impl. fertig
+Fr. 11.03 : Traininsbeginn RL
+ab April: Opponent Modelling
+
+
+
+[LINKBOX] 
+Opponent Modelling in Poker
+https://dl.acm.org/doi/pdf/10.1145/3205455.3205589
+https://www.aaai.org/ocs/index.php/WS/AAAIW18/paper/viewFile/17239/15584
+
+Spotlight Talk - Opponent Modeling and Exploitation in Poker Using Evolved Recurrent Neural Network
+https://www.youtube.com/watch?v=dtew-zqNb2o
