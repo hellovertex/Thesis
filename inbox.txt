@@ -10,7 +10,12 @@ Fr. 11.03 : Traininsbeginn RL
 ab April: Opponent Modelling
 
 
-
+[TODOS]
+- add mlflow logging to SelfPlay.equity_improvement
+- add mlflow[extras] to requirements.txt
+- colab: run neuroevolution of equity players
+- parse showdown traceback to trajectory [TDD regex approach]
+-
 [LINKBOX] 
 Opponent Modelling in Poker
 https://dl.acm.org/doi/pdf/10.1145/3205455.3205589
