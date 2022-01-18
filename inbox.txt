@@ -15,7 +15,9 @@ ab April: Opponent Modelling
 - add mlflow[extras] to requirements.txt
 - colab: run neuroevolution of equity players
 - parse showdown traceback to trajectory [TDD regex approach]
--
+- 1. baseline before RL
+- 2.
+ 
 [LINKBOX] 
 Opponent Modelling in Poker
 https://dl.acm.org/doi/pdf/10.1145/3205455.3205589
@@ -23,3 +25,22 @@ https://www.aaai.org/ocs/index.php/WS/AAAIW18/paper/viewFile/17239/15584
 
 Spotlight Talk - Opponent Modeling and Exploitation in Poker Using Evolved Recurrent Neural Network
 https://www.youtube.com/watch?v=dtew-zqNb2o
+
+
+[BRAINDUMP]
+- parser
+- infrastructure
+- credit
+- credit assignment problem
+- two separate paths: RL and Evolutionary Baseline
+
+[[2022-18-01]]
+reward design? 0-1 reward? -> entscheidung vertagen
+erstmal baseline hinbekommen mittels supervised learning und evolutionary algos
+spaeter alles sowie opponent modelling, transfer learning
+=> Baseline >> RL 
+
+equity rollouts wie oft gewinnen sie den pot
+erstmal genug haende kaufen, teuer warten auf geld
+
+[[2022-19-01]]
