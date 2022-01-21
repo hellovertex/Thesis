@@ -12,17 +12,10 @@ def get_button(s: str):
     return int(button)  # 1-indexed
 
 
-def get_players(s: str):
-    pattern = re.compile(r"Seat \d: [a-zA-Z0-9]+")
-    players = pattern.findall(s)
-    return set([player[8:] for player in players])
-
-
 def get_player_stacks(s: str):
-    pattern = re.compile(r"Seat \d: [a-zA-Z0-9]+ \([$€]\d+.?\d*")
+    pattern = re.compile(r"(Seat \d): ([a-zA-Z0-9]+) \(([$€]\d+.?\d*)")
     player_stacks = pattern.findall(s)
-    stacks = [re.split(re.compile(r'[$€]'), stack)[1] for stack in player_stacks]
-    return [float(stack) for stack in stacks]
+    return player_stacks
 
 
 def main():
@@ -35,8 +28,6 @@ def main():
         for c in content:
             if c == '': continue  # pylint: disable=multiple-statements
             print(c, type(c))
-            btn = get_button(c)
-            player_names = get_players(c)
             player_stacks = get_player_stacks(c)
             break
 
