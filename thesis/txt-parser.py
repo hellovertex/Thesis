@@ -15,11 +15,14 @@ def get_button(s: str):
 def get_players(s: str):
     pattern = re.compile(r"Seat \d: [a-zA-Z0-9]+")
     players = pattern.findall(s)
-    return [player[8:] for player in players]
+    return set([player[8:] for player in players])
 
 
 def get_player_stacks(s: str):
-    return ""
+    pattern = re.compile(r"Seat \d: [a-zA-Z0-9]+ \([$€]\d+.?\d*")
+    player_stacks = pattern.findall(s)
+    stacks = [re.split(re.compile(r'[$€]'), stack)[1] for stack in player_stacks]
+    return [float(stack) for stack in stacks]
 
 
 def main():
@@ -34,7 +37,7 @@ def main():
             print(c, type(c))
             btn = get_button(c)
             player_names = get_players(c)
-
+            player_stacks = get_player_stacks(c)
             break
 
 
