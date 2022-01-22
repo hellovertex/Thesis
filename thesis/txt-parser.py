@@ -8,14 +8,20 @@ import re
 
 def get_button(s: str):
     ptn_button = re.compile(r"Seat #\d is the button")
+    # ptn_button2 = re.compile(r"Seat #(\d) is the button")
+    # button2 = int(ptn_button2.findall(s)[0])
     button = ptn_button.findall(s)[0][6]
     return int(button)  # 1-indexed
 
 
 def get_player_stacks(s: str):
     pattern = re.compile(r"(Seat \d): ([a-zA-Z0-9]+) \(([$€]\d+.?\d*)")
-    player_stacks = pattern.findall(s)
-    return player_stacks
+    return pattern.findall(s)
+
+
+def get_blinds(s: str):
+    pattern = re.compile(r"([a-zA-Z0-9]+): posts (small blind|big blind) ([$€]\d+.?\d*)")
+    return pattern.findall(s)
 
 
 def main():
@@ -28,7 +34,9 @@ def main():
         for c in content:
             if c == '': continue  # pylint: disable=multiple-statements
             print(c, type(c))
+            btn = get_button(c)
             player_stacks = get_player_stacks(c)
+            blinds = get_blinds(c)
             break
 
 
