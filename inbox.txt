@@ -12,6 +12,9 @@ ab April: Opponent Modelling
 
 [TODOS]
 - 01-22: add input neuron that is pretrained to predict equity
+- 01-22: implement rule based baselines TAG, LAG, TAP, LAP
+- 01-22: review poker env alternatives, czanoci, rlcard.env.make("no-limit-holdem")
+
 - in pokerstars preflop nur ein raise possible
 - flop mehrere raises
 - add mlflow logging to SelfPlay.equity_improvement
