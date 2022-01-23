@@ -11,6 +11,9 @@ ab April: Opponent Modelling
 
 
 [TODOS]
+- 01-22: add input neuron that is pretrained to predict equity
+- in pokerstars preflop nur ein raise possible
+- flop mehrere raises
 - add mlflow logging to SelfPlay.equity_improvement
 - add mlflow[extras] to requirements.txt
 - colab: run neuroevolution of equity players
