@@ -11,10 +11,16 @@ ab April: Opponent Modelling
 
 
 [TODOS]
+[[24-01 Replace equity calculator inside neuron_poker package]]
+[[24-01 Obtain Baselines]]
+-
 - 01-22: add input neuron that is pretrained to predict equity
 - 01-22: implement rule based baselines TAG, LAG, TAP, LAP
-- 01-22: review poker env alternatives, czanoci, rlcard.env.make("no-limit-holdem")
-
+- 01-23: review poker env alternatives, czanoci, rlcard.env.make("no-limit-holdem")
+- 01-24: add input neuron that predicts poker hand evaluation / simulates twoplustwo evaluator
+- 01-24: get env with SEER mode
+- 01-24: train in SEER mode ablations (prune until len(private observations=1)
+- compute hand win chances for all hands with a omnipotent controller
 - in pokerstars preflop nur ein raise possible
 - flop mehrere raises
 - add mlflow logging to SelfPlay.equity_improvement
@@ -24,7 +30,10 @@ ab April: Opponent Modelling
 - 1. baseline before RL
 - 2.
  
-[LINKBOX] 
+[LINKBOX]
+
+[Poker Evaluator SUmmary]
+https://www.codingthewheel.com/archives/poker-hand-evaluator-roundup/
 Opponent Modelling in Poker
 https://dl.acm.org/doi/pdf/10.1145/3205455.3205589
 https://www.aaai.org/ocs/index.php/WS/AAAIW18/paper/viewFile/17239/15584
