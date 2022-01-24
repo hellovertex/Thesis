@@ -15,7 +15,12 @@ ab April: Opponent Modelling
  - postponed and set to [Optional], didnt find a full ring equity calculator
 [[24-01 Obtain Baselines]]
 - 1. 0.5/0.6 equity agents
-- 2. dont use nash equilibrium agent as this will not contribute to exploitability
+- 2. Dont use Nash Equilibrium agent as this will not contribute to exploitability
+- 3. Implement TA/LA, TP/LP
+[[24-01 Environment features]]
+- dynamic number of betting rounds [hold incrementing stage index]
+- SEER mode
+
 [[Misc]]
 - 01-22: add input neuron that is pretrained to predict equity
 - 01-22: implement rule based baselines TAG, LAG, TAP, LAP
@@ -23,6 +28,7 @@ ab April: Opponent Modelling
 - 01-24: add input neuron that predicts poker hand evaluation / simulates twoplustwo evaluator
 - 01-24: get env with SEER mode
 - 01-24: train in SEER mode ablations (prune until len(private observations=1)
+- 01-24: from parser, maintain playerdatabase
 - compute hand win chances for all hands with a omnipotent controller
 - in pokerstars preflop nur ein raise possible
 - flop mehrere raises
