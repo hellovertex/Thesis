@@ -41,4 +41,21 @@ def main():
 
 
 if __name__ == "__main__":
+    """
+    Mobster365: folds
+    sziget37: folds
+    Kraliya: raises $0.10 to $0.20
+    sts1981: folds
+    alaver24: raises $0.50 to $0.70
+    milkimen: folds
+    BUICKBOY2: calls $0.65
+    PlayLaughGro: folds
+    Kraliya: raises $0.50 to $1.20
+    alaver24: calls $0.50
+    BUICKBOY2: raises $1.53 to $2.73 and is all-in
+    Kraliya: raises $1.53 to $4.26
+    alaver24: folds
+    Uncalled bet ($1.53) returned to Kraliya
+    ... showdown yadayadayada
+    """
     main()

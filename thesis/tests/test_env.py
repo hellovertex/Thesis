@@ -68,20 +68,25 @@ def test_actions():
     env = _create_env(3)
     assert env.current_player.seat == 0
     assert env.player_cycle.idx == 0
+    # Player 0 raises
     env.step(Action.RAISE_POT)  # seat 0 dealer
     assert env.current_player.seat == 1
     assert env.player_cycle.idx == 1
+    # Player 1 re-raises
     env.step(Action.RAISE_POT)  # seat 1 sb
     assert env.current_player.seat == 2
     assert env.player_cycle.idx == 2
+    # Player 2 re-raises
     env.step(Action.RAISE_POT)  # seat 2 bb
     assert env.current_player.seat == 0
     assert env.player_cycle.idx == 0
+    # Player 0 re-raises
     env.step(Action.RAISE_POT)
     assert env.current_player.seat == 1
     assert env.player_cycle.idx == 1
     # seat 0 dealer
     env.step(Action.RAISE_POT)  # seat 1 sb
+    env.step(Action.ALL_IN)
     # assert env.stage == Stage.PREFLOP
     return True
 
