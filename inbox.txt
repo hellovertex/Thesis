@@ -20,6 +20,8 @@ ab April: Opponent Modelling
 [[24-01 Environment features]]
 - dynamic number of betting rounds [hold incrementing stage index]
 - SEER mode
+- [-] Specify Texas Hold Em No-Limit vs Poker taxonomy in docstrings
+- [-] 
 
 [[Misc]]
 - 01-22: add input neuron that is pretrained to predict equity

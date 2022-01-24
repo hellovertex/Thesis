@@ -84,10 +84,14 @@ def test_actions():
     env.step(Action.RAISE_POT)
     assert env.current_player.seat == 1
     assert env.player_cycle.idx == 1
-    # seat 0 dealer
-    env.step(Action.RAISE_POT)  # seat 1 sb
-    env.step(Action.ALL_IN)
-    # assert env.stage == Stage.PREFLOP
+    # Player 1 calls
+    env.step(Action.CALL)  # seat 1 sb
+    assert env.current_player.seat == 2
+    assert env.player_cycle.idx == 2
+    # Player 2 calls
+    env.step(Action.CALL)
+    # ALL PLAYERS EVEN => ENTER FLOP STAGE
+    #assert env.stage == Stage.FLOP
     return True
 
 if __name__ == "__main__":
