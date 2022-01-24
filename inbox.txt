@@ -9,6 +9,8 @@ Fr. 04.03 : Muesli agent impl. fertig
 Fr. 11.03 : Traininsbeginn RL
 ab April: Opponent Modelling
 
+[CATCH-UP]
+implement pypoker.PokerObservation.last_moves()
 
 [TODOS]
 [[24-01 Replace equity calculator inside neuron_poker package]]

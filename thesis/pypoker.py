@@ -146,7 +146,7 @@ class PokerObservation(object):
       """
 
     def __init__(self, state, game, player):
-        self._observation = None
+        self._observation = None  # todo remove, bc its only used in encoder
         self._state = None
         self._game = None
         self._player = None
