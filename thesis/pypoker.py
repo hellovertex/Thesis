@@ -12,11 +12,10 @@ CARD_CHARS = ['2S', '2C', '2D', '2H', '3S', '3C', '3D', '3H', '4S', '4C', '4D', 
 class PokerCard(object):
     """Poker card with a value and a suite.
 
-    Possible cards are combination of: values = "23456789TJQKA"
-    and suites = "SCDH".
+    Possible combinations of values = "23456789TJQKA" and suites = "SCDH".
     """
 
-    def __init__(self, value=None, suite=None, cid=-1):
+    def __init__(self, value=None, suite=None):
         self._value = value
         self._suite = suite
         self._cid = None if not (value and suite) else CARD_CHARS.index(self._value + self._suite)
@@ -194,8 +193,7 @@ class PokerObservation(object):
         return hand_list
 
     def card_range_knowledge(self):
-        # todo
-        return [list() for _ in range(self.num_players())]
+        return [list() for _ in range(self.num_players())]  # todo
 
 
 class ObservationEncoderType(enum.IntEnum):

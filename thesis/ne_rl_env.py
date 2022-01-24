@@ -149,7 +149,6 @@ class PokerEnv(Environment):
         return obs_dict
 
 
-
 def make(environment_name="NLHE-Full", num_players=6):
     """Make an environment.
 
@@ -167,7 +166,7 @@ def make(environment_name="NLHE-Full", num_players=6):
     if environment_name == "NLHE-Full":
         return PokerEnv(
             config={
-                "num_players":
+                "players":
                     num_players,
                 "observation_type":
                     pypoker.AgentObservationType.STANDARD.value
