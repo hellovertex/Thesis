@@ -3,6 +3,7 @@ from thesis import pypoker as pypoker
 from pypoker import PokerMoveType
 from typing import Union
 
+
 # -------------------------------------------------------------------------------
 # Environment API
 # -------------------------------------------------------------------------------
@@ -34,7 +35,7 @@ class Environment(object):
         """Take one step in the game.
 
         Args:
-          action: dict, mapping to an action taken by an agent.
+          action: int, mapping to an action taken by an agent.
 
         Returns:
           observation: dict, Containing full observation state.
@@ -65,7 +66,11 @@ class PokerEnv(Environment):
     """
 
     def __init__(self, config):
-        pass
+        self.game = pypoker.PokerGame(config)
+        self.observation_encoder = pypoker.ObservationEncoder(
+            self.game, pypoker.ObservationEncoderType.DICT_VALUES)
+        self.players = self.game.num_players()
+        self.state = None
 
     def reset(self, config=None):
         pass
@@ -74,7 +79,7 @@ class PokerEnv(Environment):
         """Take one step in the game.
 
         Args:
-            action: int, mapping to a legal action taken by this agent. The following
+            action: int PokerMoveType, mapping to a legal action taken by this agent. The following
                 actions are supported:
                   - 'FOLD': 0
                   - 'CHECK': 1
@@ -100,13 +105,49 @@ class PokerEnv(Environment):
         pass
 
     def _make_observation_all_players(self):
-        pass
+        obs = {}
+        player_observations = [self._extract_dict_from_backend(
+            player_id, self.state.observation(player_id)) for player_id in self.players]
+        obs["player_observations"] = player_observations
+        obs["current_player"] = self.state.cur_player()
+        return obs
 
-    def _extract_dict_from_backend(self):
-        pass
+    def _extract_dict_from_backend(self, player_id, observation):
+        """Extract a dict of features from an observation from the backend.
 
-    def _build_move(self):
-        pass
+            Args:
+              player_id: Int, player from whose perspective we generate the observation.
+              observation: A `pypoker.PokerObservation` object.
+
+            Returns:
+              obs_dict: dict, mapping from PokerObservation to a dict.
+            """
+        obs_dict = {}
+        obs_dict["current_player"] = self.state.cur_player()
+        obs_dict["current_player_offset"] = observation.cur_player_offset()
+        obs_dict["num_players"] = observation.num_players()
+        obs_dict["deck_size"] = observation.deck_size()
+
+        obs_dict["legal_moves"] = []
+        obs_dict["legal_moves_as_int"] = []
+        for move in observation.legal_moves():
+            obs_dict["legal_moves"].append(move)
+            obs_dict["legal_moves_as_int"].append(move.to_int())
+
+        obs_dict["observed_hands"] = []
+        for player_hand in observation.observed_hands():
+            cards = [card.to_str() for card in player_hand]
+            obs_dict["observed_hands"].append(cards)
+
+        obs_dict["card_knowledge"] = []
+        for player_hints in observation.card_knowledge():
+            obs_dict["card_knowledge"].append(player_hints)
+
+        obs_dict["vectorized"] = self.observation_encoder.encode(observation)
+        obs_dict["pypoker"] = observation
+
+        return obs_dict
+
 
 
 def make(environment_name="NLHE-Full", num_players=6):
