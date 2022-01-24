@@ -1,4 +1,5 @@
 """Python backend for Poker environment code. Poker refers to No-Limit Hold Em here. """
+# pylint: disable=useless-object-inheritance
 import enum
 
 
@@ -39,14 +40,17 @@ class PokerState(object):
 
       The game is turn-based, with only one active agent at a time..
       """
-    pass
+
+    def cur_player(self):
+        """Returns index of next player to act."""
+        return -1  # todo
 
 
 class AgentObservationType(enum.IntEnum):
-    """ Possible agent observation types.
+    """Possible agent observation types.
       STANDARD is similar to what a human sees when playing at a table.
       SEER is like STANDARD with the additional knowledge of the other players hands.
-      """
+    """
     STANDARD = 0
     SEER = 1
 
@@ -56,6 +60,20 @@ class PokerGame(object):
 
 
 class PokerObservation(object):
+    """Player's observed view of an environment PokerState.
+
+      The main differences are that 1) other player's cards are not visible, and
+      2) a player does not know their own player index (seat) so that all player
+      indices are described relative to the observing player (or equivalently,
+      that from the player's point of view, they are always player index 0).
+      """
+
+    def __init__(self, state, game, player):
+        self._observation = None
+        self._state = None
+        self._game = None
+        self._player = None
+
     pass
 
 
