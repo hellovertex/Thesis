@@ -77,6 +77,16 @@ class PokerEndOfGameType(enum.IntEnum):
     SHOWDOWN = 2
 
 
+class PokerTable(object):
+    """todo consider using this for PlayerCycle methods such as
+    - deactivate_current
+    - deactivate_player
+    - next_dealer
+    - update_alive
+    todo and then possibly using this inside PokerState
+    """
+
+
 class PokerState(object):
     """Current environment state for an active Poker game.
 
@@ -86,6 +96,7 @@ class PokerState(object):
     def __init__(self, game):
         self._game = game
         self._player_hands = [list() for _ in range(self._game.num_players())]
+        self._player_stacks = [self._game.initial_stack_size() for _ in range(self._game.num_players())]
 
     def observation(self, player_id):
         return None
@@ -94,11 +105,20 @@ class PokerState(object):
         """Returns index of next player to act."""
         return -1  # todo
 
+    def apply_move(self, move):
+        pass  # todo
+
     def player_hands(self):
         return self._player_hands
 
     def player_hand(self, seat):
         return self._player_hands[seat]
+
+    def player_stacks(self):
+        return self._player_stacks
+
+    def set_player_stack(self, value, seat):
+        self._player_stacks[seat] = value
 
 
 class AgentObservationType(enum.IntEnum):
@@ -126,6 +146,8 @@ class PokerGame(object):
             """
         self._params = params  # todo
         self._num_players = self._params["players"]
+        self._initial_stack_size = 100 if 'initial_stack_size' not in self._params \
+            else self._params['initial_stack_size']
         self._hand_size = 2 if 'hand_size' not in self._params else self._params['hand_size']
 
     def num_players(self):
@@ -134,6 +156,9 @@ class PokerGame(object):
 
     def hand_size(self):
         return self._hand_size
+
+    def initial_stack_size(self):
+        return self._initial_stack_size
 
 
 class PokerObservation(object):

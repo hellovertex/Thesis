@@ -33,6 +33,7 @@ implement pypoker.PokerObservation.last_moves()
 - 01-24: get env with SEER mode
 - 01-24: train in SEER mode ablations (prune until len(private observations=1)
 - 01-24: from parser, maintain playerdatabase
+- 01-25: when parsing, trim seat numbers to have no gaps in order to match env-seats
 - compute hand win chances for all hands with a omnipotent controller
 - in pokerstars preflop nur ein raise possible
 - flop mehrere raises

@@ -169,7 +169,9 @@ def make(environment_name="NLHE-Full", num_players=6):
                 "players":
                     num_players,
                 "observation_type":
-                    pypoker.AgentObservationType.STANDARD.value
+                    pypoker.AgentObservationType.STANDARD.value,
+                "initial_stack_size":
+                    100,
             })
     # elif environment_name == "NLHE-Small":
     #     return PokerEnv(
