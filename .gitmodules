@@ -1,6 +1,0 @@
-[submodule "Poker"]
-	path = Poker
-	url = https://github.com/hellovertex/Poker
-[submodule "neuron_poker"]
-	path = neuron_poker
-	url = https://github.com/hellovertex/neuron_poker
