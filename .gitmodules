@@ -1,3 +1,3 @@
 [submodule "PokerRL"]
-	path = PokerRL
+	path = PokerEnv
 	url = https://github.com/hellovertex/PokerRL

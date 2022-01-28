@@ -26,6 +26,7 @@ implement pypoker.PokerObservation.last_moves()
 - [-] 
 
 [[Misc]]
+- 01-26: use PokerRL env instead of rewriting from scratch
 - 01-22: add input neuron that is pretrained to predict equity
 - 01-22: implement rule based baselines TAG, LAG, TAP, LAP
 - 01-23: review poker env alternatives, czanoci, rlcard.env.make("no-limit-holdem")
@@ -45,10 +46,13 @@ implement pypoker.PokerObservation.last_moves()
 - 2.
  
 [LINKBOX]
+[[Equilibrium Approximation Quality of no limit poker bots]]
+https://arxiv.org/pdf/1612.07547.pdf
 
-[Poker Evaluator SUmmary]
+[[Poker Evaluator SUmmary]]
 https://www.codingthewheel.com/archives/poker-hand-evaluator-roundup/
-Opponent Modelling in Poker
+
+[[Opponent Modelling in Poker]]
 https://dl.acm.org/doi/pdf/10.1145/3205455.3205589
 https://www.aaai.org/ocs/index.php/WS/AAAIW18/paper/viewFile/17239/15584
 
