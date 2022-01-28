@@ -15,3 +15,4 @@ cppimport
 dopamine
 docopt
 pyglet
+torch
