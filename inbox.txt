@@ -26,6 +26,9 @@ implement pypoker.PokerObservation.last_moves()
 - [-] 
 
 [[Misc]]
+- 01-28: sufficient statistics - last moves: for each player, the last two moves per round
+==> if two re-raises this sufficiently covers the rounds behaviour for the player
+==> 2*num_players*max_rounds*action_length additional bits ==> e.g. 2*6*4*3
 - 01-26: use PokerRL env instead of rewriting from scratch
 - 01-22: add input neuron that is pretrained to predict equity
 - 01-22: implement rule based baselines TAG, LAG, TAP, LAP
