@@ -16,3 +16,6 @@ dopamine
 docopt
 pyglet
 torch
+psutil
+pycrayon
+ray
