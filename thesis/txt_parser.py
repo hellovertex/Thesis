@@ -1,7 +1,6 @@
 """ This module will
  - read .txt files inside ./data/
- - parse them to create corresponding environment states.
- - The states are encoded as in neuron_poker.gym_env.env.HoldemTable  """
+ - parse them to create corresponding environment states. """
 from time import time
 import re
 import enum
@@ -80,7 +79,7 @@ def get_player_stacks(line: str):
                       ('Seat 2', 'HHnguyen15', '$96.65'),
                       ('Seat 4', 'kjs609', '$200 ')]
     """
-    pattern = re.compile(r"(Seat \d): ([a-zA-Z0-9]+) \(([$€]\d+.?\d*)")
+    pattern = re.compile(r"(Seat \d): ([a-zA-Z0-9]+\s?[a-zA-Z0-9]*)\s\(([$€]\d+.?\d*)\sin chips\)")
     return pattern.findall(line)
 
 
@@ -148,11 +147,14 @@ def main(f_path: str):
             player_stacks = [PlayerStack(*stack) for stack in get_player_stacks(current)]
             num_players = len(player_stacks)
             btn_idx = get_btn_idx(player_stacks, btn)
-            all_player_info = build_all_player_info(player_stacks, num_players, btn_idx)
+            # corresponds to env.reset()
+            all_player_info = build_all_player_info(player_stacks,
+                                                    num_players,
+                                                    btn_idx)
             # up until *** HOLE CARDS *** we gather all information from env.reset()
             # *** HOLE CARDS ***
             # *** FLOP ***
-            # break
+            break
 
 
 if __name__ == "__main__":
