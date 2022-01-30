@@ -7,7 +7,7 @@ import enum
 from typing import NamedTuple, List, Tuple
 import numpy as np
 from collections import defaultdict, deque
-
+from PokerRL.game.games import NoLimitHoldem
 
 class Positions6Max(enum.IntEnum):
   """Positions as found in the literature, for a table with at most 6 Players.
@@ -306,10 +306,18 @@ def main(f_path: str):
 
       # *** Obtain encoded observation *** #
       # --- Create new env for every hand --- #
+      args = NoLimitHoldem.ARGS_CLS(n_seats=num_players,
+                                    starting_stack_sizes_list=starting_stack_sizes_list)
+      env = NoLimitHoldem(is_evaluating=True, env_args=args, lut_holder=NoLimitHoldem.get_lut_holder())
       # --- Reset it with new state_dict --- #
       # todo
+      cards_state_dict = {'deck': {'remaining_deck': []},  # np.ndarray(shape=(52-n_cards*num_players, 2))
+                          'board': [],  # np.ndarray(shape=(n_cards, 2))
+                          'hand': []}  # np.ndarray(shape=(n_players, 2, 2))
+      obs, reward, done, info = env.reset(deck_state_dict=cards_state_dict)
+      # find out how the
       # step environment with actions_per_stage and player_info
-
+      # todo
       # *** Observation Augmentation *** #
       # --- Append last 8 moves per player --- #
       # --- Append all players hands --- #
