@@ -12,6 +12,8 @@ ab April: Opponent Modelling
 [CATCH-UP]
 implement pypoker.PokerObservation.last_moves()
 [TMP]
+01-30: regarding last-moves and all-player-cards
+=> format must not change between supervised and RL observations
 
 
 
