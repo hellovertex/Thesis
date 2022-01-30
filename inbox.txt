@@ -1,4 +1,4 @@
-[Outline]
+[Outline - initial]
 
 Fr. 21.01 : Thema festgelegt
 Fr. 28.01 : Anmeldung eingereicht
@@ -8,6 +8,32 @@ Fr. 18.02 : Rainbow agent impl. fertig
 Fr. 04.03 : Muesli agent impl. fertig
 Fr. 11.03 : Traininsbeginn RL
 ab April: Opponent Modelling
+
+
+[Outline - 01-30]
+TL;DR:
+JANUARY: TOPIC + ENVIRONMENT
+FEBRUARY: BASELINES
+MARCH: RL+NE architecture + training
+APRIL: Opponent Modelling
+May: Analysis
+June: Writing?
+
+[x/2] Fr. 21.01 : decided on topic
+[x/2] Fr. 28.01 : registration done on my side
+[x/2]Fr. 04.02 : implemented text-file parser for pokerstars databases
+[-]Fr. 11.02 : Baseline on database using supervised learning: training kickoff
+[-]Fr. 18.02 : Rule-Based Agent Implementation 1/2
+[-]Fr. 25.02 : Rule-Based Agent Implementation 2/2
+[-]Fr. 04.03 : RL+NE 1/3: architecture, DQN + Baselines
+[-]Fr. 11.03 : - EXAM
+[-]Fr. 18.03 : RL+NE 2/3: training
+[-]Fr. 25.03 : RL+NE 3/3: analysis (potential refactoring/debugging)
+[-]Fr. 01.04 : Implement Opponent Exploitation from paper [1], 1/3
+[-]Fr. 08.04 : Implement Opponent Exploitation from paper [1], 2/3
+[-]Fr. 15.04 : Implement Opponent Exploitation from paper [1], 3/3
+
+[-]ab April: Opponent Modelling
 
 [CATCH-UP]
 implement pypoker.PokerObservation.last_moves()
@@ -88,7 +114,9 @@ https://arxiv.org/pdf/1612.07547.pdf
 https://www.codingthewheel.com/archives/poker-hand-evaluator-roundup/
 
 [[Opponent Modelling in Poker]]
+[1] Opponent modeling and exploitation in poker using evolved recurrent neural networks(same paper as [2]):
 https://dl.acm.org/doi/pdf/10.1145/3205455.3205589
+[2] Dynamic Adaptation and Opponent Exploitation in Computer Poker  (same paper as [1])
 https://www.aaai.org/ocs/index.php/WS/AAAIW18/paper/viewFile/17239/15584
 
 Spotlight Talk - Opponent Modeling and Exploitation in Poker Using Evolved Recurrent Neural Network
