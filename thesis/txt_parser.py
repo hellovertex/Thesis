@@ -10,7 +10,7 @@ import numpy as np
 
 class Positions6Max(enum.IntEnum):
     """Positions as found in the literature, for a table with at most 6 Players.
-        BTN for Button, SB for Small Blind, etc...
+    BTN for Button, SB for Small Blind, etc...
     """
     BTN = 0
     SB = 1
@@ -22,7 +22,7 @@ class Positions6Max(enum.IntEnum):
 
 class Positions9Max(enum.IntEnum):
     """Positions as found in the literature, for a table with at most 9 Players.
-        BTN for Button, SB for Small Blind, etc...
+    BTN for Button, SB for Small Blind, etc...
     """
     BTN = 0
     SB = 1
@@ -49,7 +49,7 @@ class PlayerInfo(NamedTuple):
 
 class PlayerStack(NamedTuple):
     """Player Stacks as parsed from the textfiles.
-        For example: PlayerStack('Seat 1', 'jimjames32', '$82 ')
+    For example: PlayerStack('Seat 1', 'jimjames32', '$82 ')
     """
     seat_display_name: str
     player_name: str
@@ -59,7 +59,7 @@ class PlayerStack(NamedTuple):
 def get_button(line: str) -> int:
     """Returns the buttons seat number as displayed to user.
         Args:
-            :line string representation of hand as gotten from .txt files
+            :line string representation of played episode as gotten from .txt files
         Returns:
             button: int representing the seat number as displayed to user
     """
@@ -73,7 +73,7 @@ def get_button(line: str) -> int:
 def get_player_stacks(line: str):
     """Returns stacks for each player.
         Args:
-            :line string representation of hand as gotten from .txt files
+            :line string representation of played episode as gotten from .txt files
         Returns:
             Example: [('Seat 1', 'jimjames32', '$82 '),
                       ('Seat 2', 'HHnguyen15', '$96.65'),
@@ -86,7 +86,7 @@ def get_player_stacks(line: str):
 def get_blinds(line: str) -> List[Tuple[str]]:
     """Returns blinds for current hand.
     Args:
-        :line string representation of hand as gotten from .txt files
+        :line string representation of played episode as gotten from .txt files
     Returns:
         Example: [('HHnguyen15', 'small blind', '$1'), ('kjs609', 'big blind', '$2')]
     """
@@ -96,12 +96,12 @@ def get_blinds(line: str) -> List[Tuple[str]]:
 
 def get_btn_idx(player_stacks: List[PlayerStack], btn_seat_num: int):
     """Returns seat index (not seat number) of seat that is currently the Button.
-    Seats can be ["Seat 1", "Seat3", "Seat 5"]. If "Seat 5" has the Button,
+    Seats can be ["Seat 1", "Seat3", "Seat 5"]. If "Seat 5" is the Button,
     btn_idx=2 will be returned.
         Args:
-            :player_stacks list of player info as gotten from .txt files
+            :player_stacks list of player info after parsing .txt files
         Returns:
-            Example: [('HHnguyen15', 'small blind', '$1'), ('kjs609', 'big blind', '$2')]
+            int index of button
     """
     # determine btn_idx
     for i, player_stack in enumerate(player_stacks):
@@ -111,33 +111,51 @@ def get_btn_idx(player_stacks: List[PlayerStack], btn_seat_num: int):
         "Button index could not be determined. Guess we have to do more debugging...")
 
 
+def _roll_position_indices(num_players: int, btn_idx: int) -> np.ndarray:
+    """ # Roll position indices, such that each seat is assigned correct position
+    # Example: btn_idx=1
+    # ==> np.roll([0,1,2], 1) returns [2,0,1]:
+    # The first  seat has position index 2, which is BB
+    # The second seat has position index 0, which is BTN
+    # The third  seat has position index 1, which is SB """
+    return np.roll(np.arange(num_players), btn_idx)
+
+
 def build_all_player_info(player_stacks: List[PlayerStack], num_players, btn_idx):
     """ Docstring """
-    # todo: docstring
-    rolled_position_indices = np.roll(np.arange(num_players), btn_idx)
+    # 1. roll seats position assignment depending on where button sits
+    rolled_position_indices = _roll_position_indices(num_players, btn_idx)
     player_infos = []
+    # build PlayerInfo for each player
     for i, info in enumerate(player_stacks):
-        seat_number = int(info[0][5])
-        display_name = info[1]
-        stack_size = float(info[2][1:])
+        seat_number = int(info.seat_display_name[5])
+        player_name = info.player_name
+        stack_size = float(info.stack[1:])
         position_index = rolled_position_indices[i]
-        position = Positions6Max(position_index).name  # parse from btn assignment
-        player_infos.append(PlayerInfo(seat_number,
-                                       position_index,
-                                       position,
-                                       display_name,
-                                       stack_size))
+        position = Positions6Max(position_index).name
+        player_infos.append(PlayerInfo(seat_number,     # 2
+                                       position_index,  # 0
+                                       position,        # 'BTN'
+                                       player_name,     # 'JoeSchmoe Billy'
+                                       stack_size))     # 82.45
     return player_infos
 
 
 def main(f_path: str):
     """Parses hand_database and returns vectorized observations as returned by rl_env."""
     t_0 = time()
-    with open(f_path, 'r',) as f:  #pylint: disable=invalid-name,unspecified-encoding
+    with open(f_path, 'r', ) as f:  # pylint: disable=invalid-name,unspecified-encoding
         hand_database = f.read()
         print(f'loading took {time() - t_0} seconds...')
         hands_played = re.split(r'PokerStars Hand #', hand_database)
-
+        # todo: remove hands that dont have showdown
+        # if we cannot see the cards, we cant do supervised learning
+        # todo: determine hero
+        # todo: fill player_actions{
+        #  'pid1': [preflop1, preflop2, flop1, flop2, river1, ...],
+        #  'pid2': [preflop1, preflop2, flop1, flop2, river1, ...],...}
+        # todo fill boards cards
+        # todo: split between hole cards flop turn river
         for current in hands_played:  # c for current_hand
             if current == '':
                 continue
@@ -154,6 +172,7 @@ def main(f_path: str):
             # up until *** HOLE CARDS *** we gather all information from env.reset()
             # *** HOLE CARDS ***
             # *** FLOP ***
+
             break
 
 
