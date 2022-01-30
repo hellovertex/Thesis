@@ -118,7 +118,11 @@ https://www.codingthewheel.com/archives/poker-hand-evaluator-roundup/
 https://dl.acm.org/doi/pdf/10.1145/3205455.3205589
 [2] Dynamic Adaptation and Opponent Exploitation in Computer Poker  (same paper as [1])
 https://www.aaai.org/ocs/index.php/WS/AAAIW18/paper/viewFile/17239/15584
-
+[3] Efficient Opponent Exploitation in No-Limit Texas Hold’em Poker:
+A Neuroevolutionary Method Combined with Reinforcement Learning
+https://www.mdpi.com/2079-9292/10/17/2087
+[4] Building a No Limit Texas Hold’em Poker Agent Based on Game Logs using Supervised Learning
+https://paginas.fe.up.pt/~niadr/PUBLICATIONS/LIACC_publications_2011_12/pdf/C55_Building_No_Limit_LFT_LPR.pdf
 Spotlight Talk - Opponent Modeling and Exploitation in Poker Using Evolved Recurrent Neural Network
 https://www.youtube.com/watch?v=dtew-zqNb2o
 
