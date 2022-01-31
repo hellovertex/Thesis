@@ -101,6 +101,9 @@ class TxtParser(Parser):
       rf'Seat \d: {PLAYER_NAME_TEMPLATE}{MATCH_ANY} showed (\[{POKER_CARD_TEMPLATE} {POKER_CARD_TEMPLATE}]) and won')
     showdown_hands = re_showdown_hands.findall(showdown)
     winner = re_winner.findall(showdown)
+    # remove whitespaces in name field
+    showdown_hands = [(hand[0].strip(), hand[1]) for hand in showdown_hands]
+    winner = [(hand[0].strip(), hand[1]) for hand in winner]
     return winner, showdown_hands
 
   @staticmethod
@@ -314,7 +317,7 @@ def _init_player_actions(player_info):
   return player_actions
 
 
-def _roll_position_indices(num_players: int, btn_idx: int) -> np.ndarray:
+def roll_position_indices(num_players: int, btn_idx: int) -> np.ndarray:
   """ # Roll position indices, such that each seat is assigned correct position
   # Example: btn_idx=1
   # ==> np.roll([0,1,2], btn_idx) returns [2,0,1]:
@@ -324,10 +327,10 @@ def _roll_position_indices(num_players: int, btn_idx: int) -> np.ndarray:
   return np.roll(np.arange(num_players), btn_idx)
 
 
-def build_all_player_info(player_stacks: List[PlayerStack], num_players, btn_idx):
+def build_all_player_info(player_stacks: List[PlayerStack], rolled_position_indices):
   """ Docstring """
-  # 1. roll seats position assignment depending on where button sits
-  rolled_position_indices = _roll_position_indices(num_players, btn_idx)
+  # 1. Roll position indices, such that each seat is assigned correct position
+
   player_infos = []
   # build PlayerInfo for each player
   for i, info in enumerate(player_stacks):
@@ -375,6 +378,16 @@ DICT_SUITE = {'': -127,
               'c': 3}
 
 
+def _str_cards_to_list(cards: str):
+  """ See example below """
+  # '[6h Ts Td 9c Jc]'
+  rm_brackets = cards.replace('[', '').replace(']', '')
+  # '6h Ts Td 9c Jc'
+  card_list = rm_brackets.split(' ')
+  # ['6h', 'Ts', 'Td', '9c', 'Jc']
+  return card_list
+
+
 def make_board_cards(board_cards: str):
   """Return 5 cards that we can prepend to the card deck so that the board will be drawn.
     Args:
@@ -383,14 +396,38 @@ def make_board_cards(board_cards: str):
       representation of board_cards that is understood by rl_env
       Example:
   """
-  # '[6h Ts Td 9c Jc]'
-  rm_brackets = board_cards.replace('[', '').replace(']', '')
-  # '6h Ts Td 9c Jc'
-  card_list = rm_brackets.split(' ')
-  # ['6h', 'Ts', 'Td', '9c', 'Jc']
+  # '[6h Ts Td 9c Jc]' to ['6h', 'Ts', 'Td', '9c', 'Jc']
+  card_list = _str_cards_to_list(board_cards)
   assert len(card_list) == 5
 
   return [[DICT_RANK[card[0]], DICT_SUITE[card[1]]] for card in card_list]
+
+
+def make_player_hands(player_info, showdown_hands):
+  """Under Construction. """
+  name = 3  # index
+  position = 1  # index
+  assert len(showdown_hands) == 2
+  name_0 = showdown_hands[0][0]
+  name_1 = showdown_hands[1][0]
+  # '[6h Ts]' to ['6h', 'Ts']
+  cards_0 = _str_cards_to_list(showdown_hands[0][1])
+  cards_1 = _str_cards_to_list(showdown_hands[1][1])
+  # initialize default hands
+  player_hands = [[-127, -127] for _ in range(len(player_info))]
+
+  # overwrite known hands
+  for player in player_info:
+    if player[name] in [name_0, name_1]:
+      # overwrite hand for player 0
+      if player[name] == name_0:
+        hand = [[DICT_RANK[card[0]], DICT_SUITE[card[1]]] for card in cards_0]
+        player_hands[player[position]] = hand
+      # overwrite hand for player 1
+      else:
+        hand = [[DICT_RANK[card[0]], DICT_SUITE[card[1]]] for card in cards_1]
+        player_hands[player[position]] = hand
+  return player_hands
 
 
 def main(f_path: str):
@@ -403,10 +440,13 @@ def main(f_path: str):
     btn_idx = hand.btn_idx
     actions_total = hand.actions_total
     # todo move to processing unit
+
     # corresponds to env.reset()
-    player_info = build_all_player_info(player_stacks,
-                                        num_players,
-                                        btn_idx)
+    rolled_position_indices = roll_position_indices(num_players, btn_idx)
+    player_info = build_all_player_info(player_stacks, rolled_position_indices)
+
+
+    player_hands = make_player_hands(player_info, hand.showdown_hands)
     # raise vs bet: raise only in preflop stage, bet after preflop
     actions_per_stage = _init_player_actions(player_info)
 
@@ -415,9 +455,10 @@ def main(f_path: str):
         # noinspection PyTypeChecker
         actions_per_stage[action.player_name][stage].append((action.action_type, action.raise_amount))
 
-    # sort the player list, such that first player is button, regardless of seat number
-    player_info_sorted = np.roll(player_info, player_info[0].position_index, axis=0)
     STACK_COLUMN = 4
+
+    # sort the player list such button is first, regardless of seat number
+    player_info_sorted = np.roll(player_info, player_info[0].position_index, axis=0)
     starting_stack_sizes_list = [int(float(stack) * 100) for stack in player_info_sorted[:, STACK_COLUMN]]
 
     # *** Obtain encoded observation *** #
@@ -435,27 +476,22 @@ def main(f_path: str):
     # --- set deck ---
     # cards are drawn without ghost cards, so we simply replace the first 5 cards of the deck
     # with the board cards that we have parsed
-    deck = env.deck.deck_remaining
+    deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
     deck[:len(board_cards)] = board_cards
     # set hands
 
-    cards_state_dict = {'deck': {'remaining_deck': []},  # np.ndarray(shape=(52-n_cards*num_players, 2))
+    cards_state_dict = {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*num_players, 2))
                         'board': np.full((5, 2), -127),  # np.ndarray(shape=(n_cards, 2))
-                        'hand': []}  # np.ndarray(shape=(n_players, 2, 2))
+                        'hand': player_hands}  # np.ndarray(shape=(n_players, 2, 2))
     obs, reward, done, info = env.reset(deck_state_dict=cards_state_dict)
-    # find out how the
-    # step environment with actions_per_stage and player_info
-    # todo
+
+    # todo: step environment with actions_per_stage and player_info
+    # todo: check how obs is normalized to avoid small floats
+
     # *** Observation Augmentation *** #
+    # todo: augment inside env wrapper
     # --- Append last 8 moves per player --- #
     # --- Append all players hands --- #
-    # all defauls are 0
-    # # todo
-    #
-    # # todo get boards cards and split between flop turn river
-    # # todo manually set deck s.t. board cards get revealed
-    # # todo: create Parser object that returns tokens and do the Processing of the tokens elsewhere
-    #
     debug = 1
 
 
