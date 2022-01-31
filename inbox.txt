@@ -84,6 +84,8 @@ implement pypoker.PokerObservation.last_moves()
 - [-] 
 
 [[Misc]]
+- 01-31: build DataParser and Processor
+- 01-31: deal with two hero scenario
 - 01-28: sufficient statistics - last moves: for each player, the last two moves per round
 ==> if two re-raises this sufficiently covers the rounds behaviour for the player
 ==> 2*num_players*max_rounds*action_length additional bits ==> e.g. 2*6*4*3
