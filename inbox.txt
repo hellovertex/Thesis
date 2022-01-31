@@ -34,7 +34,8 @@ June: Writing?
 [-]Fr. 15.04 : Implement Opponent Exploitation from paper [1], 3/3
 
 [-]ab April: Opponent Modelling
-
+[potential issues]
+starting stack sizes are converted to int, which may lead to invalid raises unless we add back the rounding diff
 [CATCH-UP]
 implement pypoker.PokerObservation.last_moves()
 [TMP]

@@ -10,6 +10,7 @@ from collections import defaultdict, deque
 from PokerRL.game.games import NoLimitHoldem
 
 
+# ---------------------------- Parser ---------------------------------
 class Parser:
   """Baseclass to parse files storing played hands as crawled from different poker websites."""
 
@@ -54,7 +55,6 @@ class Action(NamedTuple):
   raise_amount: float = -1
 
 
-
 class PokerEpisode(NamedTuple):
   """UnderConstruction"""
   date: str
@@ -64,6 +64,7 @@ class PokerEpisode(NamedTuple):
   blinds: list
   player_stacks: List[PlayerStack]
   btn_idx: int
+  board_cards: str
   actions_total: Dict[str, List[Action]]
   winners: list
   showdown_hands: list
@@ -196,6 +197,12 @@ class TxtParser(Parser):
     raise RuntimeError(
       "Button index could not be determined. Guess we have to do more debugging...")
 
+  @staticmethod
+  def get_board_cards(episode: str):
+    summary = episode.split("*** SUMMARY ***")
+    pattern = re.compile(r'Board\s(\[.*?])\n')
+    return pattern.findall(summary[1])[0]
+
   def _parse_episode(self, episode: str, showdown: str):
     """UnderConstruction"""
     hand_id = self.get_hand_id(episode)
@@ -207,6 +214,7 @@ class TxtParser(Parser):
     player_stacks = [PlayerStack(*stack) for stack in self.get_player_stacks(episode)]
     num_players = len(player_stacks)
     btn_idx = self.get_btn_idx(player_stacks, btn)
+    board_cards = self.get_board_cards(episode)
 
     hole_cards = episode.split("*** HOLE CARDS ***")[1].split("*** FLOP ***")[0]
     flop = episode.split("*** FLOP ***")[1].split("*** TURN ***")[0]
@@ -228,6 +236,7 @@ class TxtParser(Parser):
                         blinds=blinds,
                         player_stacks=player_stacks,
                         btn_idx=btn_idx,
+                        board_cards=board_cards,
                         actions_total=actions_total,
                         winners=winners,
                         showdown_hands=showdown_hands)
@@ -253,56 +262,201 @@ class TxtParser(Parser):
       return self._parse_hands(hands_played)
 
 
+# ---------------------------- Encoder ---------------------------------
+
+class Positions6Max(enum.IntEnum):
+  """Positions as in the literature, for a table with at most 6 Players.
+  BTN for Button, SB for Small Blind, etc...
+  """
+  BTN = 0
+  SB = 1
+  BB = 2
+  UTG = 3  # UnderTheGun
+  MP = 4  # Middle Position
+  CO = 5  # CutOff
+
+
+class Positions9Max(enum.IntEnum):
+  """Positions as in the literature, for a table with at most 9 Players.
+  BTN for Button, SB for Small Blind, etc...
+  """
+  BTN = 0
+  SB = 1
+  BB = 2
+  UTG = 3  # UnderTheGun
+  UTG1 = 4
+  UTG2 = 5
+  MP = 6  # Middle Position
+  MP1 = 7
+  CO = 8  # CutOff
+
+
+class PlayerInfo(NamedTuple):
+  """Player information as parsed from the textfiles.
+  For example: PlayerInfo(seat_number=1, position_index=0, position='BTN',
+  player_name='jimjames32', stack_size=82.0)
+  """
+  seat_number: int
+  position_index: int  # 0 for BTN, 1 for SB, 2 for BB, etc.
+  position: str  # c.f. Positions6Max or Positions9Max
+  player_name: str
+  stack_size: float
+
+
+# noinspection PyTypeChecker
+def _init_player_actions(player_info):
+  player_actions = {}
+  for p_info in player_info:
+    # create default dictionary for current player for each stage
+    # default dictionary stores only the last two actions per stage per player
+    player_actions[p_info.player_name] = defaultdict(lambda: deque(maxlen=2),
+                                                     keys=['preflop', 'flop', 'turn', 'river'])
+  return player_actions
+
+
+def _roll_position_indices(num_players: int, btn_idx: int) -> np.ndarray:
+  """ # Roll position indices, such that each seat is assigned correct position
+  # Example: btn_idx=1
+  # ==> np.roll([0,1,2], btn_idx) returns [2,0,1]:
+  # The first  seat has position index 2, which is BB
+  # The second seat has position index 0, which is BTN
+  # The third  seat has position index 1, which is SB """
+  return np.roll(np.arange(num_players), btn_idx)
+
+
+def build_all_player_info(player_stacks: List[PlayerStack], num_players, btn_idx):
+  """ Docstring """
+  # 1. roll seats position assignment depending on where button sits
+  rolled_position_indices = _roll_position_indices(num_players, btn_idx)
+  player_infos = []
+  # build PlayerInfo for each player
+  for i, info in enumerate(player_stacks):
+    seat_number = int(info.seat_display_name[5])
+    player_name = info.player_name
+    stack_size = float(info.stack[1:])
+    position_index = rolled_position_indices[i]
+    position = Positions6Max(position_index).name
+    player_infos.append(PlayerInfo(seat_number,  # 2
+                                   position_index,  # 0
+                                   position,  # 'BTN'
+                                   player_name,  # 'JoeSchmoe Billy'
+                                   stack_size))  # 82.45
+  return tuple(player_infos)
+
+
+def make_blinds(blinds: List[Tuple[str]], multiply_by: int = 1):
+  sb = blinds[0]
+  assert sb[1] == 'small blind'
+  bb = blinds[1]
+  assert bb[1] == 'big blind'
+  return int(sb[2].split(currency_symbol)[1]) * multiply_by, \
+         int(bb[2].split(currency_symbol)[1]) * multiply_by
+
+
+DICT_RANK = {'': -127,
+             '2': 0,
+             '3': 1,
+             '4': 2,
+             '5': 3,
+             '6': 4,
+             '7': 5,
+             '8': 6,
+             '9': 7,
+             'T': 8,
+             'J': 9,
+             'Q': 10,
+             'K': 11,
+             'A': 12}
+
+DICT_SUITE = {'': -127,
+              'h': 0,
+              'd': 1,
+              's': 2,
+              'c': 3}
+
+
+def make_board_cards(board_cards: str):
+  """Return 5 cards that we can prepend to the card deck so that the board will be drawn.
+    Args:
+      board_cards: for example '[6h Ts Td 9c Jc]'
+    Returns:
+      representation of board_cards that is understood by rl_env
+      Example:
+  """
+  # '[6h Ts Td 9c Jc]'
+  rm_brackets = board_cards.replace('[', '').replace(']', '')
+  # '6h Ts Td 9c Jc'
+  card_list = rm_brackets.split(' ')
+  # ['6h', 'Ts', 'Td', '9c', 'Jc']
+  assert len(card_list) == 5
+
+  return [[DICT_RANK[card[0]], DICT_SUITE[card[1]]] for card in card_list]
 
 
 def main(f_path: str):
   """Parses hand_database and returns vectorized observations as returned by rl_env."""
   parser = TxtParser()
   parsed_hands = parser.parse_file(f_path)
+  for hand in parsed_hands:
+    player_stacks = hand.player_stacks
+    num_players = hand.num_players
+    btn_idx = hand.btn_idx
+    actions_total = hand.actions_total
+    # todo move to processing unit
+    # corresponds to env.reset()
+    player_info = build_all_player_info(player_stacks,
+                                        num_players,
+                                        btn_idx)
+    # raise vs bet: raise only in preflop stage, bet after preflop
+    actions_per_stage = _init_player_actions(player_info)
 
-  # todo move to processing unit
-  # corresponds to env.reset()
-  # player_info = build_all_player_info(player_stacks,
-  #                                     num_players,
-  #                                     btn_idx)
-  # # raise vs bet: raise only in preflop stage, bet after preflop
-  # actions_per_stage = _init_player_actions(player_info)
-  #
-  # for stage, actions in actions_total.items():
-  #   for action in actions:
-  #     # noinspection PyTypeChecker
-  #     actions_per_stage[action.player_name][stage].append((action.action_type, action.raise_amount))
-  #
-  # # sort the player list, such that first player is button, regardless of seat number
-  # player_info_sorted = np.roll(player_info, player_info[0].position_index, axis=0)
-  # STACK_COLUMN = 4
-  # starting_stack_sizes_list = player_info_sorted[:, STACK_COLUMN]
-  #
-  # # *** Obtain encoded observation *** #
-  # # --- Create new env for every hand --- #
-  # args = NoLimitHoldem.ARGS_CLS(n_seats=num_players,
-  #                               starting_stack_sizes_list=starting_stack_sizes_list)
-  # env = NoLimitHoldem(is_evaluating=True, env_args=args, lut_holder=NoLimitHoldem.get_lut_holder())
-  # # --- Reset it with new state_dict --- #
-  # # todo
-  # cards_state_dict = {'deck': {'remaining_deck': []},  # np.ndarray(shape=(52-n_cards*num_players, 2))
-  #                     'board': [],  # np.ndarray(shape=(n_cards, 2))
-  #                     'hand': []}  # np.ndarray(shape=(n_players, 2, 2))
-  # obs, reward, done, info = env.reset(deck_state_dict=cards_state_dict)
-  # # find out how the
-  # # step environment with actions_per_stage and player_info
-  # # todo
-  # # *** Observation Augmentation *** #
-  # # --- Append last 8 moves per player --- #
-  # # --- Append all players hands --- #
-  # # all defauls are 0
-  # # todo
-  #
-  # # todo get boards cards and split between flop turn river
-  # # todo manually set deck s.t. board cards get revealed
-  # # todo: create Parser object that returns tokens and do the Processing of the tokens elsewhere
-  #
-  debug = 1
+    for stage, actions in actions_total.items():
+      for action in actions:
+        # noinspection PyTypeChecker
+        actions_per_stage[action.player_name][stage].append((action.action_type, action.raise_amount))
+
+    # sort the player list, such that first player is button, regardless of seat number
+    player_info_sorted = np.roll(player_info, player_info[0].position_index, axis=0)
+    STACK_COLUMN = 4
+    starting_stack_sizes_list = [int(float(stack) * 100) for stack in player_info_sorted[:, STACK_COLUMN]]
+
+    # *** Obtain encoded observation *** #
+    # --- Create new env for every hand --- #
+    args = NoLimitHoldem.ARGS_CLS(n_seats=num_players,
+                                  starting_stack_sizes_list=starting_stack_sizes_list)
+    env = NoLimitHoldem(is_evaluating=True, env_args=args, lut_holder=NoLimitHoldem.get_lut_holder())
+    # --- Reset it with new state_dict --- #
+    board_cards = make_board_cards(hand.board_cards)
+    # verify using env.cards2str(board_cards)
+    # --- set blinds ---
+    sb, bb = make_blinds(hand.blinds, multiply_by=100)
+    env.SMALL_BLIND = sb
+    env.BIG_BLIND = bb
+    # --- set deck ---
+    # cards are drawn without ghost cards, so we simply replace the first 5 cards of the deck
+    # with the board cards that we have parsed
+    deck = env.deck.deck_remaining
+    deck[:len(board_cards)] = board_cards
+    # set hands
+
+    cards_state_dict = {'deck': {'remaining_deck': []},  # np.ndarray(shape=(52-n_cards*num_players, 2))
+                        'board': np.full((5, 2), -127),  # np.ndarray(shape=(n_cards, 2))
+                        'hand': []}  # np.ndarray(shape=(n_players, 2, 2))
+    obs, reward, done, info = env.reset(deck_state_dict=cards_state_dict)
+    # find out how the
+    # step environment with actions_per_stage and player_info
+    # todo
+    # *** Observation Augmentation *** #
+    # --- Append last 8 moves per player --- #
+    # --- Append all players hands --- #
+    # all defauls are 0
+    # # todo
+    #
+    # # todo get boards cards and split between flop turn river
+    # # todo manually set deck s.t. board cards get revealed
+    # # todo: create Parser object that returns tokens and do the Processing of the tokens elsewhere
+    #
+    debug = 1
 
 
 if __name__ == "__main__":
