@@ -228,10 +228,12 @@ class TxtParser(Parser):
     actions_flop = self.get_actions(flop)
     actions_turn = self.get_actions(turn)
     actions_river = self.get_actions(river)
+    as_sequence = actions_preflop + actions_flop + actions_turn + actions_river
     actions_total = {'preflop': actions_preflop,
                      'flop': actions_flop,
                      'turn': actions_turn,
-                     'river': actions_river}
+                     'river': actions_river,
+                     'as_sequence': as_sequence}
     return PokerEpisode(date='',
                         hand_id=hand_id,
                         variant=self._variant,
@@ -430,6 +432,12 @@ def make_player_hands(player_info, showdown_hands):
   return player_hands
 
 
+def build_action(action: tuple):
+  """Under Construction."""
+  # todo
+  return action
+
+
 def main(f_path: str):
   """Parses hand_database and returns vectorized observations as returned by rl_env."""
   parser = TxtParser()
@@ -445,15 +453,7 @@ def main(f_path: str):
     rolled_position_indices = roll_position_indices(num_players, btn_idx)
     player_info = build_all_player_info(player_stacks, rolled_position_indices)
 
-
     player_hands = make_player_hands(player_info, hand.showdown_hands)
-    # raise vs bet: raise only in preflop stage, bet after preflop
-    actions_per_stage = _init_player_actions(player_info)
-
-    for stage, actions in actions_total.items():
-      for action in actions:
-        # noinspection PyTypeChecker
-        actions_per_stage[action.player_name][stage].append((action.action_type, action.raise_amount))
 
     STACK_COLUMN = 4
 
@@ -486,9 +486,20 @@ def main(f_path: str):
     obs, reward, done, info = env.reset(deck_state_dict=cards_state_dict)
 
     # todo: step environment with actions_per_stage and player_info
+    action_sequence = actions_total['as_sequence']
+    actions_formatted = [build_action(action) for action in action_sequence]
+    # while not done: env.step(next(actions_formatted))
     # todo: check how obs is normalized to avoid small floats
 
     # *** Observation Augmentation *** #
+    # raise vs bet: raise only in preflop stage, bet after preflop
+    actions_per_stage = _init_player_actions(player_info)
+
+    for stage, actions in actions_total.items():
+      for action in actions:
+        # noinspection PyTypeChecker
+        actions_per_stage[action.player_name][stage].append((action.action_type, action.raise_amount))
+
     # todo: augment inside env wrapper
     # --- Append last 8 moves per player --- #
     # --- Append all players hands --- #
