@@ -2,7 +2,7 @@ pandas
 pytest
 pylint
 pydocstyle
-gym
+gym==0.10.9
 numpy
 matplotlib
 pyglet
