@@ -1,34 +1,30 @@
 """ This module will
  - read .txt files inside ./data/
  - parse them to create corresponding environment states. """
-from time import time
+from typing import List, Tuple, Dict
 import re
-import enum
-from typing import NamedTuple, List, Tuple, Dict, Iterable
-import numpy as np
-from collections import defaultdict, deque
-from core.parser import Parser, PokerEpisode, Action, ActionType, PlayerStack
-from numpy import ndarray
-
-from PokerRL.game.games import NoLimitHoldem
-
+from thesis.core.parser import Parser, PokerEpisode, Action, ActionType, PlayerStack
 
 # REGEX templates
 PLAYER_NAME_TEMPLATE = r'([a-zA-Z0-9]+\s?[a-zA-Z0-9]*)'
 STARTING_STACK_TEMPLATE = r'\(([$€]\d+.?\d*)\sin chips\)'
 MATCH_ANY = r'.*?'  # not the most efficient way, but we prefer readabiliy (parsing is one time job)
 POKER_CARD_TEMPLATE = r'[23456789TJQKAjqka][SCDHscdh]'
-currency_symbol = '$'  # or #€
+CURRENCY_SYMBOL = '$'  # or #€
 
 
-# ---------------------------- Parser ---------------------------------
+# ---------------------------- PokerStars-Parser ---------------------------------
 
 class TxtParser(Parser):
+    """Reads .txt files with poker games crawled from Pokerstars.com and parses them to
+    PokerEpisodes."""
     def __init__(self):
+        # todo consider making TxtParser another abstract class and make derived PokerStars-Parser
         self._variant = None
 
     @staticmethod
     def get_hand_id(episode: str) -> int:
+        """Returns the episode number of the current hand played. """
         pattern = re.compile(r'^(\d+):')
         return int(pattern.findall(episode)[0])
 
@@ -67,12 +63,11 @@ class TxtParser(Parser):
             pattern = re.compile(r'(\d+\.?\d*)')
             raise_amount = pattern.findall(line)[-1]
             return ActionType.RAISE, raise_amount
-        elif 'calls' in line or 'checks' in line:
+        if 'calls' in line or 'checks' in line:
             return ActionType.CHECK_CALL, default_raise_amount
-        elif 'folds' in line:
+        if 'folds' in line:
             return ActionType.FOLD, default_raise_amount
-        else:
-            raise RuntimeError(f"Could not parse action type from line: \n{line}")
+        raise RuntimeError(f"Could not parse action type from line: \n{line}")
 
     @staticmethod
     def get_actions(stage: str) -> List[Action]:
@@ -85,7 +80,8 @@ class TxtParser(Parser):
           jimjames32: calls $14'''
 
           Each valid action follows the pattern {PLAYERNAME}: {action}\n
-          So we split each line by ':', and check, which of the splitresults has exactly two elements (playername, action)
+          So we split each line by ':', and check, which of the splitresults has exactly two elements
+          (playername, action).
         """
         possible_actions = [possible_action.split(':') for possible_action in stage.split('\n')]
         actions = []
@@ -120,7 +116,6 @@ class TxtParser(Parser):
                           ('Seat 2', 'HHnguyen15', '$96.65'),
                           ('Seat 4', 'kjs609', '$200 ')]
         """
-        # pattern = re.compile(r"(Seat \d): ([a-zA-Z0-9]+\s?[a-zA-Z0-9]*)\s\(([$€]\d+.?\d*)\sin chips\)")
         # pattern = re.compile(rf"(Seat \d): {PLAYER_NAME_TEMPLATE}\s\(([$€]\d+.?\d*)\sin chips\)")
         pattern = re.compile(rf"(Seat \d): {PLAYER_NAME_TEMPLATE}\s{STARTING_STACK_TEMPLATE}")
         return pattern.findall(line)
@@ -134,7 +129,8 @@ class TxtParser(Parser):
             Example: [('HHnguyen15', 'small blind', '$1'), ('kjs609', 'big blind', '$2')]
         """
         # pattern = re.compile(r"([a-zA-Z0-9]+): posts (small blind|big blind) ([$€]\d+.?\d*)")
-        pattern = re.compile(rf"{PLAYER_NAME_TEMPLATE}: posts (small blind|big blind) ([$€]\d+.?\d*)")
+        pattern = re.compile(
+            rf"{PLAYER_NAME_TEMPLATE}: posts (small blind|big blind) ([$€]\d+.?\d*)")
         return pattern.findall(episode)
 
     @staticmethod
@@ -156,6 +152,7 @@ class TxtParser(Parser):
 
     @staticmethod
     def get_board_cards(episode: str):
+        """Returns a string with board cards, e.g. '[6h Ts Td 9c Jc]'. """
         summary = episode.split("*** SUMMARY ***")
         pattern = re.compile(r'Board\s(\[.*?])\n')
         return pattern.findall(summary[1])[0]
