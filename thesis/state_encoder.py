@@ -1,53 +1,40 @@
-from time import time
-import re
-import enum
-from typing import NamedTuple, List, Tuple
+from typing import List, Tuple
 import numpy as np
 from collections import defaultdict, deque
 from core.parser import PokerEpisode, Action, ActionType, PlayerStack
 from core.encoder import Encoder
 from PokerRL.game.games import NoLimitHoldem
+from thesis.core.encoder import PlayerInfo, Positions6Max
 
 
 class RLStateEncoder(Encoder):
     Observations = List[List]
     Actions_Taken = List[Tuple[int, int]]
     currency_symbol = '$'
-    class Positions6Max(enum.IntEnum):
-        """Positions as in the literature, for a table with at most 6 Players.
-    BTN for Button, SB for Small Blind, etc...
-    """
-        BTN = 0
-        SB = 1
-        BB = 2
-        UTG = 3  # UnderTheGun
-        MP = 4  # Middle Position
-        CO = 5  # CutOff
 
-    class Positions9Max(enum.IntEnum):
-        """Positions as in the literature, for a table with at most 9 Players.
-    BTN for Button, SB for Small Blind, etc...
-    """
-        BTN = 0
-        SB = 1
-        BB = 2
-        UTG = 3  # UnderTheGun
-        UTG1 = 4
-        UTG2 = 5
-        MP = 6  # Middle Position
-        MP1 = 7
-        CO = 8  # CutOff
+    DICT_RANK = {'': -127,
+                 '2': 0,
+                 '3': 1,
+                 '4': 2,
+                 '5': 3,
+                 '6': 4,
+                 '7': 5,
+                 '8': 6,
+                 '9': 7,
+                 'T': 8,
+                 'J': 9,
+                 'Q': 10,
+                 'K': 11,
+                 'A': 12}
 
-    class PlayerInfo(NamedTuple):
-        """Player information as parsed from the textfiles.
-    For example: PlayerInfo(seat_number=1, position_index=0, position='BTN',
-    player_name='jimjames32', stack_size=82.0)
-    """
-        seat_number: int
-        position_index: int  # 0 for BTN, 1 for SB, 2 for BB, etc.
-        position: str  # c.f. Positions6Max or Positions9Max
-        player_name: str
-        stack_size: float
+    DICT_SUITE = {'': -127,
+                  'h': 0,
+                  'd': 1,
+                  's': 2,
+                  'c': 3}
+
+    def __init__(self, env_builder=None):
+        self._env_builder = env_builder
 
     # noinspection PyTypeChecker
     @staticmethod
@@ -56,8 +43,8 @@ class RLStateEncoder(Encoder):
         for p_info in player_info:
             # create default dictionary for current player for each stage
             # default dictionary stores only the last two actions per stage per player
-            player_actions[p_info.player_name] = defaultdict(lambda: deque(maxlen=2),
-                                                             keys=['preflop', 'flop', 'turn', 'river'])
+            player_actions[p_info.player_name] = defaultdict(
+                lambda: deque(maxlen=2), keys=['preflop', 'flop', 'turn', 'river'])
         return player_actions
 
     @staticmethod
@@ -82,12 +69,12 @@ class RLStateEncoder(Encoder):
             player_name = info.player_name
             stack_size = float(info.stack[1:])
             position_index = rolled_position_indices[i]
-            position = RLStateEncoder.Positions6Max(position_index).name
-            player_infos.append(RLStateEncoder.PlayerInfo(seat_number,  # 2
-                                                          position_index,  # 0
-                                                          position,  # 'BTN'
-                                                          player_name,  # 'JoeSchmoe Billy'
-                                                          stack_size))  # 82.45
+            position = Positions6Max(position_index).name
+            player_infos.append(PlayerInfo(seat_number,  # 2
+                                           position_index,  # 0
+                                           position,  # 'BTN'
+                                           player_name,  # 'JoeSchmoe Billy'
+                                           stack_size))  # 82.45
         return tuple(player_infos)
 
     @staticmethod
@@ -98,27 +85,6 @@ class RLStateEncoder(Encoder):
         assert bb[1] == 'big blind'
         return int(sb[2].split(RLStateEncoder.currency_symbol)[1]) * multiply_by, \
                int(bb[2].split(RLStateEncoder.currency_symbol)[1]) * multiply_by
-
-    DICT_RANK = {'': -127,
-                 '2': 0,
-                 '3': 1,
-                 '4': 2,
-                 '5': 3,
-                 '6': 4,
-                 '7': 5,
-                 '8': 6,
-                 '9': 7,
-                 'T': 8,
-                 'J': 9,
-                 'Q': 10,
-                 'K': 11,
-                 'A': 12}
-
-    DICT_SUITE = {'': -127,
-                  'h': 0,
-                  'd': 1,
-                  's': 2,
-                  'c': 3}
 
     @staticmethod
     def _str_cards_to_list(cards: str):
@@ -175,9 +141,6 @@ class RLStateEncoder(Encoder):
         """Under Construction."""
         return action.action_type.value, int(float(action.raise_amount) * multiply_by)
 
-    def __init__(self):
-        self._default = None
-
     @staticmethod
     def _init_env(player_info: Tuple[PlayerInfo]):
         """Initializes environment used to generate observations."""
@@ -190,7 +153,10 @@ class RLStateEncoder(Encoder):
         args = NoLimitHoldem.ARGS_CLS(n_seats=len(player_info),
                                       starting_stack_sizes_list=starting_stack_sizes_list)
         # return env instance
-        return NoLimitHoldem(is_evaluating=True, env_args=args, lut_holder=NoLimitHoldem.get_lut_holder())
+        # todo consider wrapping
+        return NoLimitHoldem(is_evaluating=True,
+                             env_args=args,
+                             lut_holder=NoLimitHoldem.get_lut_holder())
 
     def _build_cards_state_dict(self, player_info: Tuple[PlayerInfo], episode: PokerEpisode):
         board_cards = self.make_board_cards(episode.board_cards)
@@ -205,6 +171,9 @@ class RLStateEncoder(Encoder):
                 'board': np.full((5, 2), -127),  # np.ndarray(shape=(n_cards, 2))
                 'hand': player_hands}
 
+    def _encode_episode(self, episode):
+        pass
+
     def encode_episode(self, episode: PokerEpisode) -> Tuple[Observations, Actions_Taken]:
 
         # --- Initialize environment --- #
@@ -215,20 +184,17 @@ class RLStateEncoder(Encoder):
         showdown_players = [info[0] for info in episode.showdown_hands]
         winner_names = [winner[0] for winner in episode.winners]
         # --- set blinds ---
-        sb, bb = self.make_blinds(episode.blinds, multiply_by=100)
-        env.SMALL_BLIND = sb
-        env.BIG_BLIND = bb
+        env.SMALL_BLIND, env.BIG_BLIND = self.make_blinds(episode.blinds, multiply_by=100)
 
         # --- Reset it with new state_dict --- #
         cards_state_dict = self._build_cards_state_dict(player_info, episode)
-        obs, reward, done, info = env.reset(deck_state_dict=cards_state_dict)
+        obs, _, done, _ = env.reset(deck_state_dict=cards_state_dict)
 
         # --- Step Environment with action --- #
         action_sequence = episode.actions_total['as_sequence']
         actions_formatted = [self.build_action(action) for action in action_sequence]
-        done = False
-        train_data = list()
-        labels = list()
+        train_data = []
+        labels = []
         it = 0
         while not done:
             action = actions_formatted[it]
@@ -240,23 +206,9 @@ class RLStateEncoder(Encoder):
                         labels.append(action)
                     else:
                         # replace action call/raise with fold
-                        labels.append((ActionType.FOLD.value, -1))  # todo make this a little more sophisticated
-            obs, reward, done, info = env.step(action)
-            """
-  # todo: check how obs is normalized to avoid small floats
+                        labels.append((ActionType.FOLD.value, -1))
+                        # todo make this a little more sophisticated
+            obs, _, done, _ = env.step(action)
 
-  # *** Observation Augmentation *** #
-  # raise vs bet: raise only in preflop stage, bet after preflop
-  actions_per_stage = self._init_player_actions(player_info)
-
-  for stage, actions in episode.actions_total.items():
-      for action in actions:
-          # noinspection PyTypeChecker
-          actions_per_stage[action.player_name][stage].append((action.action_type, action.raise_amount))
-
-  # todo: augment inside env wrapper
-  # --- Append last 8 moves per player --- #
-  # --- Append all players hands --- #
-      """
             it += 1
         return train_data, labels

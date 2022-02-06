@@ -1,12 +1,13 @@
 from txt_parser import TxtParser
 from state_encoder import RLStateEncoder
+from PokerRL.game.wrappers import HistoryEnvBuilder
 
 
 def main(f_path: str):
     """Parses hand_database and returns vectorized observations as returned by rl_env."""
     parser = TxtParser()
     parsed_hands = parser.parse_file(f_path)
-    enc = RLStateEncoder()
+    enc = RLStateEncoder(env_builder=HistoryEnvBuilder)
 
     for hand in parsed_hands:
         observations, actions = enc.encode_episode(hand)
