@@ -7,6 +7,9 @@ import enum
 from typing import NamedTuple, List, Tuple, Dict, Iterable
 import numpy as np
 from collections import defaultdict, deque
+
+from numpy import ndarray
+
 from PokerRL.game.games import NoLimitHoldem
 
 
@@ -111,7 +114,8 @@ class TxtParser(Parser):
         """Returns either 'fold', 'check_call', or 'raise."""
         default_raise_amount = -1  # for fold, check and call actions
         if 'raises' in line or 'bets' in line:
-            raise_amount = line.split(currency_symbol)[1].split()[0]
+            pattern = re.compile(r'(\d+\.?\d*)')
+            raise_amount = pattern.findall(line)[-1]
             return ActionType.RAISE, raise_amount
         elif 'calls' in line or 'checks' in line:
             return ActionType.CHECK_CALL, default_raise_amount
@@ -290,8 +294,8 @@ class Encoder:
 
 
 class RLStateEncoder(Encoder):
-    Observation = Tuple
-    Action_Taken = Tuple
+    Observations = List[List]
+    Actions_Taken = List[Tuple[int, int]]
 
     class Positions6Max(enum.IntEnum):
         """Positions as in the literature, for a table with at most 6 Players.
@@ -485,13 +489,14 @@ class RLStateEncoder(Encoder):
                 'board': np.full((5, 2), -127),  # np.ndarray(shape=(n_cards, 2))
                 'hand': player_hands}
 
-    def encode_episode(self, episode: PokerEpisode) -> Iterable[Tuple[Observation, Action_Taken]]:
+    def encode_episode(self, episode: PokerEpisode) -> Tuple[Observations, Actions_Taken]:
 
         # --- Initialize environment --- #
         rolled_position_indices = self.roll_position_indices(episode.num_players, episode.btn_idx)
         player_info = self.build_all_player_info(episode.player_stacks, rolled_position_indices)
         env = self._init_env(player_info)
-
+        # utils
+        winner_names = [winner[0] for winner in episode.winners]
         # --- set blinds ---
         sb, bb = self.make_blinds(episode.blinds, multiply_by=100)
         env.SMALL_BLIND = sb
@@ -506,16 +511,15 @@ class RLStateEncoder(Encoder):
         actions_formatted = [self.build_action(action) for action in action_sequence]
         done = False
         train_data = list()
+        labels = list()
         it = 0
         while not done:
             action = actions_formatted[it]
-            NEXT_TO_ACT = -1
-            next_to_act = obs[NEXT_TO_ACT]
+            next_to_act = env.current_player.seat_id
             for player in player_info:
-                if player.position_index == next_to_act and player.player_name in episode.winners:
-                    # agent is next to act
-                    train_data.append((obs, action))
-                # while not done: env.step(action)
+                if player.position_index == next_to_act and player.player_name in winner_names:
+                    train_data.append(obs)
+                    labels.append(action)
             obs, reward, done, info = env.step(action)
             """
         # todo: check how obs is normalized to avoid small floats
@@ -534,7 +538,7 @@ class RLStateEncoder(Encoder):
         # --- Append all players hands --- #
             """
             it += 1
-        return train_data
+        return train_data, labels
 
 
 def main(f_path: str):
@@ -544,7 +548,7 @@ def main(f_path: str):
     enc = RLStateEncoder()
 
     for hand in parsed_hands:
-        observation, action = enc.encode_episode(hand)
+        observations, actions = enc.encode_episode(hand)
         debug = 1
 
 
