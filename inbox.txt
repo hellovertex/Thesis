@@ -42,6 +42,9 @@ implement pypoker.PokerObservation.last_moves()
 01-30: regarding last-moves and all-player-cards
 => format must not change between supervised and RL observations
 
+02-06: 1. Implement build_action
+02-07: 2. Implement Observation augmentation
+
 
 
 

@@ -10,7 +10,6 @@ from collections import defaultdict, deque
 from PokerRL.game.games import NoLimitHoldem
 
 
-
 class PlayerStack(NamedTuple):
     """Player Stacks as parsed from the textfiles.
     For example: PlayerStack('Seat 1', 'jimjames32', '$82 ')
@@ -69,8 +68,6 @@ class Parser:
 
         """
         raise NotImplementedError
-
-
 
 
 class TxtParser(Parser):
@@ -209,7 +206,7 @@ class TxtParser(Parser):
         pattern = re.compile(r'Board\s(\[.*?])\n')
         return pattern.findall(summary[1])[0]
 
-    def _parse_actions(self, episode: str) -> Dict[str: Action]:
+    def _parse_actions(self, episode: str) -> Dict[str, List[Action]]:
         """Returns a dictionary with actions per stage.
           Args:
             episode: string representation of played episode as gotten from .txt files
@@ -284,242 +281,270 @@ class TxtParser(Parser):
 
 # ---------------------------- Encoder ---------------------------------
 
-class Positions6Max(enum.IntEnum):
-    """Positions as in the literature, for a table with at most 6 Players.
-    BTN for Button, SB for Small Blind, etc...
-    """
-    BTN = 0
-    SB = 1
-    BB = 2
-    UTG = 3  # UnderTheGun
-    MP = 4  # Middle Position
-    CO = 5  # CutOff
+class Encoder:
+    """todo"""
+
+    def encode_episode(self, episode: str):
+        """Encodes one PokerEpisode to a vector that can be used for machine learning."""
+        raise NotImplementedError
 
 
-class Positions9Max(enum.IntEnum):
-    """Positions as in the literature, for a table with at most 9 Players.
-    BTN for Button, SB for Small Blind, etc...
-    """
-    BTN = 0
-    SB = 1
-    BB = 2
-    UTG = 3  # UnderTheGun
-    UTG1 = 4
-    UTG2 = 5
-    MP = 6  # Middle Position
-    MP1 = 7
-    CO = 8  # CutOff
+class RLStateEncoder(Encoder):
+    Observation = Tuple
+    Action_Taken = Tuple
 
+    class Positions6Max(enum.IntEnum):
+        """Positions as in the literature, for a table with at most 6 Players.
+        BTN for Button, SB for Small Blind, etc...
+        """
+        BTN = 0
+        SB = 1
+        BB = 2
+        UTG = 3  # UnderTheGun
+        MP = 4  # Middle Position
+        CO = 5  # CutOff
 
-class PlayerInfo(NamedTuple):
-    """Player information as parsed from the textfiles.
-    For example: PlayerInfo(seat_number=1, position_index=0, position='BTN',
-    player_name='jimjames32', stack_size=82.0)
-    """
-    seat_number: int
-    position_index: int  # 0 for BTN, 1 for SB, 2 for BB, etc.
-    position: str  # c.f. Positions6Max or Positions9Max
-    player_name: str
-    stack_size: float
+    class Positions9Max(enum.IntEnum):
+        """Positions as in the literature, for a table with at most 9 Players.
+        BTN for Button, SB for Small Blind, etc...
+        """
+        BTN = 0
+        SB = 1
+        BB = 2
+        UTG = 3  # UnderTheGun
+        UTG1 = 4
+        UTG2 = 5
+        MP = 6  # Middle Position
+        MP1 = 7
+        CO = 8  # CutOff
 
+    class PlayerInfo(NamedTuple):
+        """Player information as parsed from the textfiles.
+        For example: PlayerInfo(seat_number=1, position_index=0, position='BTN',
+        player_name='jimjames32', stack_size=82.0)
+        """
+        seat_number: int
+        position_index: int  # 0 for BTN, 1 for SB, 2 for BB, etc.
+        position: str  # c.f. Positions6Max or Positions9Max
+        player_name: str
+        stack_size: float
 
-# noinspection PyTypeChecker
-def _init_player_actions(player_info):
-    player_actions = {}
-    for p_info in player_info:
-        # create default dictionary for current player for each stage
-        # default dictionary stores only the last two actions per stage per player
-        player_actions[p_info.player_name] = defaultdict(lambda: deque(maxlen=2),
-                                                         keys=['preflop', 'flop', 'turn', 'river'])
-    return player_actions
+    # noinspection PyTypeChecker
+    @staticmethod
+    def _init_player_actions(player_info):
+        player_actions = {}
+        for p_info in player_info:
+            # create default dictionary for current player for each stage
+            # default dictionary stores only the last two actions per stage per player
+            player_actions[p_info.player_name] = defaultdict(lambda: deque(maxlen=2),
+                                                             keys=['preflop', 'flop', 'turn', 'river'])
+        return player_actions
 
+    @staticmethod
+    def roll_position_indices(num_players: int, btn_idx: int) -> np.ndarray:
+        """ # Roll position indices, such that each seat is assigned correct position
+        # Example: btn_idx=1
+        # ==> np.roll([0,1,2], btn_idx) returns [2,0,1]:
+        # The first  seat has position index 2, which is BB
+        # The second seat has position index 0, which is BTN
+        # The third  seat has position index 1, which is SB """
+        return np.roll(np.arange(num_players), btn_idx)
 
-def roll_position_indices(num_players: int, btn_idx: int) -> np.ndarray:
-    """ # Roll position indices, such that each seat is assigned correct position
-    # Example: btn_idx=1
-    # ==> np.roll([0,1,2], btn_idx) returns [2,0,1]:
-    # The first  seat has position index 2, which is BB
-    # The second seat has position index 0, which is BTN
-    # The third  seat has position index 1, which is SB """
-    return np.roll(np.arange(num_players), btn_idx)
+    @staticmethod
+    def build_all_player_info(player_stacks: List[PlayerStack], rolled_position_indices) -> Tuple[PlayerInfo]:
+        """ Docstring """
+        # 1. Roll position indices, such that each seat is assigned correct position
 
+        player_infos = []
+        # build PlayerInfo for each player
+        for i, info in enumerate(player_stacks):
+            seat_number = int(info.seat_display_name[5])
+            player_name = info.player_name
+            stack_size = float(info.stack[1:])
+            position_index = rolled_position_indices[i]
+            position = RLStateEncoder.Positions6Max(position_index).name
+            player_infos.append(RLStateEncoder.PlayerInfo(seat_number,  # 2
+                                                          position_index,  # 0
+                                                          position,  # 'BTN'
+                                                          player_name,  # 'JoeSchmoe Billy'
+                                                          stack_size))  # 82.45
+        return tuple(player_infos)
 
-def build_all_player_info(player_stacks: List[PlayerStack], rolled_position_indices):
-    """ Docstring """
-    # 1. Roll position indices, such that each seat is assigned correct position
+    @staticmethod
+    def make_blinds(blinds: List[Tuple[str]], multiply_by: int = 1):
+        sb = blinds[0]
+        assert sb[1] == 'small blind'
+        bb = blinds[1]
+        assert bb[1] == 'big blind'
+        return int(sb[2].split(currency_symbol)[1]) * multiply_by, \
+               int(bb[2].split(currency_symbol)[1]) * multiply_by
 
-    player_infos = []
-    # build PlayerInfo for each player
-    for i, info in enumerate(player_stacks):
-        seat_number = int(info.seat_display_name[5])
-        player_name = info.player_name
-        stack_size = float(info.stack[1:])
-        position_index = rolled_position_indices[i]
-        position = Positions6Max(position_index).name
-        player_infos.append(PlayerInfo(seat_number,  # 2
-                                       position_index,  # 0
-                                       position,  # 'BTN'
-                                       player_name,  # 'JoeSchmoe Billy'
-                                       stack_size))  # 82.45
-    return tuple(player_infos)
+    DICT_RANK = {'': -127,
+                 '2': 0,
+                 '3': 1,
+                 '4': 2,
+                 '5': 3,
+                 '6': 4,
+                 '7': 5,
+                 '8': 6,
+                 '9': 7,
+                 'T': 8,
+                 'J': 9,
+                 'Q': 10,
+                 'K': 11,
+                 'A': 12}
 
+    DICT_SUITE = {'': -127,
+                  'h': 0,
+                  'd': 1,
+                  's': 2,
+                  'c': 3}
 
-def make_blinds(blinds: List[Tuple[str]], multiply_by: int = 1):
-    sb = blinds[0]
-    assert sb[1] == 'small blind'
-    bb = blinds[1]
-    assert bb[1] == 'big blind'
-    return int(sb[2].split(currency_symbol)[1]) * multiply_by, \
-           int(bb[2].split(currency_symbol)[1]) * multiply_by
+    @staticmethod
+    def _str_cards_to_list(cards: str):
+        """ See example below """
+        # '[6h Ts Td 9c Jc]'
+        rm_brackets = cards.replace('[', '').replace(']', '')
+        # '6h Ts Td 9c Jc'
+        card_list = rm_brackets.split(' ')
+        # ['6h', 'Ts', 'Td', '9c', 'Jc']
+        return card_list
 
+    def make_board_cards(self, board_cards: str):
+        """Return 5 cards that we can prepend to the card deck so that the board will be drawn.
+          Args:
+            board_cards: for example '[6h Ts Td 9c Jc]'
+          Returns:
+            representation of board_cards that is understood by rl_env
+            Example:
+        """
+        # '[6h Ts Td 9c Jc]' to ['6h', 'Ts', 'Td', '9c', 'Jc']
+        card_list = self._str_cards_to_list(board_cards)
+        assert len(card_list) == 5
 
-DICT_RANK = {'': -127,
-             '2': 0,
-             '3': 1,
-             '4': 2,
-             '5': 3,
-             '6': 4,
-             '7': 5,
-             '8': 6,
-             '9': 7,
-             'T': 8,
-             'J': 9,
-             'Q': 10,
-             'K': 11,
-             'A': 12}
+        return [[self.DICT_RANK[card[0]], self.DICT_SUITE[card[1]]] for card in card_list]
 
-DICT_SUITE = {'': -127,
-              'h': 0,
-              'd': 1,
-              's': 2,
-              'c': 3}
+    def make_player_hands(self, player_info, showdown_hands):
+        """Under Construction. """
+        name = 3  # index
+        position = 1  # index
+        assert len(showdown_hands) == 2
+        name_0 = showdown_hands[0][0]
+        name_1 = showdown_hands[1][0]
+        # '[6h Ts]' to ['6h', 'Ts']
+        cards_0 = self._str_cards_to_list(showdown_hands[0][1])
+        cards_1 = self._str_cards_to_list(showdown_hands[1][1])
+        # initialize default hands
+        player_hands = [[-127, -127] for _ in range(len(player_info))]
 
+        # overwrite known hands
+        for player in player_info:
+            if player[name] in [name_0, name_1]:
+                # overwrite hand for player 0
+                if player[name] == name_0:
+                    hand = [[self.DICT_RANK[card[0]], self.DICT_SUITE[card[1]]] for card in cards_0]
+                    player_hands[player[position]] = hand
+                # overwrite hand for player 1
+                else:
+                    hand = [[self.DICT_RANK[card[0]], self.DICT_SUITE[card[1]]] for card in cards_1]
+                    player_hands[player[position]] = hand
+        return player_hands
 
-def _str_cards_to_list(cards: str):
-    """ See example below """
-    # '[6h Ts Td 9c Jc]'
-    rm_brackets = cards.replace('[', '').replace(']', '')
-    # '6h Ts Td 9c Jc'
-    card_list = rm_brackets.split(' ')
-    # ['6h', 'Ts', 'Td', '9c', 'Jc']
-    return card_list
+    @staticmethod
+    def build_action(action: Action, multiply_by=100):
+        """Under Construction."""
+        return action.action_type.value, int(float(action.raise_amount)*multiply_by)
 
+    def __init__(self):
+        self._default = None
 
-def make_board_cards(board_cards: str):
-    """Return 5 cards that we can prepend to the card deck so that the board will be drawn.
-      Args:
-        board_cards: for example '[6h Ts Td 9c Jc]'
-      Returns:
-        representation of board_cards that is understood by rl_env
-        Example:
-    """
-    # '[6h Ts Td 9c Jc]' to ['6h', 'Ts', 'Td', '9c', 'Jc']
-    card_list = _str_cards_to_list(board_cards)
-    assert len(card_list) == 5
+    @staticmethod
+    def _init_env(player_info: Tuple[PlayerInfo]):
+        """Initializes environment used to generate observations."""
+        # sort the player list such button is first, regardless of seat number
+        player_info_sorted = np.roll(player_info, player_info[0].position_index, axis=0)
+        # get starting stacks, starting with button at index 0
+        starting_stack_sizes_list = [int(float(stack) * 100) for stack in player_info_sorted[:, 4]]
 
-    return [[DICT_RANK[card[0]], DICT_SUITE[card[1]]] for card in card_list]
+        # make args for env
+        args = NoLimitHoldem.ARGS_CLS(n_seats=len(player_info),
+                                      starting_stack_sizes_list=starting_stack_sizes_list)
+        # return env instance
+        return NoLimitHoldem(is_evaluating=True, env_args=args, lut_holder=NoLimitHoldem.get_lut_holder())
 
+    def _build_cards_state_dict(self, player_info: Tuple[PlayerInfo], episode: PokerEpisode):
+        board_cards = self.make_board_cards(episode.board_cards)
+        # --- set deck ---
+        # cards are drawn without ghost cards, so we simply replace the first 5 cards of the deck
+        # with the board cards that we have parsed
+        deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
+        deck[:len(board_cards)] = board_cards
+        # make hands: np.ndarray(shape=(n_players, 2, 2))
+        player_hands = self.make_player_hands(player_info, episode.showdown_hands)
+        return {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*num_players, 2))
+                'board': np.full((5, 2), -127),  # np.ndarray(shape=(n_cards, 2))
+                'hand': player_hands}
 
-def make_player_hands(player_info, showdown_hands):
-    """Under Construction. """
-    name = 3  # index
-    position = 1  # index
-    assert len(showdown_hands) == 2
-    name_0 = showdown_hands[0][0]
-    name_1 = showdown_hands[1][0]
-    # '[6h Ts]' to ['6h', 'Ts']
-    cards_0 = _str_cards_to_list(showdown_hands[0][1])
-    cards_1 = _str_cards_to_list(showdown_hands[1][1])
-    # initialize default hands
-    player_hands = [[-127, -127] for _ in range(len(player_info))]
+    def encode_episode(self, episode: PokerEpisode) -> Iterable[Tuple[Observation, Action_Taken]]:
 
-    # overwrite known hands
-    for player in player_info:
-        if player[name] in [name_0, name_1]:
-            # overwrite hand for player 0
-            if player[name] == name_0:
-                hand = [[DICT_RANK[card[0]], DICT_SUITE[card[1]]] for card in cards_0]
-                player_hands[player[position]] = hand
-            # overwrite hand for player 1
-            else:
-                hand = [[DICT_RANK[card[0]], DICT_SUITE[card[1]]] for card in cards_1]
-                player_hands[player[position]] = hand
-    return player_hands
+        # --- Initialize environment --- #
+        rolled_position_indices = self.roll_position_indices(episode.num_players, episode.btn_idx)
+        player_info = self.build_all_player_info(episode.player_stacks, rolled_position_indices)
+        env = self._init_env(player_info)
 
+        # --- set blinds ---
+        sb, bb = self.make_blinds(episode.blinds, multiply_by=100)
+        env.SMALL_BLIND = sb
+        env.BIG_BLIND = bb
 
-def build_action(action: tuple):
-    """Under Construction."""
-    # todo
-    return action
+        # --- Reset it with new state_dict --- #
+        cards_state_dict = self._build_cards_state_dict(player_info, episode)
+        obs, reward, done, info = env.reset(deck_state_dict=cards_state_dict)
+
+        # --- Step Environment with action --- #
+        action_sequence = episode.actions_total['as_sequence']
+        actions_formatted = [self.build_action(action) for action in action_sequence]
+        done = False
+        train_data = list()
+        it = 0
+        while not done:
+            action = actions_formatted[it]
+            NEXT_TO_ACT = -1
+            next_to_act = obs[NEXT_TO_ACT]
+            for player in player_info:
+                if player.position_index == next_to_act and player.player_name in episode.winners:
+                    # agent is next to act
+                    train_data.append((obs, action))
+                # while not done: env.step(action)
+            obs, reward, done, info = env.step(action)
+            """
+        # todo: check how obs is normalized to avoid small floats
+    
+        # *** Observation Augmentation *** #
+        # raise vs bet: raise only in preflop stage, bet after preflop
+        actions_per_stage = self._init_player_actions(player_info)
+    
+        for stage, actions in episode.actions_total.items():
+            for action in actions:
+                # noinspection PyTypeChecker
+                actions_per_stage[action.player_name][stage].append((action.action_type, action.raise_amount))
+    
+        # todo: augment inside env wrapper
+        # --- Append last 8 moves per player --- #
+        # --- Append all players hands --- #
+            """
+            it += 1
+        return train_data
 
 
 def main(f_path: str):
     """Parses hand_database and returns vectorized observations as returned by rl_env."""
     parser = TxtParser()
     parsed_hands = parser.parse_file(f_path)
-
+    enc = RLStateEncoder()
 
     for hand in parsed_hands:
-        player_stacks = hand.player_stacks
-        num_players = hand.num_players
-        btn_idx = hand.btn_idx
-        actions_total = hand.actions_total
-        # todo move to processing unit
-
-        # corresponds to env.reset()
-        rolled_position_indices = roll_position_indices(num_players, btn_idx)
-        player_info = build_all_player_info(player_stacks, rolled_position_indices)
-
-        player_hands = make_player_hands(player_info, hand.showdown_hands)
-
-        STACK_COLUMN = 4
-
-        # sort the player list such button is first, regardless of seat number
-        player_info_sorted = np.roll(player_info, player_info[0].position_index, axis=0)
-        starting_stack_sizes_list = [int(float(stack) * 100) for stack in player_info_sorted[:, STACK_COLUMN]]
-
-        # *** Obtain encoded observation *** #
-        # --- Create new env for every hand --- #
-        args = NoLimitHoldem.ARGS_CLS(n_seats=num_players,
-                                      starting_stack_sizes_list=starting_stack_sizes_list)
-        env = NoLimitHoldem(is_evaluating=True, env_args=args, lut_holder=NoLimitHoldem.get_lut_holder())
-        # --- Reset it with new state_dict --- #
-        board_cards = make_board_cards(hand.board_cards)
-        # verify using env.cards2str(board_cards)
-        # --- set blinds ---
-        sb, bb = make_blinds(hand.blinds, multiply_by=100)
-        env.SMALL_BLIND = sb
-        env.BIG_BLIND = bb
-        # --- set deck ---
-        # cards are drawn without ghost cards, so we simply replace the first 5 cards of the deck
-        # with the board cards that we have parsed
-        deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
-        deck[:len(board_cards)] = board_cards
-        # set hands
-
-        cards_state_dict = {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*num_players, 2))
-                            'board': np.full((5, 2), -127),  # np.ndarray(shape=(n_cards, 2))
-                            'hand': player_hands}  # np.ndarray(shape=(n_players, 2, 2))
-        obs, reward, done, info = env.reset(deck_state_dict=cards_state_dict)
-
-        # todo: step environment with actions_per_stage and player_info
-        action_sequence = actions_total['as_sequence']
-        actions_formatted = [build_action(action) for action in action_sequence]
-        # while not done: env.step(next(actions_formatted))
-        # todo: check how obs is normalized to avoid small floats
-
-        # *** Observation Augmentation *** #
-        # raise vs bet: raise only in preflop stage, bet after preflop
-        actions_per_stage = _init_player_actions(player_info)
-
-        for stage, actions in actions_total.items():
-            for action in actions:
-                # noinspection PyTypeChecker
-                actions_per_stage[action.player_name][stage].append((action.action_type, action.raise_amount))
-
-        # todo: augment inside env wrapper
-        # --- Append last 8 moves per player --- #
-        # --- Append all players hands --- #
+        observation, action = enc.encode_episode(hand)
         debug = 1
 
 
