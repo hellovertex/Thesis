@@ -10,6 +10,7 @@ from thesis.core.wrapper import AugmentedEnvBuilder
 
 
 class Vectorizer:
+
     def __init__(self, max_players=6, n_ranks=13, n_suits=4, n_board_cards=5, n_hand_cards=2):
         # --- Utils --- #
         self._max_players = max_players
@@ -17,7 +18,7 @@ class Vectorizer:
         max_actions_per_stage_per_player = 2
         max_actions = max_actions_per_stage_per_player * n_stages + self._max_players
         self._bits_stats_per_player = len(['stack', 'curr_bet', 'has_folded', 'is_all_in']) \
-                                + len(['side_pot_rank_p0_is_']) * self._max_players
+                                      + len(['side_pot_rank_p0_is_']) * self._max_players
         self._bits_per_card = n_ranks + n_suits  # 13 ranks + 4 suits
         self._bits_per_action = self._max_players \
                                 + len(['fold', 'check/call', 'bet/raise']) \
@@ -68,15 +69,20 @@ class Vectorizer:
            total_to_call:   0.1
         """
         # copy unchanged
-        self._obs[self._offset_table:self._bits_table] = obs[self._offset_table:self._bits_table]
+        self._obs[self._offset_table:self._offset_next_player] = obs[self._offset_table:self._offset_next_player]
 
-    def encode_next_player(self, obs):
+    def encode_next_player(self, obs, num_players):
         """Example:
             p0_acts_next:   0.0
             p1_acts_next:   1.0
             p2_acts_next:   0.0
         """
-        return []
+        offset = self._offset_next_player
+        bits_from_obs = np.array(obs[offset:offset + num_players])
+        # obs only has num_players <= max_players bits here,
+        # so we pad the non existing players with zeros
+        bits_padded = bits_from_obs.resize(self._bits_next_player)
+        self._obs[self._offset_next_player:self._offset_stage] = bits_padded
 
     def encode_stage(self, obs):
         """Example:
@@ -85,7 +91,8 @@ class Vectorizer:
               round_turn:   0.0
              round_river:   0.0
         """
-        return []
+        # todo get actual offsets for current obs
+        # self.obs[self._offset_stage:self._offset_side_pots] = obs[self._offset_stage:self._offset_side_pots]
 
     def encode_side_pots(self, obs):
         """Example:
@@ -251,11 +258,12 @@ class RLStateEncoder(Encoder):
                   's': 2,
                   'c': 3}
 
-    def __init__(self, env_builder_cls=None):
+    def __init__(self, env_builder_cls=None, vectorizer: Vectorizer=None):
         self._env_builder_cls = env_builder_cls
         self._env_builder: Optional[AugmentedEnvBuilder] = None
         self._actions_per_stage = None
         self._default_player_hands = None
+        self._vec = vectorizer
 
     def _get_wrapped_env(self, player_info: Tuple[PlayerInfo]):
         """Initializes environment used to generate observations."""
@@ -428,6 +436,7 @@ class RLStateEncoder(Encoder):
                     player_hands = [[-127, -127] for _ in range(len(player_info))]
                     player_hands[next_to_act] = wrapped_env.env.seats[next_to_act].hand
                     # todo: obs + self._actions_per_stage + player_hands + zero padding
+                    # vectorized = self._vec.vectorize(obs)
                     train_data.append(obs)
                     if player.player_name in winner_names:
                         labels.append(action_label)
@@ -437,4 +446,5 @@ class RLStateEncoder(Encoder):
             obs, _, done, _ = wrapped_env.step(action_label)
 
             it += 1
+
         return train_data, labels
