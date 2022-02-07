@@ -48,5 +48,11 @@ class Encoder:  # pylint: disable=too-few-public-methods
     and implement the method "encode_episode"."""
 
     def encode_episode(self, episode: PokerEpisode):
-        """Encodes one PokerEpisode to a vector that can be used for machine learning."""
+        """Encodes one PokerEpisode to a vector that can be used for machine learning.
+            Args:
+                episode: A PokerEpisode returned by a Parser object.
+            Returns:
+                A vectorized observation together with an action that is the observations label
+                for supervised training.
+        """
         raise NotImplementedError

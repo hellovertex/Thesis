@@ -70,7 +70,7 @@ class TxtParser(Parser):
         raise RuntimeError(f"Could not parse action type from line: \n{line}")
 
     @staticmethod
-    def get_actions(stage: str) -> List[Action]:
+    def get_actions(action_history: str, stage: str) -> List[Action]:
         """This is best explained by an example. Consider the string
           '''jimjames32: raises $4 to $6\n
           HHnguyen15: raises $14 to $20\n
@@ -83,12 +83,15 @@ class TxtParser(Parser):
           So we split each line by ':', and check, which of the splitresults has exactly two elements
           (playername, action).
         """
-        possible_actions = [possible_action.split(':') for possible_action in stage.split('\n')]
+        possible_actions = [possible_action.split(':') for possible_action in action_history.split('\n')]
         actions = []
         for maybe_action in possible_actions:
             if len(maybe_action) == 2:
                 action_type, raise_amount = TxtParser._get_action_type(maybe_action[1])
-                action = Action(player_name=maybe_action[0], action_type=action_type, raise_amount=raise_amount)
+                action = Action(player_name=maybe_action[0],
+                                action_type=action_type,
+                                raise_amount=raise_amount,
+                                stage=stage)
                 actions.append(action)
         return actions
 
@@ -174,10 +177,10 @@ class TxtParser(Parser):
         turn = episode.split("*** TURN ***")[1].split("*** RIVER ***")[0]
         river = episode.split("*** RIVER ***")[1].split("*** SHOW DOWN ***")[0]
 
-        actions_preflop = self.get_actions(hole_cards)
-        actions_flop = self.get_actions(flop)
-        actions_turn = self.get_actions(turn)
-        actions_river = self.get_actions(river)
+        actions_preflop = self.get_actions(hole_cards, stage='preflop')
+        actions_flop = self.get_actions(flop, stage='flop')
+        actions_turn = self.get_actions(turn, stage='turn')
+        actions_river = self.get_actions(river, stage='river')
         as_sequence = actions_preflop + actions_flop + actions_turn + actions_river
         return {'preflop': actions_preflop,
                 'flop': actions_flop,

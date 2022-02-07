@@ -43,7 +43,21 @@ implement pypoker.PokerObservation.last_moves()
 01-30: regarding last-moves and all-player-cards
 => format must not change between supervised and RL observations
 
+[RL - Seminar Key Messages]
+02-07: Bandits
+- [UCB] Upper confidence Bound Action Selection
+-- subtly favoring actions that have received fewer samples
+-- by adding to Q, the ratio of ln(t) vs N_t(a), the ladder dominating the first
+02-07: MDPs
+- Everything is Markovian if lifted to infinite dimensional space
+- misalignment of reward leads to convergence to wrong goal
+- formal MDPs : https://isis.tu-berlin.de/mod/videoservice/view.php/cm/1271465/browse
+- control theory : https://meyn.ece.ufl.edu/2021/08/01/control-systems-and-reinforcement-learning/
+
+
 [TODOS]
+02-08: check how encoder base class can be typed with a generic vectorizer
+02-07: reward as fraction of starting stack (blinds small negativ and lost all in is -1)
 02-06: write environment wrapper with augmented observation
 02-06: write environment wrapper with seer mode for RL with openboard
 02-06: 2. Implement Observation augmentation

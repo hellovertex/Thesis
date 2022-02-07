@@ -23,6 +23,7 @@ class Action(NamedTuple):
     """If the current bet is 30, and the agent wants to bet 60 chips more, the action should
     be (2, 90).
     """
+    stage: str
     player_name: str
     action_type: ActionType
     raise_amount: float = -1
