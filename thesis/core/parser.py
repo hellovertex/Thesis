@@ -3,6 +3,13 @@ from typing import NamedTuple, Iterable, List, Dict
 import enum
 
 
+class PlayerWithCards(NamedTuple):
+    """Player with cards as string.
+    For example: PlayerWithCards('HHnguyen15', '[Ah Jd]')"""
+    player_name: str
+    cards: str
+
+
 class PlayerStack(NamedTuple):
     """Player Stacks as parsed from the textfiles.
     For example: PlayerStack('Seat 1', 'jimjames32', '$82 ')
@@ -10,6 +17,13 @@ class PlayerStack(NamedTuple):
     seat_display_name: str
     player_name: str
     stack: str
+
+
+class Blind(NamedTuple):
+    """Blind('HHnguyen15', 'small blind', '$1')"""
+    player_name: str
+    type: str    # 'small blind' | 'big blind'
+    amount: str  # '$1', '$0.25', '€1', '€0.25'
 
 
 class ActionType(enum.IntEnum):
@@ -21,7 +35,9 @@ class ActionType(enum.IntEnum):
 
 class Action(NamedTuple):
     """If the current bet is 30, and the agent wants to bet 60 chips more, the action should
-    be (2, 90).
+    be (2, 90). For Example: Action(stage='preflop',
+                                    player_name='jimjames32',
+                                    action_type=<ActionType.RAISE: 2>, raise_amount='6')
     """
     stage: str
     player_name: str
@@ -35,13 +51,13 @@ class PokerEpisode(NamedTuple):
     hand_id: int
     variant: str
     num_players: int
-    blinds: list
+    blinds: List[Blind]
     player_stacks: List[PlayerStack]
     btn_idx: int
     board_cards: str
     actions_total: Dict[str, List[Action]]
-    winners: list
-    showdown_hands: list
+    winners: List[PlayerWithCards]
+    showdown_hands: List[PlayerWithCards]
 
 
 class Parser:  # pylint: disable=too-few-public-methods
