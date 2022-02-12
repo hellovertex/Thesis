@@ -214,8 +214,6 @@ class RLStateEncoder(Encoder):
       next_to_act = env.current_player.seat_id
       for player in table:
         if player.position_index == next_to_act and player.player_name in showdown_players:
-          player_hands = [[-127, -127] for _ in range(len(table))]
-          player_hands[next_to_act] = env.env.seats[next_to_act].hand
           observations.append(obs)
           if player.player_name in winner_names:
             actions.append(action_formatted)

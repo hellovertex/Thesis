@@ -50,9 +50,9 @@ class Wrapper:
     """
     env_obs, rew_for_all_players, done, info = self.env.step(action)
     self._pushback_action(action)
-    return env_obs, rew_for_all_players, done, info
+    # return env_obs, rew_for_all_players, done, info
     # self._pushback(env_obs)
-    # return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
+    return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
 
   def step_from_processed_tuple(self, action):
     """
@@ -62,7 +62,8 @@ class Wrapper:
         obs, reward, done, info
     """
     env_obs, rew_for_all_players, done, info = self.env.step_from_processed_tuple(action)
-    return env_obs, rew_for_all_players, done, info
+    self._pushback_action(action)
+    return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
 
   def step_raise_pot_frac(self, pot_frac):
     """
@@ -71,12 +72,21 @@ class Wrapper:
     Returns:
         obs, reward, done, info
     """
-    env_obs, rew_for_all_players, done, info = self.env.step_raise_pot_frac(pot_frac=pot_frac)
-    return env_obs, rew_for_all_players, done, info
+    processed_action = (2, self.env.get_fraction_of_pot_raise(
+      fraction=pot_frac, player_that_bets=self.env.current_player))
+    return self.env.step(processed_action)
 
   def reset(self, deck_state_dict=None):
     env_obs, rew_for_all_players, done, info = self.env.reset(deck_state_dict=deck_state_dict)
-    return env_obs, rew_for_all_players, done, info
+    return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
+
+  def _return_obs(self, rew_for_all_players, done, info, env_obs=None):
+    return self.get_current_obs(env_obs=env_obs), rew_for_all_players, done, info
+
+  # _______________________________ Override to augment observation ________________________________
+
+  def get_current_obs(self, env_obs):
+    raise NotImplementedError
 
   def _pushback_action(self, action):
     raise NotImplementedError
@@ -90,6 +100,11 @@ class AugmentObservationWrapper(Wrapper):
     self._table = table
     # augmentation content
     self._actions_per_stage = None
+    """
+    player_hands = [[-127, -127] for _ in range(len(table))]
+    player_hands[next_to_act] = env.env.seats[next_to_act].hand
+    compute player hands relative to next_to_act, i.e. observation for each player
+    """
     self._player_hands = player_hands
     # vectorizes augmented observation
     # todo add kwargs from table to initialization of vectorizer
@@ -107,7 +122,13 @@ class AugmentObservationWrapper(Wrapper):
     self._actions_per_stage = player_actions
     return player_actions
 
-  def pushback_action(self, action_formatted):
+  def get_current_obs(self, env_obs):
+    # augment here with vectorizer
+    augmented_obs = env_obs + self._actions_per_stage + self._player_hands
+    return self._vectorizer.vectorize(augmented_obs)
+
+  def _pushback_action(self, action_formatted):
+    # todo
     pass
 
   @property
