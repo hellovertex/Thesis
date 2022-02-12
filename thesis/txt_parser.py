@@ -22,6 +22,20 @@ class TxtParser(Parser):
   def __init__(self):
     # todo consider making TxtParser another abstract class and make derived PokerStars-Parser
     self._variant = None
+    self._metadata = {'n_total_episodes': 0,
+                      'n_total_showdowns': 0,
+                      'n_mucks': 0,
+                      'n_showdowns_no_mucks': 0}
+
+  def _reset_metadata_counts(self):
+    self._metadata = {'n_total_episodes': 0,
+                      'n_total_showdowns': 0,
+                      'n_mucks': 0,
+                      'n_showdowns_no_mucks': 0}
+
+  @property
+  def metadata(self):
+    return self._metadata
 
   @staticmethod
   def get_hand_id(episode: str) -> int:
@@ -218,18 +232,25 @@ class TxtParser(Parser):
 
   def _parse_hands(self, hands_played):
     for current in hands_played:  # c for current_hand
+      self._metadata['n_total_episodes'] += 1
       # Only parse hands that went to Showdown stage, i.e. were shown
       if not '*** SHOW DOWN ***' in current:
         continue
+
       # get showdown
+      self._metadata['n_total_showdowns'] += 1
       showdown = self.get_showdown(current)
+
       # skip if player did not show hand
       if 'mucks' in showdown:
+        self._metadata['n_mucks'] += 1
         continue
 
+      self._metadata['n_showdowns_no_mucks'] += 1
       yield self._parse_episode(current, showdown)
 
   def parse_file(self, file_path):
+    self._reset_metadata_counts()
     self._variant = 'NoLimitHoldem'  # todo parse from filename
     with open(file_path, 'r') as f:  # pylint: disable=invalid-name,unspecified-encoding
       hand_database = f.read()

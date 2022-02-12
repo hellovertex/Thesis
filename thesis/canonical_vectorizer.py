@@ -233,4 +233,4 @@ has_folded_this_episode_p1:   0.0
     #                  + self.encode_board(obs) \
     #                  + self.encode_player_hands(obs) \
     #                  + self.encode_action_history(obs)
-    return obs
+    return np.resize(obs, (159,))

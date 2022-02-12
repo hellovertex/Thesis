@@ -17,14 +17,24 @@
   # --- Append last 8 moves per player --- #
   # --- Append all players hands --- #
       """
-from PokerEnv.PokerRL.game._.EnvWrapperBuilderBase import EnvWrapperBuilderBase
-from PokerEnv.PokerRL.game._.rl_env.base.PokerEnv import PokerEnv
-from PokerRL.game.games import NoLimitHoldem
 from collections import defaultdict, deque
-from typing import Tuple
 from thesis.core.encoder import Positions6Max
-from thesis.core.encoder import PlayerInfo
 from thesis.canonical_vectorizer import CanonicalVectorizer
+import enum
+
+
+class ActionSpace(enum.IntEnum):
+  """todo: map from RLEnv actions to this discretized version..."""
+  FOLD = 0
+  CHECK = 1
+  CALL = 2
+  RAISE_3BB = 3
+  RAISE_HALF_POT = 3
+  RAISE_POT = 4
+  RAISE_2POT = 5
+  ALL_IN = 6
+  SMALL_BLIND = 7
+  BIG_BLIND = 8
 
 
 class Wrapper:
@@ -129,27 +139,34 @@ class AugmentObservationWrapper(Wrapper):
     self._rounds = ['preflop', 'flop', 'turn', 'river']
     # self._actions_per_stage = self._init_player_actions()
     self._actions_per_stage = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
+    self._actions_per_stage_discretized = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
     self._vectorizer = CanonicalVectorizer()
     self._player_who_acted = None
-
-  # # noinspection PyTypeChecker
-  # def _init_player_actions(self):
-  #   player_actions = {}
-  #   for pos in range(self.num_players):
-  #     # create default dictionary for current player for each stage
-  #     # default dictionary stores only the last two actions per stage per player
-  #     player_actions[Positions6Max(pos)] = defaultdict(lambda: deque(maxlen=2),
-  #                                                      keys=self._rounds)
-  #   return player_actions
 
   def get_current_obs(self, env_obs):
     return self._vectorizer.vectorize(env_obs, table=self._table, action_history=self._actions_per_stage,
                                       player_hands=self._player_hands)
 
+  def _discretize(self, action_formatted):
+    if action_formatted[0] == 2:  # action is raise
+      raise_amt = action_formatted[1]
+      # todo compute raise_by using CurrentPot and BB
+      raise_by = ActionSpace.RAISE_3BB
+      # compute fraction of BB or POT
+      action_discretized = 2 + raise_by
+    else:  # action is fold or check/call
+      action_discretized = action_formatted[0]
+    return action_discretized
+
   def _pushback_action(self, action_formatted, player_who_acted, in_which_stage):
+    # todo map action_formatted to ActionSpace
     self._player_who_acted = player_who_acted
     self._actions_per_stage.deque[player_who_acted][
       self._rounds[in_which_stage]].append(action_formatted)
+
+    action_discretized = self._discretize(action_formatted)
+    self._actions_per_stage_discretized.deque[player_who_acted][
+      self._rounds[in_which_stage]].append(action_discretized)
 
   @property
   def current_player(self):

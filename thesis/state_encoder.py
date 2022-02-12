@@ -1,8 +1,9 @@
+import enum
 from typing import List, Tuple, Dict, Optional, NamedTuple
 import numpy as np
 from collections import defaultdict, deque
-from core.parser import PokerEpisode, Action, ActionType, PlayerStack
-from core.encoder import Encoder
+from thesis.core.parser import PokerEpisode, Action, ActionType, PlayerStack, Blind
+from thesis.core.encoder import Encoder
 from PokerRL.game.games import NoLimitHoldem
 from thesis.core.encoder import PlayerInfo, Positions6Max
 from thesis.core.wrapper import AugmentObservationWrapper
@@ -10,6 +11,7 @@ from PokerRL.game.Poker import Poker
 from enum import Enum
 from thesis.canonical_vectorizer import CanonicalVectorizer
 from PokerEnv.PokerRL.game._.rl_env.base.PokerEnv import PokerEnv
+
 Table = Tuple[PlayerInfo]
 
 DICT_RANK = {'': -127,
@@ -34,15 +36,6 @@ DICT_SUITE = {'': -127,
               'c': 3}
 
 
-# class Table6Max(NamedTuple):
-#   BTN: PlayerInfo
-#   SB: PlayerInfo
-#   BB: Optional[PlayerInfo]
-#   UTG: Optional[PlayerInfo]
-#   MP: Optional[PlayerInfo]
-#   CO: Optional[PlayerInfo]
-
-
 class RLStateEncoder(Encoder):
   Observations = List[List]
   Actions_Taken = List[Tuple[int, int]]
@@ -63,13 +56,13 @@ class RLStateEncoder(Encoder):
     return card_list
 
   @staticmethod
-  def make_blinds(blinds: List[Tuple[str]], multiply_by: int = 1):
+  def make_blinds(blinds: List[Blind], multiply_by: int = 1):
     sb = blinds[0]
-    assert sb[1] == 'small blind'
+    assert sb.type == 'small blind'
     bb = blinds[1]
-    assert bb[1] == 'big blind'
-    return int(sb[2].split(RLStateEncoder.currency_symbol)[1]) * multiply_by, \
-           int(bb[2].split(RLStateEncoder.currency_symbol)[1]) * multiply_by
+    assert bb.type == 'big blind'
+    return int(sb.amount.split(RLStateEncoder.currency_symbol)[1]) * multiply_by, \
+           int(bb.amount.split(RLStateEncoder.currency_symbol)[1]) * multiply_by
 
   def make_board_cards(self, board_cards: str):
     """Return 5 cards that we can prepend to the card deck so that the board will be drawn.
@@ -166,11 +159,6 @@ class RLStateEncoder(Encoder):
     players_ordered_starting_with_button = [v for v in player_info.values()]
     return tuple(players_ordered_starting_with_button)
 
-  @staticmethod
-  def _encode_env_transitions(env_obs, actions) -> Tuple[Observations, Actions_Taken]:
-    # todo: obs + self._actions_per_stage + player_hands + zero padding
-    return env_obs, actions
-
   def _init_wrapped_env(self, table: Tuple[PlayerInfo], multiply_by=100):
     """Initializes environment used to generate observations.
     Assumes Btn is at index 0."""
@@ -204,13 +192,16 @@ class RLStateEncoder(Encoder):
       # self._actions_per_stage[action.player_name][action.stage].append(action_formatted)
       next_to_act = env.current_player.seat_id
       for player in table:
+        # if player reached showdown (we can see his cards)
         if player.position_index == next_to_act and player.player_name in showdown_players:
           observations.append(obs)
+          # player that won showdown -- can be multiple (split pot)
           if player.player_name in [winner.name for winner in episode.winners]:
-            actions.append(action_formatted)
+            actions.append(action_formatted)  # use his action as supervised label
+          # player that lost showdown
           else:
             # replace action call/raise with fold
-            actions.append((ActionType.FOLD.value, -1))
+            actions.append((ActionType.FOLD.value, -1))  # replace action with FOLD for now
       obs, _, done, _ = env.step(action_formatted)
       it += 1
     return observations, actions
@@ -228,10 +219,7 @@ class RLStateEncoder(Encoder):
     cards_state_dict = self._build_cards_state_dict(table, episode)
 
     # Collect observations and actions, observations are possibly augmented
-    observations, actions = self._simulate_environment(env=self._wrapped_env,
-                                                       episode=episode,
-                                                       cards_state_dict=cards_state_dict,
-                                                       table=table)
-
-    # Vectorize collected observations and actions for supervised learning
-    return self._encode_env_transitions(observations, actions)
+    return self._simulate_environment(env=self._wrapped_env,
+                                      episode=episode,
+                                      cards_state_dict=cards_state_dict,
+                                      table=table)
