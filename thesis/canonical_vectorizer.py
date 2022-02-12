@@ -222,7 +222,9 @@ has_folded_this_episode_p1:   0.0
     """Example:"""
     return []
 
-  def vectorize(self, obs):
+  def vectorize(self, obs, table=None):
+    # use table information to do the zero padding and the index switch
+    # obs contains already actions_per_stage and player_hands
     vectorized_obs = self.encode_table(obs) \
                      + self.encode_next_player(obs) \
                      + self.encode_stage(obs) \

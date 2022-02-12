@@ -125,7 +125,7 @@ class AugmentObservationWrapper(Wrapper):
   def get_current_obs(self, env_obs):
     # augment here with vectorizer
     augmented_obs = env_obs + self._actions_per_stage + self._player_hands
-    return self._vectorizer.vectorize(augmented_obs)
+    return self._vectorizer.vectorize(augmented_obs, table=self._table)
 
   def _pushback_action(self, action_formatted):
     # todo

@@ -188,18 +188,12 @@ class RLStateEncoder(Encoder):
 
   @staticmethod
   def _encode_env_transitions(env_obs, actions) -> Tuple[Observations, Actions_Taken]:
-
     # todo: obs + self._actions_per_stage + player_hands + zero padding
-    # vectorized = self._vec.vectorize(obs)
-    return env_obs, actions  # todo implement
+    return env_obs, actions
 
   def _simulate_environment(self, env, episode, cards_state_dict, table, cbs_action=[]):
     """Docstring"""
     showdown_players = [player.name for player in episode.showdown_hands]
-    winner_names = [winner.name for winner in episode.winners]
-
-    action_sequence = episode.actions_total['as_sequence']
-
     obs, _, done, _ = env.reset(deck_state_dict=cards_state_dict)
 
     # --- Step Environment with action --- #
@@ -207,7 +201,7 @@ class RLStateEncoder(Encoder):
     actions = []
     it = 0
     while not done:
-      action = action_sequence[it]
+      action = episode.actions_total['as_sequence'][it]
       action_formatted = self.build_action(action)
       # store up to two actions per player per stage
       # self._actions_per_stage[action.player_name][action.stage].append(action_formatted)
@@ -215,7 +209,7 @@ class RLStateEncoder(Encoder):
       for player in table:
         if player.position_index == next_to_act and player.player_name in showdown_players:
           observations.append(obs)
-          if player.player_name in winner_names:
+          if player.player_name in [winner.name for winner in episode.winners]:
             actions.append(action_formatted)
           else:
             # replace action call/raise with fold
