@@ -54,8 +54,7 @@ class Wrapper:
     # step environment
     env_obs, rew_for_all_players, done, info = self.env.step(action)
 
-    # return env_obs, rew_for_all_players, done, info
-    # self._pushback(env_obs)
+    # call get_current_obs of derived class
     return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
 
   def step_from_processed_tuple(self, action):
@@ -87,6 +86,7 @@ class Wrapper:
     return self.env.step(processed_action)
 
   def reset(self, state_dict=None):
+    # todo: consider moving this to derived cls
     deck_state_dict = state_dict['deck']
     self._table = state_dict['table']
     self._player_hands = deck_state_dict['hand']
@@ -105,6 +105,21 @@ class Wrapper:
     raise NotImplementedError
 
 
+class ActionHistory:
+  # noinspection PyTypeChecker
+  def __init__(self, max_players, max_actions_per_player_per_stage):
+    self._max_players = max_players
+    self._max_actions_per_player_per_stage = max_actions_per_player_per_stage
+    self.deque = {}
+
+    for pos in range(self._max_players):
+      # create default dictionary for current player for each stage
+      # default dictionary stores only the last two actions per stage per player
+      self.deque[Positions6Max(pos)] = defaultdict(
+        lambda: deque(maxlen=max_actions_per_player_per_stage),
+        keys=['preflop', 'flop', 'turn', 'river'])
+
+
 class AugmentObservationWrapper(Wrapper):
 
   def __init__(self, env):
@@ -112,27 +127,20 @@ class AugmentObservationWrapper(Wrapper):
     self.num_players = env.N_SEATS
     self._table = None
     self._rounds = ['preflop', 'flop', 'turn', 'river']
-    # augmentation content
-    self._actions_per_stage = self._init_player_actions()
-    # todo: compute
-    """
-    player_hands = [[-127, -127] for _ in range(len(table))]
-    player_hands[next_to_act] = env.env.seats[next_to_act].hand
-    compute player hands relative to next_to_act, i.e. observation for each player
-    """
-    # vectorizes augmented observation
+    # self._actions_per_stage = self._init_player_actions()
+    self._actions_per_stage = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
     self._vectorizer = CanonicalVectorizer()
     self._player_who_acted = None
 
-  # noinspection PyTypeChecker
-  def _init_player_actions(self):
-    player_actions = {}
-    for pos in range(self.num_players):
-      # create default dictionary for current player for each stage
-      # default dictionary stores only the last two actions per stage per player
-      player_actions[Positions6Max(pos)] = defaultdict(lambda: deque(maxlen=2),
-                                                       keys=self._rounds)
-    return player_actions
+  # # noinspection PyTypeChecker
+  # def _init_player_actions(self):
+  #   player_actions = {}
+  #   for pos in range(self.num_players):
+  #     # create default dictionary for current player for each stage
+  #     # default dictionary stores only the last two actions per stage per player
+  #     player_actions[Positions6Max(pos)] = defaultdict(lambda: deque(maxlen=2),
+  #                                                      keys=self._rounds)
+  #   return player_actions
 
   def get_current_obs(self, env_obs):
     return self._vectorizer.vectorize(env_obs, table=self._table, action_history=self._actions_per_stage,
@@ -140,7 +148,8 @@ class AugmentObservationWrapper(Wrapper):
 
   def _pushback_action(self, action_formatted, player_who_acted, in_which_stage):
     self._player_who_acted = player_who_acted
-    self._actions_per_stage[player_who_acted][self._rounds[in_which_stage]].append(action_formatted)
+    self._actions_per_stage.deque[player_who_acted][
+      self._rounds[in_which_stage]].append(action_formatted)
 
   @property
   def current_player(self):
