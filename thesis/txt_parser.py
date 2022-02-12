@@ -52,9 +52,9 @@ class TxtParser(Parser):
     showdown_hands = re_showdown_hands.findall(showdown)
     winners = re_winner.findall(showdown)
     # remove whitespaces in name field
-    showdown_hands = [PlayerWithCards(player_name=hand[0].strip(), cards=hand[1])
+    showdown_hands = [PlayerWithCards(name=hand[0].strip(), cards=hand[1])
                       for hand in showdown_hands]
-    winners = [PlayerWithCards(player_name=hand[0].strip(), cards=hand[1])
+    winners = [PlayerWithCards(name=hand[0].strip(), cards=hand[1])
                for hand in winners]
     return winners, showdown_hands
 

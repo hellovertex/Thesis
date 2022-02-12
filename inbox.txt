@@ -76,6 +76,7 @@ implement pypoker.PokerObservation.last_moves()
 - [-] 
 
 [[Misc]]
+- 02-11: consider training for each num_players separately (with lower dimensional input)
 - 01-31: build DataParser and Processor
 - 01-31: deal with two hero scenario
 - 01-28: sufficient statistics - last moves: for each player, the last two moves per round

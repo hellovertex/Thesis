@@ -6,7 +6,7 @@ import enum
 class PlayerWithCards(NamedTuple):
     """Player with cards as string.
     For example: PlayerWithCards('HHnguyen15', '[Ah Jd]')"""
-    player_name: str
+    name: str
     cards: str
 
 
