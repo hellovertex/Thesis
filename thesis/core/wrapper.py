@@ -19,26 +19,25 @@
       """
 from PokerEnv.PokerRL.game._.EnvWrapperBuilderBase import EnvWrapperBuilderBase
 from PokerEnv.PokerRL.game._.rl_env.base.PokerEnv import PokerEnv
+from PokerRL.game.games import NoLimitHoldem
 from collections import defaultdict, deque
 from typing import Tuple
-
+from thesis.core.encoder import Positions6Max
 from thesis.core.encoder import PlayerInfo
 from thesis.canonical_vectorizer import CanonicalVectorizer
 
 
 class Wrapper:
 
-  def __init__(self, env, env_bldr_that_built_me):
+  def __init__(self, env):
     """
     Args:
         env (PokerEnv subclass instance):   The environment instance to be wrapped
-
-        env_bldr_that_built_me:          EnvWrappers should only be created by EnvBuilders. The EnvBuilder
-                                            instance passes ""self"" as the value for this argument.
     """
-    assert issubclass(type(env), PokerEnv)
+    # assert issubclass(type(env), PokerEnv)
     self.env = env
-    self.env_bldr = env_bldr_that_built_me
+    self._table = NotImplementedError
+    self._player_hands = []
 
   # _______________________________ directly interact with the env inside the wrapper ________________________________
   def step(self, action):
@@ -48,8 +47,13 @@ class Wrapper:
     Returns:
         obs, reward, done, info
     """
+    # store action in history buffer
+    self._pushback_action(action,
+                          player_who_acted=self.env.current_player.seat_id,
+                          in_which_stage=self.env.current_round)
+    # step environment
     env_obs, rew_for_all_players, done, info = self.env.step(action)
-    self._pushback_action(action)
+
     # return env_obs, rew_for_all_players, done, info
     # self._pushback(env_obs)
     return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
@@ -61,8 +65,14 @@ class Wrapper:
     Returns:
         obs, reward, done, info
     """
+    # store action in history buffer
+    self._pushback_action(action,
+                          player_who_acted=self.env.current_player.seat_id,
+                          in_which_stage=self.env.current_round)
+    # step environment
     env_obs, rew_for_all_players, done, info = self.env.step_from_processed_tuple(action)
-    self._pushback_action(action)
+
+    # call get_current_obs of derived class
     return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
 
   def step_raise_pot_frac(self, pot_frac):
@@ -76,7 +86,10 @@ class Wrapper:
       fraction=pot_frac, player_that_bets=self.env.current_player))
     return self.env.step(processed_action)
 
-  def reset(self, deck_state_dict=None):
+  def reset(self, state_dict=None):
+    deck_state_dict = state_dict['deck']
+    self._table = state_dict['table']
+    self._player_hands = deck_state_dict['hand']
     env_obs, rew_for_all_players, done, info = self.env.reset(deck_state_dict=deck_state_dict)
     return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
 
@@ -88,66 +101,47 @@ class Wrapper:
   def get_current_obs(self, env_obs):
     raise NotImplementedError
 
-  def _pushback_action(self, action):
+  def _pushback_action(self, action, player_who_acted, in_which_stage):
     raise NotImplementedError
 
 
 class AugmentObservationWrapper(Wrapper):
 
-  def __init__(self, env, env_bldr_that_built_me,
-               table: Tuple[PlayerInfo], player_hands, vectorizer=None):
-    super().__init__(env=env, env_bldr_that_built_me=env_bldr_that_built_me)
-    self._table = table
+  def __init__(self, env):
+    super().__init__(env=env)
+    self.num_players = env.N_SEATS
+    self._table = None
+    self._rounds = ['preflop', 'flop', 'turn', 'river']
     # augmentation content
-    self._actions_per_stage = None
+    self._actions_per_stage = self._init_player_actions()
+    # todo: compute
     """
     player_hands = [[-127, -127] for _ in range(len(table))]
     player_hands[next_to_act] = env.env.seats[next_to_act].hand
     compute player hands relative to next_to_act, i.e. observation for each player
     """
-    self._player_hands = player_hands
     # vectorizes augmented observation
-    # todo add kwargs from table to initialization of vectorizer
-    self._vectorizer = CanonicalVectorizer() if vectorizer is None else vectorizer
+    self._vectorizer = CanonicalVectorizer()
+    self._player_who_acted = None
 
   # noinspection PyTypeChecker
   def _init_player_actions(self):
-    # todo initialize from Positions instead of player names
     player_actions = {}
-    for p_info in self._table:
+    for pos in range(self.num_players):
       # create default dictionary for current player for each stage
       # default dictionary stores only the last two actions per stage per player
-      player_actions[p_info.player_name] = defaultdict(
-        lambda: deque(maxlen=2), keys=['preflop', 'flop', 'turn', 'river'])
-    self._actions_per_stage = player_actions
+      player_actions[Positions6Max(pos)] = defaultdict(lambda: deque(maxlen=2),
+                                                       keys=self._rounds)
     return player_actions
 
   def get_current_obs(self, env_obs):
-    # augment here with vectorizer
-    augmented_obs = env_obs + self._actions_per_stage + self._player_hands
-    return self._vectorizer.vectorize(augmented_obs, table=self._table)
+    return self._vectorizer.vectorize(env_obs, table=self._table, action_history=self._actions_per_stage,
+                                      player_hands=self._player_hands)
 
-  def _pushback_action(self, action_formatted):
-    # todo
-    pass
+  def _pushback_action(self, action_formatted, player_who_acted, in_which_stage):
+    self._player_who_acted = player_who_acted
+    self._actions_per_stage[player_who_acted][self._rounds[in_which_stage]].append(action_formatted)
 
   @property
   def current_player(self):
     return self.env.current_player
-
-
-class AugmentedEnvBuilder(EnvWrapperBuilderBase):
-  WRAPPER_CLS = AugmentObservationWrapper
-
-  def __init__(self, env_cls, env_args):
-    super().__init__(env_cls=env_cls, env_args=env_args)
-
-  def _get_num_public_observation_features(self):
-    # todo call encoder_that_built_me._get_num_public_observation_features
-    return super()._get_num_public_observation_features()
-
-  def _get_num_private_observation_features(self):
-    return super()._get_num_private_observation_features()
-
-  def _get_obs_parts_idxs(self):
-    return super()._get_obs_parts_idxs()

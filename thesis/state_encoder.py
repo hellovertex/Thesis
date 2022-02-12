@@ -5,11 +5,11 @@ from core.parser import PokerEpisode, Action, ActionType, PlayerStack
 from core.encoder import Encoder
 from PokerRL.game.games import NoLimitHoldem
 from thesis.core.encoder import PlayerInfo, Positions6Max
-from thesis.core.wrapper import AugmentedEnvBuilder
+from thesis.core.wrapper import AugmentObservationWrapper
 from PokerRL.game.Poker import Poker
 from enum import Enum
 from thesis.canonical_vectorizer import CanonicalVectorizer
-
+from PokerEnv.PokerRL.game._.rl_env.base.PokerEnv import PokerEnv
 Table = Tuple[PlayerInfo]
 
 DICT_RANK = {'': -127,
@@ -48,29 +48,9 @@ class RLStateEncoder(Encoder):
   Actions_Taken = List[Tuple[int, int]]
   currency_symbol = '$'
 
-  def __init__(self, env_builder_cls=None):
-    self._env_builder_cls = env_builder_cls
-    self._env_builder: Optional[AugmentedEnvBuilder] = None
-
-  def _get_wrapped_env(self, table: Tuple[PlayerInfo], multiply_by=100):
-    """Initializes environment used to generate observations.
-    Assumes Btn is at index 0."""
-    # get starting stacks, starting with button at index 0
-    stacks = [player.stack_size for player in table]
-    starting_stack_sizes_list = [int(float(stack) * multiply_by) for stack in stacks]
-
-    # make args for env
-    args = NoLimitHoldem.ARGS_CLS(n_seats=len(table),
-                                  starting_stack_sizes_list=starting_stack_sizes_list)
-    # return wrapped env instance
-    self._env_builder = self._env_builder_cls(env_cls=NoLimitHoldem, env_args=args)
-    env = NoLimitHoldem(is_evaluating=True,
-                        env_args=self._env_builder.env_args,
-                        lut_holder=NoLimitHoldem.get_lut_holder())
-
-    return self._env_builder.get_new_wrapper(is_evaluating=True, init_from_env=env, table=table)
-
-
+  def __init__(self, env_wrapper_cls=None):
+    self.env_wrapper_cls = env_wrapper_cls
+    self._wrapped_env = None
 
   @staticmethod
   def _str_cards_to_list(cards: str):
@@ -167,7 +147,7 @@ class RLStateEncoder(Encoder):
 
     # init {'BTN': None, 'SB': None,..., 'CO': None}
     player_info: Dict[str, PlayerInfo] = dict.fromkeys(
-      [pos.name for pos in Positions6Max])  # [:episode.num_players])
+      [pos.name for pos in Positions6Max][:episode.num_players])
 
     # build PlayerInfo for each player
     for i, info in enumerate(episode.player_stacks):
@@ -191,10 +171,27 @@ class RLStateEncoder(Encoder):
     # todo: obs + self._actions_per_stage + player_hands + zero padding
     return env_obs, actions
 
-  def _simulate_environment(self, env, episode, cards_state_dict, table, cbs_action=[]):
+  def _init_wrapped_env(self, table: Tuple[PlayerInfo], multiply_by=100):
+    """Initializes environment used to generate observations.
+    Assumes Btn is at index 0."""
+    # get starting stacks, starting with button at index 0
+    stacks = [player.stack_size for player in table]
+    starting_stack_sizes_list = [int(float(stack) * multiply_by) for stack in stacks]
+
+    # make args for env
+    args = NoLimitHoldem.ARGS_CLS(n_seats=len(table),
+                                  starting_stack_sizes_list=starting_stack_sizes_list)
+    # return wrapped env instance
+    env = NoLimitHoldem(is_evaluating=True,
+                        env_args=args,
+                        lut_holder=NoLimitHoldem.get_lut_holder())
+    self._wrapped_env = self.env_wrapper_cls(env)
+
+  def _simulate_environment(self, env, episode, cards_state_dict, table):
     """Docstring"""
     showdown_players = [player.name for player in episode.showdown_hands]
-    obs, _, done, _ = env.reset(deck_state_dict=cards_state_dict)
+    state_dict = {'deck': cards_state_dict, 'table': table}
+    obs, _, done, _ = env.reset(state_dict=state_dict)
 
     # --- Step Environment with action --- #
     observations = []
@@ -226,16 +223,15 @@ class RLStateEncoder(Encoder):
 
     # Initialize environment for simulation of PokerEpisode
     # todo: pass env_cls as argument (N_BOARD_CARDS etc. gets accessible)
-    wrapped_env = self._get_wrapped_env(table)
-    wrapped_env.SMALL_BLIND, wrapped_env.BIG_BLIND = self.make_blinds(episode.blinds, multiply_by=100)
+    self._init_wrapped_env(table)
+    self._wrapped_env.SMALL_BLIND, self._wrapped_env.BIG_BLIND = self.make_blinds(episode.blinds, multiply_by=100)
     cards_state_dict = self._build_cards_state_dict(table, episode)
 
     # Collect observations and actions, observations are possibly augmented
-    observations, actions = self._simulate_environment(env=wrapped_env,
+    observations, actions = self._simulate_environment(env=self._wrapped_env,
                                                        episode=episode,
                                                        cards_state_dict=cards_state_dict,
-                                                       table=table,
-                                                       cbs_action=wrapped_env.pushback_action)
+                                                       table=table)
 
     # Vectorize collected observations and actions for supervised learning
     return self._encode_env_transitions(observations, actions)

@@ -1,6 +1,6 @@
 from txt_parser import TxtParser
 from state_encoder import RLStateEncoder
-from thesis.core.wrapper import AugmentedEnvBuilder
+from thesis.core.wrapper import AugmentObservationWrapper
 
 
 def main(f_path: str):
@@ -8,7 +8,7 @@ def main(f_path: str):
     parser = TxtParser()
     parsed_hands = parser.parse_file(f_path)
     # use AugmentedEnvBuilder to get augmented observations encodings
-    enc = RLStateEncoder(env_builder_cls=AugmentedEnvBuilder)
+    enc = RLStateEncoder(env_wrapper_cls=AugmentObservationWrapper)
 
     for hand in parsed_hands:
         observations, actions = enc.encode_episode(hand)
