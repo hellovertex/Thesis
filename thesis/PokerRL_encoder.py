@@ -78,7 +78,8 @@ class RLStateEncoder(Encoder):
     def make_showdown_hands(self, table, showdown):
         """Under Construction. """
         # initialize default hands
-        player_hands = [Poker.CARD_NOT_DEALT_TOKEN_2D for _ in range(len(table))]
+        default_card = [Poker.CARD_NOT_DEALT_TOKEN_1D, Poker.CARD_NOT_DEALT_TOKEN_1D]  # rank, suit
+        player_hands = [[default_card, default_card] for _ in range(len(table))]
 
         # overwrite known hands
         for seat in table:
