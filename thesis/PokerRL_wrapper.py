@@ -20,7 +20,7 @@
 from collections import defaultdict, deque
 from thesis.core.encoder import Positions6Max
 from thesis.core.wrapper import WrapperPokerRL
-from thesis.vectorizer_PokerRL import CanonicalVectorizer
+from thesis.canonical_vectorizer import CanonicalVectorizer
 import enum
 
 
@@ -127,10 +127,11 @@ class AugmentObservationWrapper(ActionHistoryWrapper):
         ) / self.env.N_SEATS
         self.num_players = env.N_SEATS
         self._table = None
-        self._vectorizer = CanonicalVectorizer()
+        self._vectorizer = CanonicalVectorizer(env=env)
         self._player_who_acted = None
 
     def get_current_obs(self, env_obs):
+
         return self._vectorizer.vectorize(env_obs, table=self._table, action_history=self._actions_per_stage,
                                           player_hands=self._player_hands)
 

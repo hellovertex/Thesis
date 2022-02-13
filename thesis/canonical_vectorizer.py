@@ -6,8 +6,9 @@ class CanonicalVectorizer(Vectorizer):
   """Docstring"""
 
   # todo write vectorizer, such that it can be associated with exactly one env class
-  def __init__(self, max_players=6, n_ranks=13, n_suits=4, n_board_cards=5, n_hand_cards=2):
+  def __init__(self, env, max_players=6, n_ranks=13, n_suits=4, n_board_cards=5, n_hand_cards=2):
     # --- Utils --- #
+    self._env = env
     self._max_players = max_players
     n_stages = len(['preflop', 'flop', 'turn', 'river'])
     max_actions_per_stage_per_player = 2
@@ -26,8 +27,7 @@ class CanonicalVectorizer(Vectorizer):
                             'big_blind',
                             'min_raise',
                             'pot_amt',
-                            'total_to_call',
-                            ] + ['is_button'] * self._max_players)
+                            'total_to_call'])
     self._bits_next_player = self._max_players
     self._bits_stage = n_stages
     self._bits_side_pots = self._max_players
@@ -37,14 +37,15 @@ class CanonicalVectorizer(Vectorizer):
     self._bits_action_history = max_actions * self._bits_per_action
 
     # --- Offsets --- #
-    self._offset_table = 0
-    self._offset_next_player = self._bits_table
-    self._offset_stage = self._offset_next_player + self._bits_next_player
-    self._offset_side_pots = self._offset_stage + self._bits_stage
-    self._offset_player_stats = self._offset_side_pots + self._bits_side_pots
-    self._offset_board = self._offset_player_stats + self._bits_player_stats
-    self._offset_player_hands = self._offset_board + self._bits_board
-    self._offset_action_history = self._offset_player_hands + self._bits_player_hands
+    self._start_table = 0
+    self._start_next_player = self._bits_table
+    self._start_stage = self._start_next_player + self._bits_next_player
+    self._start_side_pots = self._start_stage + self._bits_stage
+    self._start_player_stats = self._start_side_pots + self._bits_side_pots
+    self._start_board = self._start_player_stats + self._bits_player_stats
+    self._start_player_hands = self._start_board + self._bits_board
+    self._start_action_history = self._start_player_hands + self._bits_player_hands
+    self.offset = None
 
     # --- Number of features --- #
     self._obs_len = self._bits_table \
@@ -65,12 +66,12 @@ class CanonicalVectorizer(Vectorizer):
            min_raise:   0.2
              pot_amt:   0.0
        total_to_call:   0.1
-         is_button_0:   0.0
-         is_button_1:   1.0
-         is_button_2:   0.0
     """
+
+    self.offset = 0 + self._bits_table
+    assert self.offset == self._start_next_player
     # copy unchanged
-    self._obs[self._offset_table:self._offset_next_player] = obs[self._offset_table:self._offset_next_player]
+    self._obs[0:self.offset] = obs[0:self.offset]
 
   def encode_next_player(self, obs, num_players):
     """Example:
@@ -78,12 +79,16 @@ class CanonicalVectorizer(Vectorizer):
         p1_acts_next:   1.0
         p2_acts_next:   0.0
     """
-    offset = self._offset_next_player
-    bits_from_obs = np.array(obs[offset:offset + num_players])
-    # obs only has num_players <= max_players bits here,
-    # so we pad the non existing players with zeros
-    bits_padded = bits_from_obs.resize(self._bits_next_player)
-    self._obs[self._offset_next_player:self._offset_stage] = bits_padded
+    self.offset += self._bits_next_player
+    assert self.offset == self._start_stage
+    # original obs indices
+    start_orig = self._env.obs_idx_dict['p0_acts_next']
+    end_orig = start_orig + self._env.N_SEATS
+    # extract from original observation
+    bits = obs[start_orig:start_orig+end_orig]
+    # zero padding
+    bits = np.resize(bits, self._max_players)
+    self._obs[self._start_next_player:self.offset] = bits
 
   def encode_stage(self, obs):
     """Example:
@@ -92,16 +97,19 @@ class CanonicalVectorizer(Vectorizer):
           round_turn:   0.0
          round_river:   0.0
     """
+    self.offset += self._bits_stage
+    assert self.offset == self._start_side_pots
     # todo get actual offsets for current obs
     # self.obs[self._offset_stage:self._offset_side_pots] = obs[self._offset_stage:self._offset_side_pots]
 
   def encode_side_pots(self, obs):
     """Example:
-       round_preflop:   1.0
-          round_flop:   0.0
-          round_turn:   0.0
-         round_river:   0.0
+        side_pot_0:   0.0
+        side_pot_1:   0.0
+        side_pot_2:   0.0
     """
+    self.offset += self._bits_side_pots
+    assert self.offset == self._start_player_stats
     return []
 
   def encode_player_stats(self, obs):
@@ -122,9 +130,12 @@ has_folded_this_episode_p1:   0.0
    side_pot_rank_p1_is_...:   0.0
    side_pot_rank_p1_is_n:   0.0
    """
+    self.offset += self._bits_player_stats
+    assert self.offset == self._start_board
     return []
 
   def encode_board(self, obs):
+    self.offset += self._bits_board
     """Example:
     0th_board_card_rank_0:   0.0
    0th_board_card_rank_1:   0.0
@@ -212,17 +223,24 @@ has_folded_this_episode_p1:   0.0
    4th_board_card_suit_2:   0.0
    4th_board_card_suit_3:   0.0
    """
+    self.offset += self._bits_board
+    assert self.offset == self._start_player_stats
     return []
 
   def encode_player_hands(self, obs):
     """Example:"""
+    self.offset += self._bits_player_hands
+    assert self.offset == self._start_action_history
     return []
 
   def encode_action_history(self, obs):
     """Example:"""
+    self.offset += self._bits_action_history
+    assert self.offset == self._obs_len
     return []
 
   def vectorize(self, obs, action_history=None, player_hands=None, table=None):
+    # todo consider passing obs_idx_dict instead of using self._env
     # use table information to do the zero padding and the index switch
     # obs contains already actions_per_stage and player_hands
     # vectorized_obs = self.encode_table(obs) \

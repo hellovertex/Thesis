@@ -1,6 +1,6 @@
 from thesis.txt_parser import TxtParser
-from thesis.state_encoder import RLStateEncoder
-from thesis.core.wrapper import AugmentObservationWrapper
+from thesis.PokerRL_encoder import RLStateEncoder
+from thesis.PokerRL_wrapper import AugmentObservationWrapper
 import os
 import pandas as pd
 import numpy as np

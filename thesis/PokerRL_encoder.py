@@ -171,8 +171,8 @@ class RLStateEncoder(Encoder):
     def _simulate_environment(self, env, episode, cards_state_dict, table):
         """Under Construction."""
         showdown_players = [player.name for player in episode.showdown_hands]
-        state_dict = {'deck': cards_state_dict, 'table': table}
-        obs, _, done, _ = env.reset(state_dict=state_dict)
+        state_dict = {'deck_state_dict': cards_state_dict, 'table': table}
+        obs, _, done, _ = env.reset(config=state_dict)
 
         # --- Step Environment with action --- #
         observations = []
