@@ -18,9 +18,9 @@
   # --- Append all players hands --- #
       """
 from collections import defaultdict, deque
-from thesis.core.encoder import Positions6Max
-from thesis.core.wrapper import WrapperPokerRL
-from thesis.canonical_vectorizer import CanonicalVectorizer
+from thesis.baselines.supervised_learning.core.encoder import Positions6Max
+from thesis.baselines.supervised_learning.core.wrapper import WrapperPokerRL
+from thesis.baselines.supervised_learning.canonical_vectorizer import CanonicalVectorizer
 import enum
 
 

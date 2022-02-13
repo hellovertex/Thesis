@@ -56,6 +56,8 @@ implement pypoker.PokerObservation.last_moves()
 
 
 [TODOS]
+02-14: create azure vm with blob to compute all training data,
+02-14: --> then move train_data from azure to GDRIVE to run training in colab
 02-13: create print_augmented_obs function
 02-11: move core/* to supervised_learning/core/*
 02-08: check how encoder base class can be typed with a generic vectorizer

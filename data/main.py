@@ -1,6 +1,6 @@
-from thesis.txt_parser import TxtParser
-from thesis.PokerRL_encoder import RLStateEncoder
-from thesis.PokerRL_wrapper import AugmentObservationWrapper
+from thesis.baselines.supervised_learning.txt_parser import TxtParser
+from thesis.baselines.supervised_learning.PokerRL_encoder import RLStateEncoder
+from thesis.baselines.supervised_learning.PokerRL_wrapper import AugmentObservationWrapper
 import os
 import pandas as pd
 import numpy as np
@@ -9,6 +9,10 @@ DATA_DIR = '../data/'
 
 
 def main(filename: str):
+  # todo: implement construct_obs inside encoder
+  # todo: implement print_obs inside encoder
+  # todo: parse whole data folder
+  # todo: write all parsed observations to a single file with labelled columns
   """Parses hand_database and returns vectorized observations as returned by rl_env."""
   parser = TxtParser()
   parsed_hands = parser.parse_file(DATA_DIR + filename)

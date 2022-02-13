@@ -1,7 +1,7 @@
 """Module to consume from Parser classes. Encoders will make observations from PokerEpisodes."""
 import enum
 from typing import NamedTuple
-from thesis.core.parser import PokerEpisode
+from thesis.baselines.supervised_learning.core.parser import PokerEpisode
 
 
 class Positions6Max(enum.IntEnum):
