@@ -1,18 +1,10 @@
-import enum
-from typing import List, Tuple, Dict, Optional, NamedTuple
+from typing import List, Tuple, Dict
 import numpy as np
-from collections import defaultdict, deque
-from thesis.core.parser import PokerEpisode, Action, ActionType, PlayerStack, Blind
+from thesis.core.parser import PokerEpisode, Action, ActionType, Blind
 from thesis.core.encoder import Encoder
 from PokerRL.game.games import NoLimitHoldem
 from thesis.core.encoder import PlayerInfo, Positions6Max
-from thesis.core.wrapper import AugmentObservationWrapper, ActionSpace
 from PokerRL.game.Poker import Poker
-from enum import Enum
-from thesis.canonical_vectorizer import CanonicalVectorizer
-from PokerEnv.PokerRL.game._.rl_env.base.PokerEnv import PokerEnv
-
-Table = Tuple[PlayerInfo]
 
 DICT_RANK = {'': -127,
              '2': 0,
@@ -39,15 +31,15 @@ DICT_SUITE = {'': -127,
 class RLStateEncoder(Encoder):
     Observations = List[List]
     Actions_Taken = List[Tuple[int, int]]
-    currency_symbol = '$'
 
-    def __init__(self, env_wrapper_cls=None):
+    def __init__(self, env_wrapper_cls=None, currency_symbol='$'):
         self.env_wrapper_cls = env_wrapper_cls
         self._wrapped_env = None
+        self._currency_symbol = currency_symbol
 
     @staticmethod
-    def _str_cards_to_list(cards: str):
-        """ See example below """
+    def str_cards_to_list(cards: str):
+        """See example below """
         # '[6h Ts Td 9c Jc]'
         rm_brackets = cards.replace('[', '').replace(']', '')
         # '6h Ts Td 9c Jc'
@@ -60,14 +52,14 @@ class RLStateEncoder(Encoder):
         """Under Construction."""
         return action.action_type.value, int(float(action.raise_amount) * multiply_by)
 
-    @staticmethod
-    def make_blinds(blinds: List[Blind], multiply_by: int = 1):
+    def make_blinds(self, blinds: List[Blind], multiply_by: int = 1):
+        """Under Construction."""
         sb = blinds[0]
         assert sb.type == 'small blind'
         bb = blinds[1]
         assert bb.type == 'big blind'
-        return int(sb.amount.split(RLStateEncoder.currency_symbol)[1]) * multiply_by, \
-               int(bb.amount.split(RLStateEncoder.currency_symbol)[1]) * multiply_by
+        return int(sb.amount.split(self._currency_symbol)[1]) * multiply_by, \
+               int(bb.amount.split(self._currency_symbol)[1]) * multiply_by
 
     def make_board_cards(self, board_cards: str):
         """Return 5 cards that we can prepend to the card deck so that the board will be drawn.
@@ -78,7 +70,7 @@ class RLStateEncoder(Encoder):
         Example:
     """
         # '[6h Ts Td 9c Jc]' to ['6h', 'Ts', 'Td', '9c', 'Jc']
-        card_list = self._str_cards_to_list(board_cards)
+        card_list = self.str_cards_to_list(board_cards)
         assert len(card_list) == 5
 
         return [[DICT_RANK[card[0]], DICT_SUITE[card[1]]] for card in card_list]
@@ -93,7 +85,7 @@ class RLStateEncoder(Encoder):
             for final_player in showdown:
                 if seat.player_name == final_player.name:
                     # '[6h Ts]' to ['6h', 'Ts']
-                    showdown_cards = self._str_cards_to_list(final_player.cards)
+                    showdown_cards = self.str_cards_to_list(final_player.cards)
                     # ['6h', 'Ts'] to [[5,3], [5,0]]
                     hand = [[DICT_RANK[card[0]], DICT_SUITE[card[1]]] for card in showdown_cards]
                     # overwrite [[-127,127],[-127,-127]] with [[5,3], [5,0]]
@@ -119,8 +111,8 @@ class RLStateEncoder(Encoder):
         # np.roll([0,1,2,3], 1) returns [3,0,1,2]  <== Button is at index 1 now
         return np.roll(np.arange(num_players), btn_idx)
 
-    def make_table(self, episode: PokerEpisode) -> Table:
-        """Docstring """
+    def make_table(self, episode: PokerEpisode) -> Tuple[PlayerInfo]:
+        """Under Construction."""
         # Roll position indices, such that each seat is assigned correct position
         rolled_position_indices = self._roll_position_indices(episode.num_players, episode.btn_idx)
 
@@ -146,6 +138,7 @@ class RLStateEncoder(Encoder):
         return tuple(players_ordered_starting_with_button)
 
     def _build_cards_state_dict(self, table: Tuple[PlayerInfo], episode: PokerEpisode):
+        """Under Construction."""
         board_cards = self.make_board_cards(episode.board_cards)
         # --- set deck ---
         # cards are drawn without ghost cards, so we simply replace the first 5 cards of the deck
@@ -176,7 +169,7 @@ class RLStateEncoder(Encoder):
         self._wrapped_env = self.env_wrapper_cls(env)
 
     def _simulate_environment(self, env, episode, cards_state_dict, table):
-        """Docstring"""
+        """Under Construction."""
         showdown_players = [player.name for player in episode.showdown_hands]
         state_dict = {'deck': cards_state_dict, 'table': table}
         obs, _, done, _ = env.reset(state_dict=state_dict)
