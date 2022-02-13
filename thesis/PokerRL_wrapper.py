@@ -25,16 +25,16 @@ import enum
 
 
 class ActionSpace(enum.IntEnum):
-    """Under Construction"""
-    FOLD = 0
-    CHECK = 1
-    CALL = 2
-    RAISE_MIN_OR_3BB = 3
-    RAISE_HALF_POT = 4
-    RAISE_POT = 5
-    ALL_IN = 6
-    SMALL_BLIND = 7
-    BIG_BLIND = 8
+  """Under Construction"""
+  FOLD = 0
+  CHECK = 1
+  CALL = 2
+  RAISE_MIN_OR_3BB = 3
+  RAISE_HALF_POT = 4
+  RAISE_POT = 5
+  ALL_IN = 6
+  SMALL_BLIND = 7
+  BIG_BLIND = 8
 
 
 class ActionHistory:
@@ -54,86 +54,92 @@ class ActionHistory:
 
 class ActionHistoryWrapper(WrapperPokerRL):
 
-    def __init__(self, env):
-        """
-        Args:
-            env (PokerEnv subclass instance):   The environment instance to be wrapped
-        """
-        super().__init__(env=env)
-        self._player_hands = []
-        self._rounds = ['preflop', 'flop', 'turn', 'river']
-        self._actions_per_stage = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
-        self._actions_per_stage_discretized = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
-        self._player_who_acted = None
-    # _______________________________ Overridden ________________________________
-    def _before_step(self, action):
-        """
-        Steps the environment from an action of the natural action representation to the environment.
+  def __init__(self, env):
+    """
+    Args:
+        env (PokerEnv subclass instance):   The environment instance to be wrapped
+    """
+    super().__init__(env=env)
+    self._player_hands = []
+    self._rounds = ['preflop', 'flop', 'turn', 'river']
+    self._actions_per_stage = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
+    self._actions_per_stage_discretized = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
+    self._player_who_acted = None
 
-        Returns:
-            obs, reward, done, info
-        """
-        # store action in history buffer
-        self._pushback_action(action,
-                              player_who_acted=self.env.current_player.seat_id,
-                              in_which_stage=self.env.current_round)
-        self._player_who_acted = self.env.current_player.seat_id
+  # _______________________________ Overridden ________________________________
+  def _before_step(self, action):
+    """
+    Steps the environment from an action of the natural action representation to the environment.
 
-    def _before_reset(self, config=None):
-        # for the initial case of the environment reset, we manually put player index to 0
-        # so that observation will be rolled relative to self
-        self._player_who_acted = 0
-        self._player_hands = config['deck_state_dict']['hand']
+    Returns:
+        obs, reward, done, info
+    """
+    # store action in history buffer
+    self._pushback_action(action,
+                          player_who_acted=self.env.current_player.seat_id,
+                          in_which_stage=self.env.current_round)
+    self._player_who_acted = self.env.current_player.seat_id
 
-    # _______________________________ Action History ________________________________
+  def _before_reset(self, config=None):
+    # for the initial case of the environment reset, we manually put player index to 0
+    # so that observation will be rolled relative to self
+    self._player_who_acted = 0
+    self._player_hands = config['deck_state_dict']['hand']
 
-    def discretize(self, action_formatted):
-      if action_formatted[0] == 2:  # action is raise
-        pot_size = self.env.get_all_winnable_money()
-        raise_amt = action_formatted[1]
-        if raise_amt < pot_size / 2:
-          return ActionSpace.RAISE_MIN_OR_3BB
-        elif raise_amt < pot_size:
-          return ActionSpace.RAISE_HALF_POT
-        elif raise_amt < 2 * pot_size:
-          return ActionSpace.RAISE_POT
-        else:
-          return ActionSpace.ALL_IN
-      else:  # action is fold or check/call
-        action_discretized = action_formatted[0]
-      return action_discretized
+  # _______________________________ Action History ________________________________
 
-    def _pushback_action(self, action_formatted, player_who_acted, in_which_stage):
-        # part of observation
-        self._actions_per_stage.deque[player_who_acted][
-            self._rounds[in_which_stage]].append(action_formatted)
+  def discretize(self, action_formatted):
+    if action_formatted[0] == 2:  # action is raise
+      pot_size = self.env.get_all_winnable_money()
+      raise_amt = action_formatted[1]
+      if raise_amt < pot_size / 2:
+        return ActionSpace.RAISE_MIN_OR_3BB
+      elif raise_amt < pot_size:
+        return ActionSpace.RAISE_HALF_POT
+      elif raise_amt < 2 * pot_size:
+        return ActionSpace.RAISE_POT
+      else:
+        return ActionSpace.ALL_IN
+    else:  # action is fold or check/call
+      action_discretized = action_formatted[0]
+    return action_discretized
 
-        action_discretized = self.discretize(action_formatted)
-        # for the neural network labels
-        self._actions_per_stage_discretized.deque[player_who_acted][
-          self._rounds[in_which_stage]].append(action_discretized)
+  def _pushback_action(self, action_formatted, player_who_acted, in_which_stage):
+    # part of observation
+    self._actions_per_stage.deque[player_who_acted][
+      self._rounds[in_which_stage]].append(action_formatted)
 
-    # _______________________________ Override to Augment observation ________________________________
-    def get_current_obs(self, env_obs):
-        """Implement this to encode Action History into observation"""
-        raise NotImplementedError
+    action_discretized = self.discretize(action_formatted)
+    # for the neural network labels
+    self._actions_per_stage_discretized.deque[player_who_acted][
+      self._rounds[in_which_stage]].append(action_discretized)
+
+  # _______________________________ Override to Augment observation ________________________________
+  def get_current_obs(self, env_obs):
+    """Implement this to encode Action History into observation"""
+    raise NotImplementedError
 
 
 class AugmentObservationWrapper(ActionHistoryWrapper):
 
-    def __init__(self, env):
-        super().__init__(env=env)
-        self._normalization_sum = float(
-            sum([s.starting_stack_this_episode for s in self.env.seats])
-        ) / self.env.N_SEATS
-        self.num_players = env.N_SEATS
-        self._vectorizer = CanonicalVectorizer(env=env)
+  def __init__(self, env):
+    super().__init__(env=env)
+    self._normalization_sum = float(
+      sum([s.starting_stack_this_episode for s in self.env.seats])
+    ) / self.env.N_SEATS
+    self.num_players = env.N_SEATS
+    self._vectorizer = CanonicalVectorizer(env=env)
 
-    def get_current_obs(self, env_obs):
+  def get_current_obs(self, env_obs):
+    return self._vectorizer.vectorize(env_obs, self._player_who_acted, action_history=self._actions_per_stage,
+                                      player_hands=self._player_hands, normalization=self._normalization_sum)
 
-        return self._vectorizer.vectorize(env_obs, self._player_who_acted, action_history=self._actions_per_stage,
-                                          player_hands=self._player_hands, normalization=self._normalization_sum)
+  def _construct_obs_space(self):
+    pass
 
-    @property
-    def current_player(self):
-        return self.env.current_player
+  def print_obs(self):
+    pass
+
+  @property
+  def current_player(self):
+    return self.env.current_player
