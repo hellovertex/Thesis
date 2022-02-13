@@ -18,20 +18,18 @@ class CanonicalVectorizer(Vectorizer):
     self._n_stages = len(['preflop', 'flop', 'turn', 'river'])
     self._player_hands = None
     self._action_history = None
-    self._table = None
+    self._player_who_acted = None
     # btn_idx is equal to current player offset, since button is at index 0 inside environment
     # but we encode observation such that player is at index 0
     self._btn_idx = self._env.BTN_POS
     max_actions_per_stage_per_player = 2
-    max_actions = max_actions_per_stage_per_player * self._n_stages + self._max_players
-    self._bits_stats_per_player_original = len(['stack', 'curr_bet', 'has_folded', 'is_all_in']) \
-                                  + len(['side_pot_rank_p0_is_']) * self._env.N_SEATS
+    max_actions = max_actions_per_stage_per_player * self._n_stages * self._max_players
+    self._bits_per_action = len(['fold', 'check/call', 'bet/raise']) \
+                            + len(['last_action_how_much'])
+    self._bits_stats_per_player_original = self._bits_per_action * self._env.N_SEATS
     self._bits_stats_per_player = len(['stack', 'curr_bet', 'has_folded', 'is_all_in']) \
                                   + len(['side_pot_rank_p0_is_']) * self._max_players
     self._bits_per_card = n_ranks + n_suits  # 13 ranks + 4 suits
-    self._bits_per_action = self._max_players \
-                            + len(['fold', 'check/call', 'bet/raise']) \
-                            + len(['last_action_how_much'])
     # --- Observation Bits --- #
     self._bits_table = len(['ante',
                             'small_blind',
@@ -46,7 +44,8 @@ class CanonicalVectorizer(Vectorizer):
     self._bits_player_stats_original = self._bits_stats_per_player_original * self._env.N_SEATS
     self._bits_board = self._bits_per_card * n_board_cards  # 3 cards flop, 1 card turn, 1 card river
     self._bits_player_hands = self._max_players * n_hand_cards * self._bits_per_card
-    self._bits_action_history = max_actions * self._bits_per_action
+    self._bits_action_history_one_player = max_actions_per_stage_per_player * self._n_stages * self._bits_per_action
+    self._bits_action_history = self._bits_action_history_one_player * self._max_players
 
     # --- Offsets --- #
     self._start_table = 0
@@ -122,7 +121,7 @@ class CanonicalVectorizer(Vectorizer):
     # zero padding is not necessary
     # copy from original observation without zero padding
     self._obs[self._start_stage:self.offset] = bits
-  
+
   def encode_side_pots(self, obs):
     """Example:
         side_pot_0:   0.0
@@ -137,7 +136,7 @@ class CanonicalVectorizer(Vectorizer):
     # extract from original observation
     bits = obs[start_orig:end_orig]
     # move self to index 0
-    bits = np.roll(bits, -self._env.current_player.seat_id)
+    bits = np.roll(bits, -self._player_who_acted)
     # zero padding
     bits = np.resize(bits, self._max_players)
     # copy from original observation with zero padding
@@ -169,7 +168,7 @@ has_folded_this_episode_p1:   0.0
     # extract from original observation
     bits = obs[start_orig:end_orig]
     # move self to index 0
-    bits = np.roll(bits, -self._env.current_player.seat_id*self._bits_stats_per_player_original)
+    bits = np.roll(bits, -self._player_who_acted * self._bits_stats_per_player_original)
     # zero padding
     bits = np.resize(bits, self._bits_player_stats)
     # copy from original observation with zero padding
@@ -279,8 +278,8 @@ has_folded_this_episode_p1:   0.0
     self.offset += self._bits_player_hands
     assert self.offset == self._start_action_history
     # move own cards to index 0
-    roll_by = -self._env.current_player.seat_id
-    rolled_cards = np.roll(self._player_hands, roll_by).reshape(-1, self._n_hand_cards)
+    roll_by = -self._player_who_acted
+    rolled_cards = np.roll(self._player_hands, roll_by, axis=0).reshape(-1, self._n_hand_cards)
     # rolled_cards = [[ 5  3], [ 5  0], [12  0], [ 9  1], [ -127  -127], [ -127  -127]]
     # replace NAN with 0
     rolled_cards[np.where(rolled_cards == Poker.CARD_NOT_DEALT_TOKEN_1D)] = 0
@@ -300,15 +299,43 @@ has_folded_this_episode_p1:   0.0
     hand_bits = np.resize(hand_bits, self._bits_player_hands)
     self._obs[self._start_player_hands:self.offset] = hand_bits
 
-  def encode_action_history(self, obs):
+  def _vectorize_deque(self, dict_with_deque, normalization):
+
+    vectorized = np.zeros(self._bits_action_history_one_player)
+    if not 'preflop' in dict_with_deque.keys():
+      # action history is yet empty
+      return vectorized
+
+    for stage in dict_with_deque.keys():
+      if stage == 'keys':
+        continue
+      for i, action in enumerate(dict_with_deque[stage]):
+        vectorized[action[0] + i*self._bits_per_action] = 1
+        vectorized[3+i*self._bits_per_action] = action[1] / normalization
+    return vectorized
+
+  def encode_action_history(self, obs, normalization):
     """Example:"""
     self.offset += self._bits_action_history
     assert self.offset == self._obs_len
+    idxs = [i for i in range(self._env.N_SEATS)]
+    # indices relative to self
+    idxs = np.roll(idxs, -self._player_who_acted)
+    bits = None
+    for idx in idxs:
+      if not isinstance(bits, np.ndarray):
+        bits = self._vectorize_deque(self._action_history.deque[idx], normalization)
+      else:
+        bits = np.append(bits, self._vectorize_deque(self._action_history.deque[idx], normalization))
+    bits = np.resize(bits, self._bits_action_history)
+    self._obs[self._start_action_history:self.offset] = bits
 
-  def vectorize(self, obs, action_history=None, player_hands=None, table=None):
+  def vectorize(self, obs, player_who_acted=None, action_history=None, player_hands=None, normalization=None):
     self._player_hands = player_hands
     self._action_history = action_history
-    self._table = table
+
+    # subtracting - 1 not necessary since current_player not incremented yet
+    self._player_who_acted = player_who_acted
     # todo consider passing obs_idx_dict instead of using self._env
     # use table information to do the zero padding and the index switch
     # obs contains already actions_per_stage and player_hands
@@ -319,5 +346,6 @@ has_folded_this_episode_p1:   0.0
     self.encode_player_stats(obs)
     self.encode_board(obs)
     self.encode_player_hands(obs)
-    self.encode_action_history(obs)
-    return np.resize(obs, (159,))
+    self.encode_action_history(obs, normalization)
+    assert self.offset == self._obs_len
+    return self._obs
