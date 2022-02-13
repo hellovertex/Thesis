@@ -1,182 +1,109 @@
-# todo: augment state
-# todo: optional, change FOLD replacements to be less aggressive
-# todo from action-tuple and observation, construct discrete action (i.e. discretize raise amount)
-"""
-  # todo: check how obs is normalized to avoid small floats
-
-  # *** Observation Augmentation *** #
-  # raise vs bet: raise only in preflop stage, bet after preflop
-  actions_per_stage = self._init_player_actions(player_info)
-
-  for stage, actions in episode.actions_total.items():
-      for action in actions:
-          # noinspection PyTypeChecker
-          actions_per_stage[action.player_name][stage].append((action.action_type, action.raise_amount))
-
-  # todo: augment inside env wrapper
-  # --- Append last 8 moves per player --- #
-  # --- Append all players hands --- #
-      """
-from collections import defaultdict, deque
-from thesis.core.encoder import Positions6Max
-from thesis.canonical_vectorizer import CanonicalVectorizer
-import enum
-
-
-class ActionSpace(enum.IntEnum):
-    """todo: map from RLEnv actions to this discretized version..."""
-    FOLD = 0
-    CHECK = 1
-    CALL = 2
-    RAISE_MIN_OR_3BB = 3
-    RAISE_HALF_POT = 4
-    RAISE_POT = 5
-    ALL_IN = 6
-    SMALL_BLIND = 7
-    BIG_BLIND = 8
-
-
 class Wrapper:
 
-    def __init__(self, env):
-        """
-        Args:
-            env (PokerEnv subclass instance):   The environment instance to be wrapped
-        """
-        # assert issubclass(type(env), PokerEnv)
-        self.env = env
-        self._table = NotImplementedError
-        self._player_hands = []
+  def __init__(self, env):
+    """
+    Args:
+        env:   The environment instance to be wrapped
+    """
+    self.env = env
 
-    # _______________________________ directly interact with the env inside the wrapper ________________________________
-    def step(self, action):
-        """
-        Steps the environment from an action of the natural action representation to the environment.
+  def reset(self, config):
+    """Reset the environment with a new config.
+    Signals environment handlers to reset and restart the environment using
+    a config dict.
+    Args:
+      config: dict, specifying the parameters of the environment to be
+        generated. May contain state_dict to generate a deterministic environment.
+    Returns:
+      observation: A dict containing the full observation state.
+    """
+    raise NotImplementedError("Not implemented in Abstract Base class")
 
-        Returns:
-            obs, reward, done, info
-        """
-        # store action in history buffer
-        self._pushback_action(action,
-                              player_who_acted=self.env.current_player.seat_id,
-                              in_which_stage=self.env.current_round)
-        # step environment
-        env_obs, rew_for_all_players, done, info = self.env.step(action)
-
-        # call get_current_obs of derived class
-        return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
-
-    def step_from_processed_tuple(self, action):
-        """
-        Steps the environment from a tuple (action, num_chips,).
-
-        Returns:
-            obs, reward, done, info
-        """
-        # store action in history buffer
-        self._pushback_action(action,
-                              player_who_acted=self.env.current_player.seat_id,
-                              in_which_stage=self.env.current_round)
-        # step environment
-        env_obs, rew_for_all_players, done, info = self.env.step_from_processed_tuple(action)
-
-        # call get_current_obs of derived class
-        return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
-
-    def step_raise_pot_frac(self, pot_frac):
-        """
-        Steps the environment from a fractional pot raise instead of an action as usually specified.
-
-        Returns:
-            obs, reward, done, info
-        """
-        processed_action = (2, self.env.get_fraction_of_pot_raise(
-            fraction=pot_frac, player_that_bets=self.env.current_player))
-        return self.env.step(processed_action)
-
-    def reset(self, state_dict=None):
-        # todo: consider moving this to derived cls
-        deck_state_dict = state_dict['deck']
-        self._table = state_dict['table']
-        self._player_hands = deck_state_dict['hand']
-        env_obs, rew_for_all_players, done, info = self.env.reset(deck_state_dict=deck_state_dict)
-        return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
-
-    def _return_obs(self, rew_for_all_players, done, info, env_obs=None):
-        return self.get_current_obs(env_obs=env_obs), rew_for_all_players, done, info
-
-    # _______________________________ Override to augment observation ________________________________
-
-    def get_current_obs(self, env_obs):
-        raise NotImplementedError
-
-    def _pushback_action(self, action, player_who_acted, in_which_stage):
-        raise NotImplementedError
+  def step(self, action):
+    """Take one step in the game.
+    Args:
+      action: object, mapping to an action taken by an agent.
+    Returns:
+      observation: object, Containing full observation state.
+      reward: float, Reward obtained from taking the action.
+      done: bool, Whether the game is done.
+      info: dict, Optional debugging information.
+    Raises:
+      AssertionError: When an illegal action is provided.
+    """
+    raise NotImplementedError("Not implemented in Abstract Base class")
 
 
-class ActionHistory:
-    # noinspection PyTypeChecker
-    def __init__(self, max_players, max_actions_per_player_per_stage):
-        self._max_players = max_players
-        self._max_actions_per_player_per_stage = max_actions_per_player_per_stage
-        self.deque = {}
+class WrapperPokerRL(Wrapper):
 
-        for pos in range(self._max_players):
-            # create default dictionary for current player for each stage
-            # default dictionary stores only the last two actions per stage per player
-            self.deque[Positions6Max(pos)] = defaultdict(
-                lambda: deque(maxlen=max_actions_per_player_per_stage),
-                keys=['preflop', 'flop', 'turn', 'river'])
+  def reset(self, config=None):
+    """
+    Resets the state of the game to the standard beginning of the episode. If specified in the args passed,
+    stack size randomization is applied in the new episode. If deck_state_dict is not None, the cards
+    and associated random variables are synchronized FROM the given environment, so that when .step() is called on
+    each of them, they produce the same result.
 
+    Args:
+        config["deck_state_dict"]:      Optional.
+                                        If an instance of a PokerEnv subclass is passed, the deck, holecards, and
+                                        board in this instance will be synchronized from the handed env cls.
+    """
+    assert config.get('deck_state_dict')
+    self._before_reset(config)
+    env_obs, rew_for_all_players, done, info = self.env.reset(deck_state_dict=config['deck_state_dict'])
+    return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
 
-class AugmentObservationWrapper(Wrapper):
+  def step(self, action):
+    """
+    Steps the environment from an action of the natural action representation to the environment.
 
-    def __init__(self, env):
-        super().__init__(env=env)
-        self._normalization_sum = float(
-            sum([s.starting_stack_this_episode for s in self.env.seats])
-        ) / self.env.N_SEATS
-        self.num_players = env.N_SEATS
-        self._table = None
-        self._rounds = ['preflop', 'flop', 'turn', 'river']
-        # self._actions_per_stage = self._init_player_actions()
-        self._actions_per_stage = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
-        self._actions_per_stage_discretized = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
-        self._vectorizer = CanonicalVectorizer()
-        self._player_who_acted = None
+    Returns:
+        obs, reward, done, info
+    """
 
-    def get_current_obs(self, env_obs):
-        return self._vectorizer.vectorize(env_obs, table=self._table, action_history=self._actions_per_stage,
-                                          player_hands=self._player_hands)
+    # callbacks in derived class
+    self._before_step(action)
 
-    def discretize(self, action_formatted):
-      if action_formatted[0] == 2:  # action is raise
-        pot_size = self.env.get_all_winnable_money()
-        raise_amt = action_formatted[1]
-        if raise_amt < pot_size / 2:
-          return ActionSpace.RAISE_MIN_OR_3BB
-        elif raise_amt < pot_size:
-          return ActionSpace.RAISE_HALF_POT
-        elif raise_amt < 2 * pot_size:
-          return ActionSpace.RAISE_POT
-        else:
-          return ActionSpace.ALL_IN
-      else:  # action is fold or check/call
-        action_discretized = action_formatted[0]
-      return action_discretized
+    # step environment
+    env_obs, rew_for_all_players, done, info = self.env.step(action)
 
-    def _pushback_action(self, action_formatted, player_who_acted, in_which_stage):
-        # todo map action_formatted to ActionSpace
-        self._player_who_acted = player_who_acted
-        # part of observation
-        self._actions_per_stage.deque[player_who_acted][
-            self._rounds[in_which_stage]].append(action_formatted)
+    # call get_current_obs of derived class
+    return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
 
-        action_discretized = self.discretize(action_formatted)
-        # for the neural network labels
-        self._actions_per_stage_discretized.deque[player_who_acted][
-          self._rounds[in_which_stage]].append(action_discretized)
+  def step_from_processed_tuple(self, action):
+    """
+    Steps the environment from a tuple (action, num_chips,).
 
-    @property
-    def current_player(self):
-        return self.env.current_player
+    Returns:
+        obs, reward, done, info
+    """
+    return self.step(action)
+
+  def step_raise_pot_frac(self, pot_frac):
+    """
+    Steps the environment from a fractional pot raise instead of an action as usually specified.
+
+    Returns:
+        obs, reward, done, info
+    """
+    processed_action = (2, self.env.get_fraction_of_pot_raise(
+      fraction=pot_frac, player_that_bets=self.env.current_player))
+
+    return self.step(processed_action)
+
+  def _return_obs(self, rew_for_all_players, done, info, env_obs=None):
+    return self.get_current_obs(env_obs=env_obs), rew_for_all_players, done, info
+
+  # _______________________________ Override to augment observation ________________________________
+
+  def _before_step(self, action):
+    raise NotImplementedError
+
+  def _before_reset(self, config):
+    raise NotImplementedError
+
+  def get_current_obs(self, env_obs):
+    raise NotImplementedError
+
+   # Can add additional callbacks here if necessary...
+
