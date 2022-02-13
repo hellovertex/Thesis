@@ -1,4 +1,5 @@
 from thesis.core.vectorizer import Vectorizer
+from PokerEnv.PokerRL.game.Poker import Poker
 import numpy as np
 
 
@@ -10,7 +11,12 @@ class CanonicalVectorizer(Vectorizer):
     # --- Utils --- #
     self._env = env
     self._max_players = max_players
+    self._n_ranks = n_ranks
+    self._n_suits = n_suits
+    self._n_board_cards = n_board_cards
+    self._n_hand_cards = n_hand_cards
     self._n_stages = len(['preflop', 'flop', 'turn', 'river'])
+    self._player_hands = None
     max_actions_per_stage_per_player = 2
     max_actions = max_actions_per_stage_per_player * self._n_stages + self._max_players
     self._bits_stats_per_player_original = len(['stack', 'curr_bet', 'has_folded', 'is_all_in']) \
@@ -18,8 +24,6 @@ class CanonicalVectorizer(Vectorizer):
     self._bits_stats_per_player = len(['stack', 'curr_bet', 'has_folded', 'is_all_in']) \
                                   + len(['side_pot_rank_p0_is_']) * self._max_players
     self._bits_per_card = n_ranks + n_suits  # 13 ranks + 4 suits
-
-    # todo thermomether encoding for action_what
     self._bits_per_action = self._max_players \
                             + len(['fold', 'check/call', 'bet/raise']) \
                             + len(['last_action_how_much'])
@@ -263,7 +267,25 @@ has_folded_this_episode_p1:   0.0
     """Example:"""
     self.offset += self._bits_player_hands
     assert self.offset == self._start_action_history
+    # move own cards to index 0
     roll_by = self._env.current_player.seat_id
+    rolled_hands = np.roll(self._player_hands, roll_by).flatten()
+    # replace NAN with 0
+    rolled_hands[np.where(rolled_hands == Poker.CARD_NOT_DEALT_TOKEN_1D)] = 0
+    print(rolled_hands)
+    # initialize hand_bits to 0
+    card_bits = self._n_ranks + self._n_suits
+    hand_bits = [0] * self._n_board_cards * card_bits
+    # overwrite one_hot card_bits
+    for n_card, card in rolled_hands:
+      offset = card_bits * n_card
+      # set rank
+      hand_bits[card[0] + offset] = 1
+      # set suit
+      hand_bits[card[1] + offset + self._n_ranks] = 1
+    # zero padding
+    hand_bits = np.resize(hand_bits, self._bits_player_hands)
+    self._obs[self._start_player_hands:self.offset] = hand_bits
 
   def encode_action_history(self, obs):
     """Example:"""
@@ -275,6 +297,7 @@ has_folded_this_episode_p1:   0.0
     # copy from original observation with zero padding
 
   def vectorize(self, obs, action_history=None, player_hands=None, table=None):
+    self._player_hands = player_hands
     # todo consider passing obs_idx_dict instead of using self._env
     # use table information to do the zero padding and the index switch
     # obs contains already actions_per_stage and player_hands
@@ -284,6 +307,6 @@ has_folded_this_episode_p1:   0.0
     self.encode_side_pots(obs)
     self.encode_player_stats(obs)
     self.encode_board(obs)
-    #                  + self.encode_player_hands(obs) \
+    self.encode_player_hands(obs) \
     #                  + self.encode_action_history(obs)
     return np.resize(obs, (159,))
