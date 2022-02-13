@@ -56,6 +56,11 @@ class RLStateEncoder(Encoder):
     return card_list
 
   @staticmethod
+  def build_action(action: Action, multiply_by=100):
+    """Under Construction."""
+    return action.action_type.value, int(float(action.raise_amount) * multiply_by)
+
+  @staticmethod
   def make_blinds(blinds: List[Blind], multiply_by: int = 1):
     sb = blinds[0]
     assert sb.type == 'small blind'
@@ -96,31 +101,12 @@ class RLStateEncoder(Encoder):
     return player_hands
 
   @staticmethod
-  def build_action(action: Action, multiply_by=100):
-    """Under Construction."""
-    return action.action_type.value, int(float(action.raise_amount) * multiply_by)
-
-  def _build_cards_state_dict(self, table: Tuple[PlayerInfo], episode: PokerEpisode):
-    board_cards = self.make_board_cards(episode.board_cards)
-    # --- set deck ---
-    # cards are drawn without ghost cards, so we simply replace the first 5 cards of the deck
-    # with the board cards that we have parsed
-    deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
-    deck[:len(board_cards)] = board_cards
-    # make hands: np.ndarray(shape=(n_players, 2, 2))
-    player_hands = self.make_showdown_hands(table, episode.showdown_hands)
-    board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
-    return {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*num_players, 2))
-            'board': board,  # np.ndarray(shape=(n_cards, 2))
-            'hand': player_hands}
-
-  @staticmethod
   def _roll_position_indices(num_players: int, btn_idx: int) -> np.ndarray:
     """ Roll position indices, such that each seat is assigned correct position.
     Args:
       btn_idx: seat index (not seat number) of seat that is currently the Button.
                 Seats can be ["Seat 1", "Seat3", "Seat 5"]. If "Seat 5" is the Button,
-                btn_idx=2
+                then btn_idx=2
       num_players: Number of players currently at the table (not max. players).
     Returns: Assignment of position indices to seat numbers.
 
@@ -143,11 +129,11 @@ class RLStateEncoder(Encoder):
       [pos.name for pos in Positions6Max][:episode.num_players])
 
     # build PlayerInfo for each player
-    for i, info in enumerate(episode.player_stacks):
-      seat_number = int(info.seat_display_name[5])
-      player_name = info.player_name
-      stack_size = float(info.stack[1:])
-      position_index = rolled_position_indices[i]
+    for seat_idx, seat in enumerate(episode.player_stacks):
+      seat_number = int(seat.seat_display_name[5])
+      player_name = seat.player_name
+      stack_size = float(seat.stack[1:])
+      position_index = rolled_position_indices[seat_idx]
       position = Positions6Max(position_index).name
       player_info[position] = PlayerInfo(seat_number,  # 2
                                          position_index,  # 0
@@ -158,6 +144,20 @@ class RLStateEncoder(Encoder):
     # Seat indices such that button is first, regardless of seat number
     players_ordered_starting_with_button = [v for v in player_info.values()]
     return tuple(players_ordered_starting_with_button)
+
+  def _build_cards_state_dict(self, table: Tuple[PlayerInfo], episode: PokerEpisode):
+    board_cards = self.make_board_cards(episode.board_cards)
+    # --- set deck ---
+    # cards are drawn without ghost cards, so we simply replace the first 5 cards of the deck
+    # with the board cards that we have parsed
+    deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
+    deck[:len(board_cards)] = board_cards
+    # make hands: np.ndarray(shape=(n_players, 2, 2))
+    player_hands = self.make_showdown_hands(table, episode.showdown_hands)
+    board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
+    return {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*num_players, 2))
+            'board': board,  # np.ndarray(shape=(n_cards, 2))
+            'hand': player_hands}
 
   def _init_wrapped_env(self, table: Tuple[PlayerInfo], multiply_by=100):
     """Initializes environment used to generate observations.
