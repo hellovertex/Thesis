@@ -10,9 +10,11 @@ class CanonicalVectorizer(Vectorizer):
     # --- Utils --- #
     self._env = env
     self._max_players = max_players
-    n_stages = len(['preflop', 'flop', 'turn', 'river'])
+    self._n_stages = len(['preflop', 'flop', 'turn', 'river'])
     max_actions_per_stage_per_player = 2
-    max_actions = max_actions_per_stage_per_player * n_stages + self._max_players
+    max_actions = max_actions_per_stage_per_player * self._n_stages + self._max_players
+    self._bits_stats_per_player_original = len(['stack', 'curr_bet', 'has_folded', 'is_all_in']) \
+                                  + len(['side_pot_rank_p0_is_']) * self._env.N_SEATS
     self._bits_stats_per_player = len(['stack', 'curr_bet', 'has_folded', 'is_all_in']) \
                                   + len(['side_pot_rank_p0_is_']) * self._max_players
     self._bits_per_card = n_ranks + n_suits  # 13 ranks + 4 suits
@@ -29,9 +31,10 @@ class CanonicalVectorizer(Vectorizer):
                             'pot_amt',
                             'total_to_call'])
     self._bits_next_player = self._max_players
-    self._bits_stage = n_stages
+    self._bits_stage = self._n_stages
     self._bits_side_pots = self._max_players
     self._bits_player_stats = self._bits_stats_per_player * self._max_players
+    self._bits_player_stats_original = self._bits_stats_per_player_original * self._env.N_SEATS
     self._bits_board = self._bits_per_card * n_board_cards  # 3 cards flop, 1 card turn, 1 card river
     self._bits_player_hands = self._max_players * n_hand_cards * self._bits_per_card
     self._bits_action_history = max_actions * self._bits_per_action
@@ -73,7 +76,7 @@ class CanonicalVectorizer(Vectorizer):
     # copy unchanged
     self._obs[0:self.offset] = obs[0:self.offset]
 
-  def encode_next_player(self, obs, num_players):
+  def encode_next_player(self, obs):
     """Example:
         p0_acts_next:   0.0
         p1_acts_next:   1.0
@@ -85,9 +88,10 @@ class CanonicalVectorizer(Vectorizer):
     start_orig = self._env.obs_idx_dict['p0_acts_next']
     end_orig = start_orig + self._env.N_SEATS
     # extract from original observation
-    bits = obs[start_orig:start_orig+end_orig]
+    bits = obs[start_orig:end_orig]
     # zero padding
     bits = np.resize(bits, self._max_players)
+    # copy from original observation with zero padding
     self._obs[self._start_next_player:self.offset] = bits
 
   def encode_stage(self, obs):
@@ -99,9 +103,15 @@ class CanonicalVectorizer(Vectorizer):
     """
     self.offset += self._bits_stage
     assert self.offset == self._start_side_pots
-    # todo get actual offsets for current obs
-    # self.obs[self._offset_stage:self._offset_side_pots] = obs[self._offset_stage:self._offset_side_pots]
-
+    # original obs indices
+    start_orig = self._env.obs_idx_dict['round_preflop']
+    end_orig = start_orig + self._n_stages
+    # extract from original observation
+    bits = obs[start_orig:end_orig]
+    # zero padding is not necessary
+    # copy from original observation without zero padding
+    self._obs[self._start_stage:self.offset] = bits
+  
   def encode_side_pots(self, obs):
     """Example:
         side_pot_0:   0.0
@@ -110,7 +120,15 @@ class CanonicalVectorizer(Vectorizer):
     """
     self.offset += self._bits_side_pots
     assert self.offset == self._start_player_stats
-    return []
+    # original obs indices
+    start_orig = self._env.obs_idx_dict['side_pot_0']
+    end_orig = start_orig + self._env.N_SEATS
+    # extract from original observation
+    bits = obs[start_orig:end_orig]
+    # zero padding
+    bits = np.resize(bits, self._max_players)
+    # copy from original observation with zero padding
+    self._obs[self._start_side_pots:self.offset] = bits
 
   def encode_player_stats(self, obs):
     """Example:
@@ -132,10 +150,17 @@ has_folded_this_episode_p1:   0.0
    """
     self.offset += self._bits_player_stats
     assert self.offset == self._start_board
-    return []
+    # original obs indices
+    start_orig = self._env.obs_idx_dict['stack_p0']
+    end_orig = start_orig + self._bits_player_stats_original
+    # extract from original observation
+    bits = obs[start_orig:end_orig]
+    # zero padding
+    bits = np.resize(bits, self._bits_player_stats)
+    # copy from original observation with zero padding
+    self._obs[self._start_player_stats:self.offset] = bits
 
   def encode_board(self, obs):
-    self.offset += self._bits_board
     """Example:
     0th_board_card_rank_0:   0.0
    0th_board_card_rank_1:   0.0
@@ -224,31 +249,41 @@ has_folded_this_episode_p1:   0.0
    4th_board_card_suit_3:   0.0
    """
     self.offset += self._bits_board
-    assert self.offset == self._start_player_stats
-    return []
+    assert self.offset == self._start_player_hands
+    # original obs indices
+    start_orig = self._env.obs_idx_dict['0th_board_card_rank_0']
+    end_orig = start_orig + self._bits_board
+    # extract from original observation
+    bits = obs[start_orig:end_orig]
+    # zero padding is not necessary
+    # copy from original observation without zero padding
+    self._obs[self._start_board:self.offset] = bits
 
   def encode_player_hands(self, obs):
     """Example:"""
     self.offset += self._bits_player_hands
     assert self.offset == self._start_action_history
-    return []
+    roll_by = self._env.current_player.seat_id
 
   def encode_action_history(self, obs):
     """Example:"""
     self.offset += self._bits_action_history
     assert self.offset == self._obs_len
-    return []
+    # original obs indices
+    # extract from original observation
+    # zero padding
+    # copy from original observation with zero padding
 
   def vectorize(self, obs, action_history=None, player_hands=None, table=None):
     # todo consider passing obs_idx_dict instead of using self._env
     # use table information to do the zero padding and the index switch
     # obs contains already actions_per_stage and player_hands
-    # vectorized_obs = self.encode_table(obs) \
-    #                  + self.encode_next_player(obs) \
-    #                  + self.encode_stage(obs) \
-    #                  + self.encode_side_pots(obs) \
-    #                  + self.encode_player_stats(obs) \
-    #                  + self.encode_board(obs) \
+    self.encode_table(obs)
+    self.encode_next_player(obs)
+    self.encode_stage(obs)
+    self.encode_side_pots(obs)
+    self.encode_player_stats(obs)
+    self.encode_board(obs)
     #                  + self.encode_player_hands(obs) \
     #                  + self.encode_action_history(obs)
     return np.resize(obs, (159,))
