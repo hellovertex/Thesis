@@ -30,7 +30,7 @@ def main(filename: str):
       labels = np.concatenate((labels, actions), axis=0)
     print("Simulating environment", end='') if i == 0 else print('.', end='')
 
-  print(f"\nExtracted {len(training_data)} training samples from {i} poker hands...")
+  print(f"\nExtracted {len(training_data)} training samples from {i+1} poker hands...")
 
   # write train data
   pd.DataFrame(data=training_data, index=labels).to_csv(file_path, index_label='label')

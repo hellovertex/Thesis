@@ -331,14 +331,13 @@ has_folded_this_episode_p1:   0.0
     self._obs[self._start_action_history:self.offset] = bits
 
   def vectorize(self, obs, player_who_acted=None, action_history=None, player_hands=None, normalization=None):
+    # reset
+    self._obs = np.zeros(self._obs_len)
+    self.offset = None
     self._player_hands = player_hands
     self._action_history = action_history
-
-    # subtracting - 1 not necessary since current_player not incremented yet
     self._player_who_acted = player_who_acted
-    # todo consider passing obs_idx_dict instead of using self._env
-    # use table information to do the zero padding and the index switch
-    # obs contains already actions_per_stage and player_hands
+    # encode
     self.encode_table(obs)
     self.encode_next_player(obs)
     self.encode_stage(obs)
@@ -347,5 +346,6 @@ has_folded_this_episode_p1:   0.0
     self.encode_board(obs)
     self.encode_player_hands(obs)
     self.encode_action_history(obs, normalization)
+
     assert self.offset == self._obs_len
     return self._obs

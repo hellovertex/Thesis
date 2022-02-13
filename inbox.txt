@@ -104,6 +104,8 @@ implement pypoker.PokerObservation.last_moves()
 - 2.
  
 [LINKBOX]
+[HAND DOWNLOAD]
+https://handhq.com/download
 [[Equilibrium Approximation Quality of no limit poker bots]]
 https://arxiv.org/pdf/1612.07547.pdf
 
