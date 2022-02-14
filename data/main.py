@@ -9,8 +9,9 @@ DATA_DIR = '../data/'
 
 
 def main(filename: str):
-  # todo: implement construct_obs inside encoder
-  # todo: implement print_obs inside encoder
+  # todo: implement construct_obs inside wrapper
+  # todo: implement print_obs inside wrapper
+  # todo: implement Generator
   # todo: parse whole data folder
   # todo: write all parsed observations to a single file with labelled columns
   """Parses hand_database and returns vectorized observations as returned by rl_env."""

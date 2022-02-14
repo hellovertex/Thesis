@@ -7,12 +7,18 @@ class CanonicalVectorizer(Vectorizer):
   """Docstring"""
 
   # todo write vectorizer, such that it can be associated with exactly one env class
-  def __init__(self, env, max_players=6, n_ranks=13, n_suits=4, n_board_cards=5, n_hand_cards=2):
+  def __init__(self, env, max_players=6, n_ranks=13, n_suits=4, n_board_cards=5, n_hand_cards=2, use_zero_padding=True):
     # --- Utils --- #
+    # todo implement SEER mode
+    # if this switch is disabled, we use num_players instead of max_players
+    # todo implement this switch
+    self._use_zero_padding = use_zero_padding
     self._env = env
     self._max_players = max_players
-    self._n_ranks = n_ranks
-    self._n_suits = n_suits
+    self.n_ranks = n_ranks
+    self.n_suits = n_suits
+    assert self.n_ranks == self._env.N_RANKS
+    assert self.n_suits == self._env.N_SUITS
     self._n_board_cards = n_board_cards
     self._n_hand_cards = n_hand_cards
     self._n_stages = len(['preflop', 'flop', 'turn', 'river'])
@@ -26,7 +32,8 @@ class CanonicalVectorizer(Vectorizer):
     max_actions = max_actions_per_stage_per_player * self._n_stages * self._max_players
     self._bits_per_action = len(['fold', 'check/call', 'bet/raise']) \
                             + len(['last_action_how_much'])
-    self._bits_stats_per_player_original = self._bits_per_action * self._env.N_SEATS
+    self._bits_stats_per_player_original = len(['stack', 'curr_bet', 'has_folded', 'is_all_in']) \
+                                  + len(['side_pot_rank_p0_is_']) * self._env.N_SEATS
     self._bits_stats_per_player = len(['stack', 'curr_bet', 'has_folded', 'is_all_in']) \
                                   + len(['side_pot_rank_p0_is_']) * self._max_players
     self._bits_per_card = n_ranks + n_suits  # 13 ranks + 4 suits
@@ -166,13 +173,20 @@ has_folded_this_episode_p1:   0.0
     start_orig = self._env.obs_idx_dict['stack_p0']
     end_orig = start_orig + self._bits_player_stats_original
     # extract from original observation
-    bits = obs[start_orig:end_orig]
-    # move self to index 0
-    bits = np.roll(bits, -self._player_who_acted * self._bits_stats_per_player_original)
+    bits = np.array(obs[start_orig:end_orig])
     # zero padding
-    bits = np.resize(bits, self._bits_player_stats)
+
+    bits_per_player = np.split(bits, self._env.N_SEATS)
+    bits_to_pad_in_between = np.zeros(self._max_players - self._env.N_SEATS)
+    padded_in_between = np.array([np.append(s, bits_to_pad_in_between) for s in bits_per_player])
+    padded_in_between = np.hstack(padded_in_between)  # flattened
+    # todo fix this
+    # move self to index 0
+    padded_in_between = np.roll(padded_in_between, -self._player_who_acted * self._bits_stats_per_player_original)
+    # zero padding for missing players
+
     # copy from original observation with zero padding
-    self._obs[self._start_player_stats:self.offset] = bits
+    self._obs[self._start_player_stats:self.offset] = np.resize(padded_in_between, self._bits_player_stats)
 
   def encode_board(self, obs):
     """Example:
@@ -286,7 +300,7 @@ has_folded_this_episode_p1:   0.0
     # rolled_cards = [[ 5  3], [ 5  0], [12  0], [ 9  1], [ 0  0], [ 0  0]]
 
     # initialize hand_bits to 0
-    card_bits = self._n_ranks + self._n_suits
+    card_bits = self.n_ranks + self.n_suits
     hand_bits = [0] * self._n_hand_cards * self._env.N_SEATS * card_bits
     # overwrite one_hot card_bits
     for n_card, card in enumerate(rolled_cards):
@@ -294,7 +308,7 @@ has_folded_this_episode_p1:   0.0
       # set rank
       hand_bits[card[0] + offset] = 1
       # set suit
-      hand_bits[card[1] + offset + self._n_ranks] = 1
+      hand_bits[card[1] + offset + self.n_ranks] = 1
     # zero padding
     hand_bits = np.resize(hand_bits, self._bits_player_hands)
     self._obs[self._start_player_hands:self.offset] = hand_bits
