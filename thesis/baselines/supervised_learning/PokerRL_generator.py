@@ -40,7 +40,7 @@ class PokerRLGenerator:
         file_dir = os.path.join(self._out_dir, out_subdir)
         file_path = os.path.join(file_dir, self._out_filename)
         if not os.path.exists(file_path):
-            os.mkdir(file_dir)
+            os.makedirs(os.path.realpath(file_dir))
         pd.DataFrame(data=training_data,
                      index=labels,
                      columns=self._encoder.feature_names).to_csv(
