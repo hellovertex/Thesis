@@ -21,9 +21,13 @@ class PokerRLGenerator:
         self._parser = parser
         self._encoder = encoder
 
+    @property
+    def out_filename(self):
+        return self._out_filename
+
     def _write_metadata(self, file_dir):
         file_path_metadata = os.path.join(file_dir, f"{self._out_filename}.meta")
-        with open(file_path_metadata, "a") as file:
+        with open(file_path_metadata, "w") as file:
             file.write(self._parser.metadata.__repr__())
         return file_path_metadata
 
@@ -38,9 +42,9 @@ class PokerRLGenerator:
             file_path, index_label='label', mode='a')
         return file_dir, file_path
 
-    def generate_from_file(self, filename, out_subdir='0.25_0.50'):
+    def generate_from_file(self, abs_filepath, out_subdir='0.25_0.50'):
         """Docstring"""
-        parsed_hands = self._parser.parse_file(self._data_dir + filename)
+        parsed_hands = self._parser.parse_file(abs_filepath)
         training_data, labels = None, None
         for i, hand in enumerate(parsed_hands):
             observations, actions = self._encoder.encode_episode(hand)

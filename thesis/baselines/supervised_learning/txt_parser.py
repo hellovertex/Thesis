@@ -250,7 +250,7 @@ class TxtParser(Parser):
       yield self._parse_episode(current, showdown)
 
   def parse_file(self, file_path):
-    self._reset_metadata_counts()
+    # self._reset_metadata_counts()
     self._variant = 'NoLimitHoldem'  # todo parse from filename
     with open(file_path, 'r') as f:  # pylint: disable=invalid-name,unspecified-encoding
       hand_database = f.read()
