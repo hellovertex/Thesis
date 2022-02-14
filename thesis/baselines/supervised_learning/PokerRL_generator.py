@@ -52,5 +52,5 @@ class PokerRLGenerator:
             file.write(self._parser.metadata.__repr__())
 
         df = pd.read_csv(file_path)
-        print("Data created: ")
+        print(f"Data created: and written to {file_path}")
         print(df.head())

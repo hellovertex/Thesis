@@ -12,7 +12,7 @@ def main(filename):
     encoder = RLStateEncoder(env_wrapper_cls=AugmentObservationWrapper)
 
     generator = PokerRLGenerator(data_dir=DATA_DIR,
-                          out_dir=DATA_DIR + '/train_data/',
+                          out_dir=DATA_DIR + '/train_data',
                           parser=parser,
                           encoder=encoder,
                           out_filename='6MAX_0.25USD_0.50USD_Pokerstars_eu.txt')
