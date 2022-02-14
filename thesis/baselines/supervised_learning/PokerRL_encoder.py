@@ -36,6 +36,11 @@ class RLStateEncoder(Encoder):
         self.env_wrapper_cls = env_wrapper_cls
         self._wrapped_env = None
         self._currency_symbol = currency_symbol
+        self._columns = None
+
+    @property
+    def columns(self):
+        return self._columns
 
     @staticmethod
     def str_cards_to_list(cards: str):
@@ -168,6 +173,8 @@ class RLStateEncoder(Encoder):
                             env_args=args,
                             lut_holder=NoLimitHoldem.get_lut_holder())
         self._wrapped_env = self.env_wrapper_cls(env)
+        # will be used for naming feature index in training data vector
+        self._columns = list(self._wrapped_env.obs_idx_dict.keys())
 
     def _simulate_environment(self, env, episode, cards_state_dict, table):
         """Under Construction."""
