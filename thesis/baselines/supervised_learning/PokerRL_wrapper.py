@@ -1,7 +1,7 @@
 from collections import defaultdict, deque
-from thesis.baselines.supervised_learning.core.encoder import Positions6Max
-from thesis.baselines.supervised_learning.core.wrapper import WrapperPokerRL
-from thesis.baselines.supervised_learning.canonical_vectorizer import CanonicalVectorizer
+from core.encoder import Positions6Max
+from core.wrapper import WrapperPokerRL
+from canonical_vectorizer import CanonicalVectorizer
 from PokerEnv.PokerRL.game.Poker import Poker
 import enum
 import numpy as np

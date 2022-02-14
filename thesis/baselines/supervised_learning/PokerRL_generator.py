@@ -1,5 +1,5 @@
-from thesis.baselines.supervised_learning.core.parser import Parser
-from thesis.baselines.supervised_learning.core.encoder import Encoder
+from core.parser import Parser
+from core.encoder import Encoder
 import os
 import pandas as pd
 import numpy as np
