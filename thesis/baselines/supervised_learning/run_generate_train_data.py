@@ -17,6 +17,7 @@ def main(filename):
                           parser=parser,
                           encoder=encoder,
                           out_filename='6MAX_0.25USD_0.50USD_Pokerstars_eu.txt')
+    # out_subdir = generator.get_out_subdir(filename)
     generator.generate_from_file(filename, out_subdir='0.25_0.50')
 
 
