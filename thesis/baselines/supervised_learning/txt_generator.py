@@ -1,15 +1,15 @@
 from core.parser import Parser
 from core.encoder import Encoder
+from core.generator import Generator
 import os
 import pandas as pd
 import numpy as np
 
 
-class PokerRLGenerator:
-    """This handles creation of folders inside train_data that correspond to table specifics.
-     Table specifics include number of players, platform, blinds, table-type, poker-variant,..."""
+class CsvGenerator(Generator):
+    """This handles creation and population of folders inside train_data, corresponding to encoded
+    PokerEpisode instances. These encodings can be used for supervised learning. """
 
-    # todo consider writing base class
     def __init__(self, data_dir: str,
                  out_dir,
                  parser: Parser,

@@ -1,4 +1,4 @@
-from PokerRL_generator import PokerRLGenerator
+from txt_generator import CsvGenerator
 from txt_parser import TxtParser
 from PokerRL_encoder import RLStateEncoder
 from PokerRL_wrapper import AugmentObservationWrapper
@@ -13,7 +13,7 @@ def main(filenames: list):
     # use AugmentedEnvBuilder to get augmented observations encodings
     encoder = RLStateEncoder(env_wrapper_cls=AugmentObservationWrapper)
 
-    generator = PokerRLGenerator(data_dir=DATA_DIR,
+    generator = CsvGenerator(data_dir=DATA_DIR,
                           out_dir=os.path.join(DATA_DIR + 'train_data'),
                           parser=parser,
                           encoder=encoder,
@@ -26,7 +26,6 @@ def main(filenames: list):
 
 if __name__ == '__main__':
     UNZIPPED_DATA_DIR = DATA_DIR + '/0.25-0.50'
-    # FILENAMES = ['Atalante-1-2-USD-NoLimitHoldem-PokerStarsPA-1-16-2022.txt',]
     filenames_recursively = glob.glob(UNZIPPED_DATA_DIR.__str__() + '/**/*.txt', recursive=True)
 
     # os.walk here to generate list of files
