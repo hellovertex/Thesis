@@ -1,7 +1,7 @@
-from thesis.baselines.supervised_learning.PokerRL_generator import PokerRLGenerator
-from thesis.baselines.supervised_learning.txt_parser import TxtParser
-from thesis.baselines.supervised_learning.PokerRL_encoder import RLStateEncoder
-from thesis.baselines.supervised_learning.PokerRL_wrapper import AugmentObservationWrapper
+from PokerRL_generator import PokerRLGenerator
+from txt_parser import TxtParser
+from PokerRL_encoder import RLStateEncoder
+from PokerRL_wrapper import AugmentObservationWrapper
 
 DATA_DIR = '../../../data/'
 
