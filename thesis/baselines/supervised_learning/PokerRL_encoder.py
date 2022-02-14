@@ -2,11 +2,9 @@ from typing import List, Tuple, Dict
 import numpy as np
 from core.parser import PokerEpisode, Action, ActionType, Blind
 from core.encoder import Encoder
-import PokerEnv
-from PokerEnv.PokerRL.game.games import NoLimitHoldem
+from PokerRL.game.games import NoLimitHoldem
 from core.encoder import PlayerInfo, Positions6Max
-from PokerEnv.PokerRL.game.Poker import Poker
-
+from PokerRL.game.Poker import Poker
 DICT_RANK = {'': -127,
              '2': 0,
              '3': 1,
