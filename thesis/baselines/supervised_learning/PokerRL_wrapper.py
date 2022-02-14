@@ -2,7 +2,7 @@ from collections import defaultdict, deque
 from core.encoder import Positions6Max
 from core.wrapper import WrapperPokerRL
 from canonical_vectorizer import CanonicalVectorizer
-from PokerEnv.PokerRL.game.Poker import Poker
+from PokerRL.game.Poker import Poker
 import enum
 import numpy as np
 from gym import spaces

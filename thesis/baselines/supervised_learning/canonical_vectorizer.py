@@ -1,5 +1,5 @@
 from core.vectorizer import Vectorizer
-from PokerEnv.PokerRL.game.Poker import Poker
+from PokerRL.game.Poker import Poker
 import numpy as np
 
 
