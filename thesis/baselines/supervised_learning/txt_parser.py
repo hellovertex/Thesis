@@ -3,7 +3,7 @@
  - parse them to create corresponding environment states. """
 from typing import List, Tuple, Dict
 import re
-from thesis.baselines.supervised_learning.core.parser import Parser, PokerEpisode, Action, ActionType, PlayerStack, Blind, PlayerWithCards
+from core.parser import Parser, PokerEpisode, Action, ActionType, PlayerStack, Blind, PlayerWithCards
 
 # REGEX templates
 PLAYER_NAME_TEMPLATE = r'([a-zA-Z0-9]+\s?[a-zA-Z0-9]*)'
