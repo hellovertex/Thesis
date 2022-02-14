@@ -10,7 +10,7 @@ class PokerRLGenerator:
      Table specifics include number of players, platform, blinds, table-type, poker-variant,..."""
     # todo consider writing base class
     def __init__(self, data_dir: str,
-                 out_dir: str,
+                 out_dir,
                  parser: Parser,
                  encoder: Encoder,
                  out_filename: str):

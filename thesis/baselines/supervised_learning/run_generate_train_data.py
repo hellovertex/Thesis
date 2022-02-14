@@ -2,6 +2,7 @@ from PokerRL_generator import PokerRLGenerator
 from txt_parser import TxtParser
 from PokerRL_encoder import RLStateEncoder
 from PokerRL_wrapper import AugmentObservationWrapper
+import os
 
 DATA_DIR = '../../../data/'
 
@@ -12,7 +13,7 @@ def main(filename):
     encoder = RLStateEncoder(env_wrapper_cls=AugmentObservationWrapper)
 
     generator = PokerRLGenerator(data_dir=DATA_DIR,
-                          out_dir=DATA_DIR + '/train_data',
+                          out_dir=os.path.join(DATA_DIR + 'train_data'),
                           parser=parser,
                           encoder=encoder,
                           out_filename='6MAX_0.25USD_0.50USD_Pokerstars_eu.txt')
