@@ -116,8 +116,11 @@ class AugmentObservationWrapper(ActionHistoryWrapper):
         self.num_players = env.N_SEATS
         self.max_players = 6
         self.num_board_cards = 5
-        self._vectorizer = CanonicalVectorizer(env=env)
         self.observation_space, self.obs_idx_dict, self.obs_parts_idxs_dict = self._construct_obs_space()
+        self._vectorizer = CanonicalVectorizer(num_players=self.num_players,
+                                               obs_idx_dict=self.env.obs_idx_dict,
+                                               # btn pos used to return obs relative to self
+                                               btn_pos=self.env.BTN_POS)
 
     def get_current_obs(self, env_obs):
         obs = self._vectorizer.vectorize(env_obs, self._player_who_acted, action_history=self._actions_per_stage,

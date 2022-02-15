@@ -208,6 +208,9 @@ class RLStateEncoder(Encoder):
                     actions.append(action_label)
             obs, _, done, _ = env.step(action_formatted)
             it += 1
+        if not observations:
+            print(actions)
+            raise RuntimeError("Seems we need more debugging")
         return observations, actions
 
     def encode_episode(self, episode: PokerEpisode) -> Tuple[Observations, Actions_Taken]:

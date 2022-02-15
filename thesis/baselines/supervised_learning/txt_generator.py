@@ -48,15 +48,21 @@ class CsvGenerator(Generator):
         training_data, labels = None, None
         for i, hand in enumerate(parsed_hands):
             observations, actions = self._encoder.encode_episode(hand)
+            if not observations:
+                continue
             if training_data is None:
                 training_data = observations
                 labels = actions
             else:
-                training_data = np.concatenate((training_data, observations), axis=0)
-                labels = np.concatenate((labels, actions), axis=0)
+                try:
+                    training_data = np.concatenate((training_data, observations), axis=0)
+                    labels = np.concatenate((labels, actions), axis=0)
+                except Exception as e:
+                    print(e)
             print("Simulating environment", end='') if i == 0 else print('.', end='')
 
-        print(f"\nExtracted {len(training_data)} training samples from {i + 1} poker hands...")
+        print(f"\nExtracted {len(training_data)} training samples from {i + 1} poker hands"
+              f"in file {abs_filepath}...")
 
         # write train data
         file_dir, file_path = self._write_train_data(training_data, labels, out_subdir=out_subdir)

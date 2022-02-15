@@ -6,7 +6,7 @@ import re
 from core.parser import Parser, PokerEpisode, Action, ActionType, PlayerStack, Blind, PlayerWithCards
 
 # REGEX templates
-PLAYER_NAME_TEMPLATE = r'([a-zA-Z0-9]+\s?[a-zA-Z0-9]*)'
+PLAYER_NAME_TEMPLATE = r'([a-zA-Z0-9_.-@]+\s?[_.-a-zA-Z0-9@]*)'
 STARTING_STACK_TEMPLATE = r'\(([$€]\d+.?\d*)\sin chips\)'
 MATCH_ANY = r'.*?'  # not the most efficient way, but we prefer readabiliy (parsing is one time job)
 POKER_CARD_TEMPLATE = r'[23456789TJQKAjqka][SCDHscdh]'
@@ -65,6 +65,7 @@ class TxtParser(Parser):
             rf'Seat \d: {PLAYER_NAME_TEMPLATE}{MATCH_ANY} showed (\[{POKER_CARD_TEMPLATE} {POKER_CARD_TEMPLATE}]) and won')
         showdown_hands = re_showdown_hands.findall(showdown)
         winners = re_winner.findall(showdown)
+
         # remove whitespaces in name field
         showdown_hands = [PlayerWithCards(name=hand[0].strip(), cards=hand[1])
                           for hand in showdown_hands]
@@ -210,8 +211,7 @@ class TxtParser(Parser):
         for sbl in CURRENCY_SYMBOLS:
             if sbl in episode:
                 return sbl
-            else:
-                raise ValueError("Currency symbol not supported")
+        raise ValueError("Currency symbol not supported")
 
     def _parse_episode(self, episode: str, showdown: str):
         """UnderConstruction"""
