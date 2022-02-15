@@ -5,6 +5,7 @@ from core.encoder import Encoder
 from PokerRL.game.games import NoLimitHoldem
 from core.encoder import PlayerInfo, Positions6Max
 from PokerRL.game.Poker import Poker
+
 DICT_RANK = {'': -127,
              '2': 0,
              '3': 1,
@@ -31,10 +32,10 @@ class RLStateEncoder(Encoder):
     Observations = List[List]
     Actions_Taken = List[Tuple[int, int]]
 
-    def __init__(self, env_wrapper_cls=None, currency_symbol='$'):
+    def __init__(self, env_wrapper_cls=None):
         self.env_wrapper_cls = env_wrapper_cls
         self._wrapped_env = None
-        self._currency_symbol = currency_symbol
+        self._currency_symbol = None
         self._feature_names = None
 
     @property
@@ -56,14 +57,14 @@ class RLStateEncoder(Encoder):
         """Under Construction."""
         return action.action_type.value, int(float(action.raise_amount) * multiply_by)
 
-    def make_blinds(self, blinds: List[Blind], multiply_by: int = 1):
+    def make_blinds(self, blinds: List[Blind], multiply_by: int = 100):
         """Under Construction."""
         sb = blinds[0]
         assert sb.type == 'small blind'
         bb = blinds[1]
         assert bb.type == 'big blind'
-        return int(sb.amount.split(self._currency_symbol)[1]) * multiply_by, \
-               int(bb.amount.split(self._currency_symbol)[1]) * multiply_by
+        return int(float(sb.amount.split(self._currency_symbol)[1])) * multiply_by, \
+               int(float(bb.amount.split(self._currency_symbol)[1])) * multiply_by
 
     def make_board_cards(self, board_cards: str):
         """Return 5 cards that we can prepend to the card deck so that the board will be drawn.
@@ -214,6 +215,7 @@ class RLStateEncoder(Encoder):
         Returns observations and corresponding actions of players that made it to showdown."""
         # utils
         table = self.make_table(episode)
+        self._currency_symbol = episode.currency_symbol
 
         # Initialize environment for simulation of PokerEpisode
         # todo: pass env_cls as argument (N_BOARD_CARDS etc. gets accessible)

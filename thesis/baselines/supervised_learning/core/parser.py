@@ -50,6 +50,7 @@ class PokerEpisode(NamedTuple):
     date: str
     hand_id: int
     variant: str
+    currency_symbol: str  # '$' or '€'  or '￡'
     num_players: int
     blinds: List[Blind]
     player_stacks: List[PlayerStack]

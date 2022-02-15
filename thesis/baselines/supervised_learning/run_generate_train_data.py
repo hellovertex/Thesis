@@ -19,13 +19,15 @@ def main(filenames: list):
                           encoder=encoder,
                           out_filename='6MAX_0.25USD_0.50USD_Pokerstars_eu.txt')
 
-    for filename in filenames:
+    for i, filename in enumerate(filenames):
         # out_subdir = generator.get_out_subdir(filename)
+        print(f"Encoding training data from file {i}/{len(filenames)}...")
         generator.generate_from_file(filename, out_subdir='0.25_0.50')
 
 
 if __name__ == '__main__':
-    UNZIPPED_DATA_DIR = DATA_DIR + '/0.25-0.50'
+    # UNZIPPED_DATA_DIR = DATA_DIR + '/0.25-0.50'
+    UNZIPPED_DATA_DIR = DATA_DIR + '/examples_unprocessed'
     filenames_recursively = glob.glob(UNZIPPED_DATA_DIR.__str__() + '/**/*.txt', recursive=True)
 
     # os.walk here to generate list of files
