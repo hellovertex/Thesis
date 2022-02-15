@@ -61,6 +61,9 @@ class CsvGenerator(Generator):
                     print(e)
             print("Simulating environment", end='') if i == 0 else print('.', end='')
 
+        # some rare cases, where the file did not contain showdown plays
+        if training_data is None:
+            return None
         print(f"\nExtracted {len(training_data)} training samples from {i + 1} poker hands"
               f"in file {abs_filepath}...")
 

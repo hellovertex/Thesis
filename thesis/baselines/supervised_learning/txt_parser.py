@@ -6,7 +6,8 @@ import re
 from core.parser import Parser, PokerEpisode, Action, ActionType, PlayerStack, Blind, PlayerWithCards
 
 # REGEX templates
-PLAYER_NAME_TEMPLATE = r'([a-zA-Z0-9_.-@]+\s?[_.-a-zA-Z0-9@]*)'
+# PLAYER_NAME_TEMPLATE = r'([a-zA-Z0-9_.@#!-]+\s?[-@#!_.a-zA-Z0-9]*)'
+PLAYER_NAME_TEMPLATE = r'([a-zA-Z0-9_.@#!-]+\s?[-@#!_.a-zA-Z0-9]*\s?[-@#!_.a-zA-Z0-9]*)'
 STARTING_STACK_TEMPLATE = r'\(([$€]\d+.?\d*)\sin chips\)'
 MATCH_ANY = r'.*?'  # not the most efficient way, but we prefer readabiliy (parsing is one time job)
 POKER_CARD_TEMPLATE = r'[23456789TJQKAjqka][SCDHscdh]'
@@ -139,6 +140,9 @@ class TxtParser(Parser):
         """
         # pattern = re.compile(rf"(Seat \d): {PLAYER_NAME_TEMPLATE}\s\(([$€]\d+.?\d*)\sin chips\)")
         pattern = re.compile(rf"(Seat \d): {PLAYER_NAME_TEMPLATE}\s{STARTING_STACK_TEMPLATE}")
+        amounts = re.compile(rf'{STARTING_STACK_TEMPLATE}')
+        stacks = pattern.findall(line)
+        assert len(stacks) == len(amounts.findall(line))
         return pattern.findall(line)
 
     @staticmethod

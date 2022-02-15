@@ -21,7 +21,8 @@ def main(filenames: list):
 
     for i, filename in enumerate(filenames):
         # out_subdir = generator.get_out_subdir(filename)
-        print(f"Encoding training data from file {i}/{len(filenames)}...")
+        print(f"Encoding training data from file {i}/{len(filenames)}:"
+              f"{filename}")
         generator.generate_from_file(filename, out_subdir='0.25_0.50')
 
 
