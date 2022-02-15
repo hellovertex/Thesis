@@ -1,3 +1,4 @@
+azureml-sdk
 requests
 pandas
 pytest
