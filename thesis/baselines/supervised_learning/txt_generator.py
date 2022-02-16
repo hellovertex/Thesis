@@ -20,22 +20,29 @@ class CsvGenerator(Generator):
                  out_dir,
                  parser: Parser,
                  encoder: Encoder,
-                 out_filename: str):
+                 out_filename: str,
+                 write_azure: bool):
         self._out_filename = out_filename
         self._out_dir = out_dir
         self._data_dir = data_dir
         self._parser = parser
         self._encoder = encoder
-        self._experiment = Experiment(workspace=self.get_workspace(),
-                                      name="supervised-baseline")
+        self._write_azure = write_azure
+        self._experiment = None
+        if write_azure:
+            self._experiment = Experiment(workspace=self.get_workspace(),
+                                          name="supervised-baseline")
+        self._num_lines_written = 0
 
     def __enter__(self):
-        self._run = self._experiment.start_logging()
+        if self._write_azure:
+            self._run = self._experiment.start_logging()
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         print(exc_type, exc_value, exc_traceback)
-        self._run.complete()
+        if self._write_azure:
+            self._run.complete()
 
     @staticmethod
     def get_workspace():
@@ -61,22 +68,25 @@ class CsvGenerator(Generator):
 
     def _write_train_data(self, data, labels, out_subdir):
         file_dir = os.path.join(self._out_dir, out_subdir)
-        file_path = os.path.join(file_dir, self._out_filename)
+        # create new file every 100k lines
+        file_name = self._out_filename + '_' + str(int(self._num_lines_written / 100000))
+        file_path = os.path.join(file_dir, file_name)
         if not os.path.exists(file_path):
-            os.makedirs(os.path.realpath(file_dir))
+            os.makedirs(os.path.realpath(file_dir), exist_ok=True)
         pd.DataFrame(data=data,
                      index=labels,
                      columns=self._encoder.feature_names).to_csv(
             file_path, index_label='label', mode='a')
         return file_dir, file_path
 
-    def _write_to_cloud(self, abs_filepath):
+    def _write_to_azure(self, abs_filepath):
         self._run.upload_file(name="output.csv", path_or_stream=abs_filepath)
 
     def generate_from_file(self, abs_filepath, out_subdir='0.25_0.50'):
         """Docstring"""
         parsed_hands = self._parser.parse_file(abs_filepath)
         training_data, labels = None, None
+        i = 0  # in case parsed_hands is None
         for i, hand in enumerate(parsed_hands):
             observations, actions = self._encoder.encode_episode(hand)
             if not observations:
@@ -92,6 +102,7 @@ class CsvGenerator(Generator):
                     print(e)
             print("Simulating environment", end='') if i == 0 else print('.', end='')
 
+        self._num_lines_written += i
         # some rare cases, where the file did not contain showdown plays
         if training_data is None:
             return None
@@ -105,7 +116,8 @@ class CsvGenerator(Generator):
         file_path_metadata = self._write_metadata(file_dir=file_dir)
 
         # write to cloud
-        self._write_to_cloud(file_path)
+        if self._write_azure:
+            self._write_to_azure(file_path)
 
         df = pd.read_csv(file_path)
         print(f"Data created: and written to {file_path}, "

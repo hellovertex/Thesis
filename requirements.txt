@@ -1,6 +1,9 @@
-mlflow==1.23.1
-azureml-mlflow==1.38.0
-azureml-sdk==1.38.0
+azureml
+azureml-sdk
 pandas
 pytest
 pylint
+flake8
+mypy
+torch
+requests

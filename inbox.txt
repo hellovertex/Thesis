@@ -56,6 +56,12 @@ implement pypoker.PokerObservation.last_moves()
 
 
 [TODOS]
+02-16: docker image: steps:
+ - 1. clone repo
+ - 2. pip install requests
+ - 3. goto PokerEnv and pip install PokerRL
+ - 4. mount data/ folder
+ - 5.
 02-15: azure machine learning instance
 02-14: create azure vm with blob to compute all training data,
 02-14: --> then move train_data from azure to GDRIVE to run training in colab
