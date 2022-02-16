@@ -1,6 +1,6 @@
-mlflow
-azureml-mlflow
-azureml-sdk
+mlflow==1.23.1
+azureml-mlflow==1.38.0
+azureml-sdk==1.38.0
 pandas
 pytest
 pylint
