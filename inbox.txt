@@ -56,6 +56,7 @@ implement pypoker.PokerObservation.last_moves()
 
 
 [TODOS]
+02-15: azure machine learning instance
 02-14: create azure vm with blob to compute all training data,
 02-14: --> then move train_data from azure to GDRIVE to run training in colab
 02-13: create print_augmented_obs function

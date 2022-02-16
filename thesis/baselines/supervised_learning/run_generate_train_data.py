@@ -13,17 +13,17 @@ def main(filenames: list):
     # use AugmentedEnvBuilder to get augmented observations encodings
     encoder = RLStateEncoder(env_wrapper_cls=AugmentObservationWrapper)
 
-    generator = CsvGenerator(data_dir=DATA_DIR,
-                          out_dir=os.path.join(DATA_DIR + 'train_data'),
-                          parser=parser,
-                          encoder=encoder,
-                          out_filename='6MAX_0.25USD_0.50USD_Pokerstars_eu.txt')
-
-    for i, filename in enumerate(filenames):
-        # out_subdir = generator.get_out_subdir(filename)
-        print(f"Encoding training data from file {i}/{len(filenames)}:"
-              f"{filename}")
-        generator.generate_from_file(filename, out_subdir='0.25_0.50')
+    with CsvGenerator(data_dir=DATA_DIR,
+                      out_dir=os.path.join(DATA_DIR + 'train_data'),
+                      parser=parser,
+                      encoder=encoder,
+                      out_filename='6MAX_0.25USD_0.50USD_Pokerstars_eu.txt') as generator:
+        for i, filename in enumerate(filenames):
+            # out_subdir = generator.get_out_subdir(filename)
+            print(f"Encoding training data from file {i}/{len(filenames)}:"
+                  f"{filename}")
+            generator.generate_from_file(filename, out_subdir='0.25_0.50')
+            break
 
 
 if __name__ == '__main__':

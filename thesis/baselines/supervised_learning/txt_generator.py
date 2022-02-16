@@ -1,9 +1,15 @@
-from core.parser import Parser
+import os
+import sys
+
+import numpy as np
+import pandas as pd
+from azureml.core import Experiment
+from azureml.core import Workspace
+
 from core.encoder import Encoder
 from core.generator import Generator
-import os
-import pandas as pd
-import numpy as np
+from core.parser import Parser
+from contextlib import contextmanager
 
 
 class CsvGenerator(Generator):
@@ -20,6 +26,28 @@ class CsvGenerator(Generator):
         self._data_dir = data_dir
         self._parser = parser
         self._encoder = encoder
+        self._experiment = Experiment(workspace=self.get_workspace(),
+                                      name="supervised-baseline")
+
+    def __enter__(self):
+        self._run = self._experiment.start_logging()
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        print(exc_type, exc_value, exc_traceback)
+        self._run.complete()
+
+    @staticmethod
+    def get_workspace():
+        config = {
+            "subscription_id": "0d263aec-21a1-4c68-90f8-687d99ccb93b",
+            "resource_group": "thesis",
+            "workspace_name": "generate-train-data"
+        }
+        # connect to get-train-data workspace
+        return Workspace.get(name=config["workspace_name"],
+                             subscription_id=config["subscription_id"],
+                             resource_group=config["resource_group"])
 
     @property
     def out_filename(self):
@@ -41,6 +69,9 @@ class CsvGenerator(Generator):
                      columns=self._encoder.feature_names).to_csv(
             file_path, index_label='label', mode='a')
         return file_dir, file_path
+
+    def _write_to_cloud(self, abs_filepath):
+        self._run.upload_file(name="output.csv", path_or_stream=abs_filepath)
 
     def generate_from_file(self, abs_filepath, out_subdir='0.25_0.50'):
         """Docstring"""
@@ -72,6 +103,9 @@ class CsvGenerator(Generator):
 
         # write meta data
         file_path_metadata = self._write_metadata(file_dir=file_dir)
+
+        # write to cloud
+        self._write_to_cloud(file_path)
 
         df = pd.read_csv(file_path)
         print(f"Data created: and written to {file_path}, "
