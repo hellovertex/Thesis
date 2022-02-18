@@ -1,0 +1,1444 @@
+PokerStars Hand #233174643456:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 19:49:27 ET
+Table 'Aaltje' 9-max Seat #1 is the button
+Seat 1: imarcu932 ($1.28 in chips)
+Seat 2: Vadimirfenix ($1.25 in chips)
+Seat 3: gapparov93 ($2 in chips)
+Vadimirfenix: posts small blind $0.01
+gapparov93: posts big blind $0.02
+imarcu932: posts the ante $0.01
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+*** HOLE CARDS ***
+imarcu932: raises $0.10 to $0.12
+Vadimirfenix: folds
+gapparov93: folds
+Uncalled bet ($0.10) returned to imarcu932
+imarcu932 collected $0.08 from pot
+imarcu932: doesn't show hand
+*** SUMMARY ***
+Total pot $0.08 | Rake $0
+Seat 1: imarcu932 (button) collected ($0.08)
+Seat 2: Vadimirfenix (small blind) folded before Flop
+Seat 3: gapparov93 (big blind) folded before Flop
+
+
+PokerStars Hand #233174650526:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 19:49:47 ET
+Table 'Aaltje' 9-max Seat #2 is the button
+Seat 1: imarcu932 ($1.33 in chips)
+Seat 2: Vadimirfenix ($1.23 in chips)
+Seat 3: gapparov93 ($1.97 in chips)
+gapparov93: posts small blind $0.01
+imarcu932: posts big blind $0.02
+imarcu932: posts the ante $0.01
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+*** HOLE CARDS ***
+Vadimirfenix: calls $0.02
+gapparov93: calls $0.01
+imarcu932: checks
+*** FLOP *** [Kd 7c 3d]
+gapparov93: checks
+imarcu932: checks
+Vadimirfenix: checks
+*** TURN *** [Kd 7c 3d] [Jc]
+gapparov93: checks
+imarcu932: checks
+Vadimirfenix: bets $0.02
+gapparov93: calls $0.02
+imarcu932: folds
+*** RIVER *** [Kd 7c 3d Jc] [9s]
+gapparov93: checks
+Vadimirfenix: checks
+*** SHOW DOWN ***
+gapparov93: shows [Ts 6h] (high card King)
+Vadimirfenix: shows [Ac 6d] (high card Ace)
+Vadimirfenix collected $0.13 from pot
+*** SUMMARY ***
+Total pot $0.13 | Rake $0
+Board [Kd 7c 3d Jc 9s]
+Seat 1: imarcu932 (big blind) folded on the Turn
+Seat 2: Vadimirfenix (button) showed [Ac 6d] and won ($0.13) with high card Ace
+Seat 3: gapparov93 (small blind) showed [Ts 6h] and lost with high card King
+
+
+PokerStars Hand #233174671659:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 19:50:45 ET
+Table 'Aaltje' 9-max Seat #3 is the button
+Seat 1: imarcu932 ($1.30 in chips)
+Seat 2: Vadimirfenix ($1.31 in chips)
+Seat 3: gapparov93 ($1.92 in chips)
+imarcu932: posts small blind $0.01
+Vadimirfenix: posts big blind $0.02
+imarcu932: posts the ante $0.01
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+*** HOLE CARDS ***
+gapparov93: folds
+imarcu932: calls $0.01
+Vadimirfenix: checks
+*** FLOP *** [7d Ad Qs]
+imarcu932: checks
+Vadimirfenix: bets $0.03
+imarcu932: folds
+Uncalled bet ($0.03) returned to Vadimirfenix
+Vadimirfenix collected $0.07 from pot
+Vadimirfenix: doesn't show hand
+*** SUMMARY ***
+Total pot $0.07 | Rake $0
+Board [7d Ad Qs]
+Seat 1: imarcu932 (small blind) folded on the Flop
+Seat 2: Vadimirfenix (big blind) collected ($0.07)
+Seat 3: gapparov93 (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #233174677004:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 19:51:00 ET
+Table 'Aaltje' 9-max Seat #1 is the button
+Seat 1: imarcu932 ($1.27 in chips)
+Seat 2: Vadimirfenix ($1.35 in chips)
+Seat 3: gapparov93 ($1.91 in chips)
+Vadimirfenix: posts small blind $0.01
+gapparov93: posts big blind $0.02
+imarcu932: posts the ante $0.01
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+*** HOLE CARDS ***
+imarcu932: calls $0.02
+Vadimirfenix: folds
+gapparov93: checks
+*** FLOP *** [Kd Td Ah]
+gapparov93: checks
+imarcu932: bets $0.06
+gapparov93: folds
+Uncalled bet ($0.06) returned to imarcu932
+imarcu932 collected $0.08 from pot
+imarcu932: doesn't show hand
+*** SUMMARY ***
+Total pot $0.08 | Rake $0
+Board [Kd Td Ah]
+Seat 1: imarcu932 (button) collected ($0.08)
+Seat 2: Vadimirfenix (small blind) folded before Flop
+Seat 3: gapparov93 (big blind) folded on the Flop
+
+
+PokerStars Hand #233174696244:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 19:51:54 ET
+Table 'Aaltje' 9-max Seat #1 is the button
+Seat 1: imarcu932 ($1.39 in chips)
+Seat 2: Vadimirfenix ($1.26 in chips)
+Seat 3: gapparov93 ($1.88 in chips)
+Vadimirfenix: posts small blind $0.01
+gapparov93: posts big blind $0.02
+imarcu932: posts the ante $0.01
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+*** HOLE CARDS ***
+imarcu932: raises $0.10 to $0.12
+Vadimirfenix: calls $0.11
+gapparov93: folds
+*** FLOP *** [4c Kc 5h]
+Vadimirfenix: bets $0.14
+imarcu932: raises $0.14 to $0.28
+Vadimirfenix: calls $0.14
+*** TURN *** [4c Kc 5h] [Ac]
+Vadimirfenix: bets $0.82
+imarcu932: raises $0.16 to $0.98 and is all-in
+Vadimirfenix: calls $0.03 and is all-in
+Uncalled bet ($0.13) returned to imarcu932
+*** RIVER *** [4c Kc 5h Ac] [Ts]
+*** SHOW DOWN ***
+Vadimirfenix: shows [3c 2c] (a flush, Ace high)
+imarcu932: shows [Kh Ks] (three of a kind, Kings)
+Vadimirfenix collected $2.46 from pot
+*** SUMMARY ***
+Total pot $2.55 | Rake $0.09
+Board [4c Kc 5h Ac Ts]
+Seat 1: imarcu932 (button) showed [Kh Ks] and lost with three of a kind, Kings
+Seat 2: Vadimirfenix (small blind) showed [3c 2c] and won ($2.46) with a flush, Ace high
+Seat 3: gapparov93 (big blind) folded before Flop
+
+
+PokerStars Hand #233174710941:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 19:52:36 ET
+Table 'Aaltje' 9-max Seat #2 is the button
+Seat 1: imarcu932 ($0.13 in chips)
+Seat 2: Vadimirfenix ($2.46 in chips)
+Seat 3: gapparov93 ($1.85 in chips)
+gapparov93: posts small blind $0.01
+imarcu932: posts big blind $0.02
+imarcu932: posts the ante $0.01
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+*** HOLE CARDS ***
+Vadimirfenix: calls $0.02
+gapparov93: calls $0.01
+imarcu932: raises $0.10 to $0.12 and is all-in
+Vadimirfenix: calls $0.10
+gapparov93: folds
+*** FLOP *** [2s 5d Ad]
+*** TURN *** [2s 5d Ad] [Ts]
+*** RIVER *** [2s 5d Ad Ts] [Qd]
+*** SHOW DOWN ***
+imarcu932: shows [Kc 3c] (high card Ace)
+Vadimirfenix: shows [8d Td] (a flush, Ace high)
+Vadimirfenix collected $0.28 from pot
+*** SUMMARY ***
+Total pot $0.29 | Rake $0.01
+Board [2s 5d Ad Ts Qd]
+Seat 1: imarcu932 (big blind) showed [Kc 3c] and lost with high card Ace
+Seat 2: Vadimirfenix (button) showed [8d Td] and won ($0.28) with a flush, Ace high
+Seat 3: gapparov93 (small blind) folded before Flop
+
+
+PokerStars Hand #233174802447:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 19:56:58 ET
+Table 'Aaltje' 9-max Seat #2 is the button
+Seat 2: Vadimirfenix ($2.56 in chips)
+Seat 3: gapparov93 ($1.87 in chips)
+Seat 4: Richcopford ($1.20 in chips)
+gapparov93: posts small blind $0.01
+Richcopford: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+Vadimirfenix: folds
+gapparov93: calls $0.01
+Richcopford: checks
+*** FLOP *** [Td 3d 2h]
+gapparov93: checks
+Richcopford: bets $0.02
+gapparov93: calls $0.02
+*** TURN *** [Td 3d 2h] [8c]
+gapparov93: checks
+imarcu932 is disconnected
+Richcopford: bets $0.02
+gapparov93: raises $0.02 to $0.04
+Richcopford: calls $0.02
+*** RIVER *** [Td 3d 2h 8c] [9d]
+gapparov93: bets $0.06
+Richcopford: folds
+Uncalled bet ($0.06) returned to gapparov93
+gapparov93 collected $0.18 from pot
+gapparov93: doesn't show hand
+*** SUMMARY ***
+Total pot $0.19 | Rake $0.01
+Board [Td 3d 2h 8c 9d]
+Seat 2: Vadimirfenix (button) folded before Flop (didn't bet)
+Seat 3: gapparov93 (small blind) collected ($0.18)
+Seat 4: Richcopford (big blind) folded on the River
+
+
+PokerStars Hand #233174824191:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 19:58:12 ET
+Table 'Aaltje' 9-max Seat #2 is the button
+Seat 2: Vadimirfenix ($2.52 in chips)
+Seat 3: gapparov93 ($1.99 in chips)
+Seat 4: Richcopford ($1.11 in chips)
+gapparov93: posts small blind $0.01
+Richcopford: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+Vadimirfenix: calls $0.02
+gapparov93: calls $0.01
+Richcopford: checks
+*** FLOP *** [6c Th Td]
+gapparov93: checks
+Richcopford: checks
+imarcu932 is disconnected
+Vadimirfenix: checks
+*** TURN *** [6c Th Td] [9d]
+gapparov93: checks
+Richcopford: checks
+Vadimirfenix: checks
+*** RIVER *** [6c Th Td 9d] [Tc]
+gapparov93: checks
+Richcopford: checks
+Vadimirfenix: bets $0.09
+gapparov93: folds
+Richcopford: folds
+Uncalled bet ($0.09) returned to Vadimirfenix
+Vadimirfenix collected $0.09 from pot
+Vadimirfenix: doesn't show hand
+imarcu932 is disconnected
+*** SUMMARY ***
+Total pot $0.09 | Rake $0
+Board [6c Th Td 9d Tc]
+Seat 2: Vadimirfenix (button) collected ($0.09)
+Seat 3: gapparov93 (small blind) folded on the River
+Seat 4: Richcopford (big blind) folded on the River
+
+
+PokerStars Hand #233174838551:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 19:59:00 ET
+Table 'Aaltje' 9-max Seat #3 is the button
+Seat 2: Vadimirfenix ($2.58 in chips)
+Seat 3: gapparov93 ($1.96 in chips)
+Seat 4: Richcopford ($1.08 in chips)
+Richcopford: posts small blind $0.01
+Vadimirfenix: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+gapparov93: calls $0.02
+Richcopford: calls $0.01
+Vadimirfenix: raises $0.02 to $0.04
+gapparov93: calls $0.02
+Richcopford: calls $0.02
+*** FLOP *** [6d 5c 9c]
+Richcopford: checks
+Vadimirfenix: checks
+gapparov93: checks
+*** TURN *** [6d 5c 9c] [3c]
+Richcopford: bets $0.02
+Vadimirfenix: calls $0.02
+gapparov93: calls $0.02
+*** RIVER *** [6d 5c 9c 3c] [8d]
+Richcopford: bets $0.02
+imarcu932 is disconnected
+Vadimirfenix: calls $0.02
+gapparov93: raises $0.02 to $0.04
+Richcopford: folds
+Vadimirfenix: folds
+Uncalled bet ($0.02) returned to gapparov93
+gapparov93 collected $0.26 from pot
+gapparov93: doesn't show hand
+*** SUMMARY ***
+Total pot $0.27 | Rake $0.01
+Board [6d 5c 9c 3c 8d]
+Seat 2: Vadimirfenix (big blind) folded on the River
+Seat 3: gapparov93 (button) collected ($0.26)
+Seat 4: Richcopford (small blind) folded on the River
+
+
+PokerStars Hand #233174854176:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 19:59:54 ET
+Table 'Aaltje' 9-max Seat #4 is the button
+Seat 2: Vadimirfenix ($2.49 in chips)
+Seat 3: gapparov93 ($2.13 in chips)
+Seat 4: Richcopford ($0.99 in chips)
+Vadimirfenix: posts small blind $0.01
+gapparov93: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+Richcopford: calls $0.02
+Vadimirfenix: calls $0.01
+gapparov93: checks
+*** FLOP *** [4d 7c Td]
+imarcu932 is disconnected
+Vadimirfenix: bets $0.02
+gapparov93: calls $0.02
+Richcopford: calls $0.02
+*** TURN *** [4d 7c Td] [9c]
+Vadimirfenix: checks
+gapparov93: checks
+Richcopford: checks
+*** RIVER *** [4d 7c Td 9c] [Jd]
+Vadimirfenix: bets $0.07
+gapparov93: folds
+Richcopford: raises $0.07 to $0.14
+imarcu932 is disconnected
+Vadimirfenix: calls $0.07
+*** SHOW DOWN ***
+Richcopford: shows [Js 8c] (a straight, Seven to Jack)
+Vadimirfenix: mucks hand
+Richcopford collected $0.41 from pot
+*** SUMMARY ***
+Total pot $0.43 | Rake $0.02
+Board [4d 7c Td 9c Jd]
+Seat 2: Vadimirfenix (small blind) mucked
+Seat 3: gapparov93 (big blind) folded on the River
+Seat 4: Richcopford (button) showed [Js 8c] and won ($0.41) with a straight, Seven to Jack
+
+
+PokerStars Hand #233174872213:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:00:50 ET
+Table 'Aaltje' 9-max Seat #2 is the button
+Seat 2: Vadimirfenix ($2.30 in chips)
+Seat 3: gapparov93 ($2.08 in chips)
+Seat 4: Richcopford ($1.21 in chips)
+gapparov93: posts small blind $0.01
+Richcopford: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+Vadimirfenix: calls $0.02
+gapparov93: calls $0.01
+Richcopford: checks
+*** FLOP *** [3c 7h 5c]
+gapparov93: checks
+Richcopford: checks
+Vadimirfenix: checks
+*** TURN *** [3c 7h 5c] [9s]
+gapparov93: checks
+Richcopford: checks
+imarcu932 is disconnected
+Vadimirfenix: checks
+*** RIVER *** [3c 7h 5c 9s] [3d]
+gapparov93: checks
+Richcopford: checks
+Vadimirfenix: checks
+*** SHOW DOWN ***
+gapparov93: shows [Kd 5h] (two pair, Fives and Threes)
+Richcopford: mucks hand
+Vadimirfenix: mucks hand
+gapparov93 collected $0.09 from pot
+*** SUMMARY ***
+Total pot $0.09 | Rake $0
+Board [3c 7h 5c 9s 3d]
+Seat 2: Vadimirfenix (button) mucked
+Seat 3: gapparov93 (small blind) showed [Kd 5h] and won ($0.09) with two pair, Fives and Threes
+Seat 4: Richcopford (big blind) mucked
+
+
+PokerStars Hand #233174886937:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:01:23 ET
+Table 'Aaltje' 9-max Seat #3 is the button
+Seat 2: Vadimirfenix ($2.27 in chips)
+Seat 3: gapparov93 ($2.14 in chips)
+Seat 4: Richcopford ($1.18 in chips)
+Richcopford: posts small blind $0.01
+Vadimirfenix: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+gapparov93: calls $0.02
+Richcopford: raises $0.02 to $0.04
+Vadimirfenix: folds
+gapparov93: calls $0.02
+*** FLOP *** [2c 3s 7d]
+Richcopford: bets $0.06
+gapparov93: folds
+Uncalled bet ($0.06) returned to Richcopford
+Richcopford collected $0.13 from pot
+Richcopford: doesn't show hand
+*** SUMMARY ***
+Total pot $0.13 | Rake $0
+Board [2c 3s 7d]
+Seat 2: Vadimirfenix (big blind) folded before Flop
+Seat 3: gapparov93 (button) folded on the Flop
+Seat 4: Richcopford (small blind) collected ($0.13)
+
+
+PokerStars Hand #233174893612:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:01:43 ET
+Table 'Aaltje' 9-max Seat #4 is the button
+Seat 2: Vadimirfenix ($2.24 in chips)
+Seat 3: gapparov93 ($2.09 in chips)
+Seat 4: Richcopford ($1.26 in chips)
+Vadimirfenix: posts small blind $0.01
+gapparov93: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+Richcopford: folds
+Vadimirfenix: calls $0.01
+gapparov93: checks
+*** FLOP *** [4d Js Ac]
+Vadimirfenix: checks
+gapparov93: checks
+*** TURN *** [4d Js Ac] [3d]
+Vadimirfenix: checks
+gapparov93: checks
+*** RIVER *** [4d Js Ac 3d] [5h]
+Vadimirfenix: bets $0.03
+gapparov93: folds
+Uncalled bet ($0.03) returned to Vadimirfenix
+Vadimirfenix collected $0.07 from pot
+Vadimirfenix: doesn't show hand
+*** SUMMARY ***
+Total pot $0.07 | Rake $0
+Board [4d Js Ac 3d 5h]
+Seat 2: Vadimirfenix (small blind) collected ($0.07)
+Seat 3: gapparov93 (big blind) folded on the River
+Seat 4: Richcopford (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #233174905459:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:02:16 ET
+Table 'Aaltje' 9-max Seat #2 is the button
+Seat 2: Vadimirfenix ($2.28 in chips)
+Seat 3: gapparov93 ($2.06 in chips)
+Seat 4: Richcopford ($1.25 in chips)
+gapparov93: posts small blind $0.01
+Richcopford: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+Vadimirfenix: calls $0.02
+gapparov93: calls $0.01
+Richcopford: checks
+*** FLOP *** [Qd 8c 3c]
+gapparov93: checks
+Richcopford: bets $0.02
+Vadimirfenix: folds
+gapparov93: calls $0.02
+*** TURN *** [Qd 8c 3c] [2h]
+gapparov93: checks
+Richcopford: bets $0.02
+gapparov93: calls $0.02
+*** RIVER *** [Qd 8c 3c 2h] [2s]
+gapparov93: checks
+Richcopford: checks
+*** SHOW DOWN ***
+gapparov93: shows [Qh 6h] (two pair, Queens and Deuces)
+Richcopford: mucks hand
+gapparov93 collected $0.16 from pot
+*** SUMMARY ***
+Total pot $0.17 | Rake $0.01
+Board [Qd 8c 3c 2h 2s]
+Seat 2: Vadimirfenix (button) folded on the Flop
+Seat 3: gapparov93 (small blind) showed [Qh 6h] and won ($0.16) with two pair, Queens and Deuces
+Seat 4: Richcopford (big blind) mucked
+
+
+PokerStars Hand #233174920306:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:02:58 ET
+Table 'Aaltje' 9-max Seat #3 is the button
+Seat 2: Vadimirfenix ($2.25 in chips)
+Seat 3: gapparov93 ($2.15 in chips)
+Seat 4: Richcopford ($1.18 in chips)
+Richcopford: posts small blind $0.01
+Vadimirfenix: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+gapparov93: calls $0.02
+Richcopford: raises $0.02 to $0.04
+Vadimirfenix: folds
+gapparov93: raises $0.02 to $0.06
+Richcopford: calls $0.02
+*** FLOP *** [5h Jc Ac]
+Richcopford: checks
+gapparov93: bets $0.08
+Richcopford: raises $0.08 to $0.16
+gapparov93: folds
+Uncalled bet ($0.08) returned to Richcopford
+Richcopford collected $0.32 from pot
+Richcopford: doesn't show hand
+*** SUMMARY ***
+Total pot $0.33 | Rake $0.01
+Board [5h Jc Ac]
+Seat 2: Vadimirfenix (big blind) folded before Flop
+Seat 3: gapparov93 (button) folded on the Flop
+Seat 4: Richcopford (small blind) collected ($0.32)
+
+
+PokerStars Hand #233174947726:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:03:54 ET
+Table 'Aaltje' 9-max Seat #4 is the button
+Seat 2: Vadimirfenix ($2.22 in chips)
+Seat 3: gapparov93 ($2 in chips)
+Seat 4: Richcopford ($1.35 in chips)
+Vadimirfenix: posts small blind $0.01
+gapparov93: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+Richcopford: raises $0.02 to $0.04
+Vadimirfenix: folds
+gapparov93: calls $0.02
+*** FLOP *** [7s 2s 2d]
+gapparov93: checks
+Richcopford: checks
+*** TURN *** [7s 2s 2d] [6h]
+gapparov93: checks
+Richcopford: bets $0.04
+gapparov93: folds
+Uncalled bet ($0.04) returned to Richcopford
+Richcopford collected $0.12 from pot
+Richcopford: doesn't show hand
+*** SUMMARY ***
+Total pot $0.12 | Rake $0
+Board [7s 2s 2d 6h]
+Seat 2: Vadimirfenix (small blind) folded before Flop
+Seat 3: gapparov93 (big blind) folded on the Turn
+Seat 4: Richcopford (button) collected ($0.12)
+
+
+PokerStars Hand #233174967476:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:04:50 ET
+Table 'Aaltje' 9-max Seat #2 is the button
+Seat 2: Vadimirfenix ($2.26 in chips)
+Seat 3: gapparov93 ($1.89 in chips)
+Seat 4: Richcopford ($1.42 in chips)
+gapparov93: posts small blind $0.01
+Richcopford: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+Vadimirfenix: calls $0.02
+gapparov93: calls $0.01
+Richcopford: checks
+*** FLOP *** [Kd 7c Jc]
+gapparov93: checks
+Richcopford: bets $0.02
+Vadimirfenix: calls $0.02
+gapparov93: calls $0.02
+*** TURN *** [Kd 7c Jc] [Tc]
+gapparov93: checks
+Richcopford: bets $0.02
+Vadimirfenix: raises $0.02 to $0.04
+gapparov93: raises $0.02 to $0.06
+Richcopford: folds
+Vadimirfenix: calls $0.02
+*** RIVER *** [Kd 7c Jc Tc] [3s]
+gapparov93: checks
+Vadimirfenix: checks
+*** SHOW DOWN ***
+gapparov93: shows [8c 4c] (a flush, Jack high)
+Vadimirfenix: mucks hand
+gapparov93 collected $0.28 from pot
+*** SUMMARY ***
+Total pot $0.29 | Rake $0.01
+Board [Kd 7c Jc Tc 3s]
+Seat 2: Vadimirfenix (button) mucked
+Seat 3: gapparov93 (small blind) showed [8c 4c] and won ($0.28) with a flush, Jack high
+Seat 4: Richcopford (big blind) folded on the Turn
+
+
+PokerStars Hand #233174991484:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:05:58 ET
+Table 'Aaltje' 9-max Seat #3 is the button
+Seat 2: Vadimirfenix ($2.15 in chips)
+Seat 3: gapparov93 ($2.06 in chips)
+Seat 4: Richcopford ($1.35 in chips)
+Richcopford: posts small blind $0.01
+Vadimirfenix: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+gapparov93: calls $0.02
+Richcopford: raises $0.02 to $0.04
+Vadimirfenix: raises $0.02 to $0.06
+gapparov93: calls $0.04
+Richcopford: calls $0.02
+*** FLOP *** [Kc 8h Js]
+Richcopford: checks
+Vadimirfenix: checks
+gapparov93: checks
+*** TURN *** [Kc 8h Js] [5c]
+Richcopford: checks
+Vadimirfenix: bets $0.02
+gapparov93: calls $0.02
+Richcopford: calls $0.02
+*** RIVER *** [Kc 8h Js 5c] [9c]
+Richcopford: checks
+Vadimirfenix: bets $0.26
+gapparov93: folds
+Richcopford: folds
+Uncalled bet ($0.26) returned to Vadimirfenix
+Vadimirfenix collected $0.26 from pot
+Vadimirfenix: doesn't show hand
+*** SUMMARY ***
+Total pot $0.27 | Rake $0.01
+Board [Kc 8h Js 5c 9c]
+Seat 2: Vadimirfenix (big blind) collected ($0.26)
+Seat 3: gapparov93 (button) folded on the River
+Seat 4: Richcopford (small blind) folded on the River
+
+
+PokerStars Hand #233175013443:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:07:01 ET
+Table 'Aaltje' 9-max Seat #4 is the button
+Seat 2: Vadimirfenix ($2.32 in chips)
+Seat 3: gapparov93 ($1.97 in chips)
+Seat 4: Richcopford ($1.26 in chips)
+Vadimirfenix: posts small blind $0.01
+gapparov93: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+Richcopford: folds
+Vadimirfenix: calls $0.01
+gapparov93: checks
+*** FLOP *** [Js 7d 8h]
+Vadimirfenix: checks
+gapparov93: checks
+*** TURN *** [Js 7d 8h] [Ad]
+Vadimirfenix: checks
+gapparov93: checks
+*** RIVER *** [Js 7d 8h Ad] [6c]
+Vadimirfenix: checks
+gapparov93: checks
+*** SHOW DOWN ***
+Vadimirfenix: shows [Kc Jc] (a pair of Jacks)
+gapparov93: mucks hand
+Vadimirfenix collected $0.07 from pot
+*** SUMMARY ***
+Total pot $0.07 | Rake $0
+Board [Js 7d 8h Ad 6c]
+Seat 2: Vadimirfenix (small blind) showed [Kc Jc] and won ($0.07) with a pair of Jacks
+Seat 3: gapparov93 (big blind) mucked
+Seat 4: Richcopford (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #233175022470:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:07:27 ET
+Table 'Aaltje' 9-max Seat #2 is the button
+Seat 2: Vadimirfenix ($2.36 in chips)
+Seat 3: gapparov93 ($1.94 in chips)
+Seat 4: Richcopford ($1.25 in chips)
+gapparov93: posts small blind $0.01
+Richcopford: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+Vadimirfenix: raises $0.04 to $0.06
+gapparov93: calls $0.05
+Richcopford: calls $0.04
+*** FLOP *** [4d 8s Js]
+gapparov93: checks
+Richcopford: checks
+Vadimirfenix: checks
+*** TURN *** [4d 8s Js] [Ts]
+gapparov93: checks
+Richcopford: checks
+Vadimirfenix: checks
+*** RIVER *** [4d 8s Js Ts] [9s]
+gapparov93: checks
+Richcopford: checks
+Vadimirfenix: bets $0.02
+gapparov93: calls $0.02
+Richcopford: folds
+*** SHOW DOWN ***
+Vadimirfenix: shows [5h 6h] (high card Jack)
+gapparov93: shows [As 7d] (a flush, Ace high)
+gapparov93 collected $0.24 from pot
+*** SUMMARY ***
+Total pot $0.25 | Rake $0.01
+Board [4d 8s Js Ts 9s]
+Seat 2: Vadimirfenix (button) showed [5h 6h] and lost with high card Jack
+Seat 3: gapparov93 (small blind) showed [As 7d] and won ($0.24) with a flush, Ace high
+Seat 4: Richcopford (big blind) folded on the River
+
+
+PokerStars Hand #233175038643:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:08:13 ET
+Table 'Aaltje' 9-max Seat #3 is the button
+Seat 2: Vadimirfenix ($2.27 in chips)
+Seat 3: gapparov93 ($2.09 in chips)
+Seat 4: Richcopford ($1.18 in chips)
+Richcopford: posts small blind $0.01
+Vadimirfenix: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+gapparov93: calls $0.02
+Richcopford: calls $0.01
+Mózna joins the table at seat #5
+Vadimirfenix has timed out
+Vadimirfenix: checks
+*** FLOP *** [2h Kh 9s]
+Richcopford: checks
+Vadimirfenix has timed out
+Vadimirfenix: checks
+gapparov93: checks
+*** TURN *** [2h Kh 9s] [9c]
+Richcopford: checks
+Vadimirfenix has timed out
+Vadimirfenix: checks
+gapparov93: checks
+*** RIVER *** [2h Kh 9s 9c] [9h]
+Richcopford: checks
+Vadimirfenix has timed out
+Vadimirfenix: checks
+gapparov93: checks
+*** SHOW DOWN ***
+Richcopford: shows [Qs 7s] (three of a kind, Nines)
+Vadimirfenix: mucks hand
+gapparov93: shows [Qh Jh] (a flush, King high)
+gapparov93 collected $0.09 from pot
+*** SUMMARY ***
+Total pot $0.09 | Rake $0
+Board [2h Kh 9s 9c 9h]
+Seat 2: Vadimirfenix (big blind) mucked
+Seat 3: gapparov93 (button) showed [Qh Jh] and won ($0.09) with a flush, King high
+Seat 4: Richcopford (small blind) showed [Qs 7s] and lost with three of a kind, Nines
+
+
+PokerStars Hand #233175102894:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:10:55 ET
+Table 'Aaltje' 9-max Seat #3 is the button
+Seat 3: gapparov93 ($2.12 in chips)
+Seat 4: Richcopford ($1.18 in chips)
+Seat 5: Mózna ($1.20 in chips)
+Richcopford: posts small blind $0.01
+Mózna: posts big blind $0.02
+Vadimirfenix: sits out
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+Mózna: posts the ante $0.01
+*** HOLE CARDS ***
+gapparov93: calls $0.02
+Richcopford: raises $0.02 to $0.04
+Mózna: calls $0.02
+imarcu932 was removed from the table for failing to post
+imarcu932 leaves the table
+gapparov93: calls $0.02
+*** FLOP *** [8s Jh 9d]
+Richcopford: bets $0.06
+Mózna: calls $0.06
+gapparov93: raises $0.06 to $0.12
+Richcopford: calls $0.06
+Mózna: calls $0.06
+*** TURN *** [8s Jh 9d] [Tc]
+Richcopford: checks
+Mózna: checks
+gapparov93: bets $0.16
+Richcopford: calls $0.16
+Mózna: calls $0.16
+*** RIVER *** [8s Jh 9d Tc] [5d]
+Richcopford: checks
+Mózna: checks
+gapparov93: checks
+*** SHOW DOWN ***
+Richcopford: shows [Kd Kh] (a pair of Kings)
+Mózna: mucks hand
+gapparov93: shows [7s 9s] (a straight, Seven to Jack)
+gapparov93 collected $0.96 from pot
+*** SUMMARY ***
+Total pot $0.99 | Rake $0.03
+Board [8s Jh 9d Tc 5d]
+Seat 3: gapparov93 (button) showed [7s 9s] and won ($0.96) with a straight, Seven to Jack
+Seat 4: Richcopford (small blind) showed [Kd Kh] and lost with a pair of Kings
+Seat 5: Mózna (big blind) mucked
+
+
+PokerStars Hand #233175125413:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:12:00 ET
+Table 'Aaltje' 9-max Seat #4 is the button
+Seat 2: Vadimirfenix ($2.24 in chips)
+Seat 3: gapparov93 ($2.75 in chips)
+Seat 4: Richcopford ($0.85 in chips)
+Seat 5: Mózna ($0.87 in chips)
+Mózna: posts small blind $0.01
+Vadimirfenix: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+Mózna: posts the ante $0.01
+*** HOLE CARDS ***
+gapparov93: calls $0.02
+Richcopford: raises $0.02 to $0.04
+Mózna: calls $0.03
+Vadimirfenix: folds
+gapparov93: calls $0.02
+*** FLOP *** [3s Ts Ah]
+Mózna: checks
+gapparov93: checks
+Richcopford: bets $0.06
+Mózna: folds
+gapparov93: raises $0.06 to $0.12
+Richcopford: calls $0.06
+*** TURN *** [3s Ts Ah] [2s]
+gapparov93: bets $0.10
+Richcopford: folds
+Uncalled bet ($0.10) returned to gapparov93
+gapparov93 collected $0.41 from pot
+gapparov93: doesn't show hand
+*** SUMMARY ***
+Total pot $0.42 | Rake $0.01
+Board [3s Ts Ah 2s]
+Seat 2: Vadimirfenix (big blind) folded before Flop
+Seat 3: gapparov93 collected ($0.41)
+Seat 4: Richcopford (button) folded on the Turn
+Seat 5: Mózna (small blind) folded on the Flop
+
+
+PokerStars Hand #233175143936:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:12:54 ET
+Table 'Aaltje' 9-max Seat #5 is the button
+Seat 2: Vadimirfenix ($2.21 in chips)
+Seat 3: gapparov93 ($2.99 in chips)
+Seat 4: Richcopford ($0.68 in chips)
+Seat 5: Mózna ($0.82 in chips)
+Vadimirfenix: posts small blind $0.01
+gapparov93: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+Mózna: posts the ante $0.01
+*** HOLE CARDS ***
+Richcopford: calls $0.02
+Mózna: calls $0.02
+Vadimirfenix: folds
+gapparov93: raises $0.02 to $0.04
+Richcopford: calls $0.02
+Mózna: calls $0.02
+*** FLOP *** [2s 2h Qd]
+gapparov93: checks
+Richcopford: checks
+Mózna: checks
+*** TURN *** [2s 2h Qd] [Ac]
+gapparov93: checks
+Richcopford: checks
+Mózna: checks
+*** RIVER *** [2s 2h Qd Ac] [3d]
+gapparov93: checks
+Richcopford: checks
+Mózna: checks
+*** SHOW DOWN ***
+gapparov93: shows [9d As] (two pair, Aces and Deuces)
+Richcopford: mucks hand
+Mózna: mucks hand
+gapparov93 collected $0.16 from pot
+*** SUMMARY ***
+Total pot $0.17 | Rake $0.01
+Board [2s 2h Qd Ac 3d]
+Seat 2: Vadimirfenix (small blind) folded before Flop
+Seat 3: gapparov93 (big blind) showed [9d As] and won ($0.16) with two pair, Aces and Deuces
+Seat 4: Richcopford mucked
+Seat 5: Mózna (button) mucked
+
+
+PokerStars Hand #233175162910:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:13:22 ET
+Table 'Aaltje' 9-max Seat #2 is the button
+Seat 2: Vadimirfenix ($2.19 in chips)
+Seat 3: gapparov93 ($3.10 in chips)
+Seat 4: Richcopford ($0.63 in chips)
+Seat 5: Mózna ($0.77 in chips)
+gapparov93: posts small blind $0.01
+Richcopford: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+Mózna: posts the ante $0.01
+*** HOLE CARDS ***
+Mózna: calls $0.02
+Vadimirfenix: calls $0.02
+gapparov93: calls $0.01
+Richcopford: checks
+*** FLOP *** [5h 4h 2c]
+gapparov93: checks
+Richcopford: bets $0.02
+Mózna: calls $0.02
+Vadimirfenix: calls $0.02
+gapparov93: calls $0.02
+*** TURN *** [5h 4h 2c] [Ks]
+gapparov93: checks
+Richcopford: checks
+Mózna: bets $0.04
+Vadimirfenix: folds
+gapparov93: raises $0.04 to $0.08
+Richcopford: folds
+Mózna: calls $0.04
+*** RIVER *** [5h 4h 2c Ks] [9c]
+gapparov93: bets $0.10
+Mózna: calls $0.10
+*** SHOW DOWN ***
+gapparov93: shows [4c 5s] (two pair, Fives and Fours)
+Mózna: shows [2s Kh] (two pair, Kings and Deuces)
+Mózna collected $0.54 from pot
+*** SUMMARY ***
+Total pot $0.56 | Rake $0.02
+Board [5h 4h 2c Ks 9c]
+Seat 2: Vadimirfenix (button) folded on the Turn
+Seat 3: gapparov93 (small blind) showed [4c 5s] and lost with two pair, Fives and Fours
+Seat 4: Richcopford (big blind) folded on the Turn
+Seat 5: Mózna showed [2s Kh] and won ($0.54) with two pair, Kings and Deuces
+
+
+PokerStars Hand #233175186529:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:14:30 ET
+Table 'Aaltje' 9-max Seat #3 is the button
+Seat 2: Vadimirfenix ($2.14 in chips)
+Seat 3: gapparov93 ($2.87 in chips)
+Seat 4: Richcopford ($0.58 in chips)
+Seat 5: Mózna ($1.08 in chips)
+Richcopford: posts small blind $0.01
+Mózna: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+Mózna: posts the ante $0.01
+*** HOLE CARDS ***
+Vadimirfenix: folds
+gapparov93: folds
+Richcopford: raises $0.06 to $0.08
+Mózna: calls $0.06
+*** FLOP *** [Qh Kh 7s]
+Richcopford: bets $0.08
+Mózna: calls $0.08
+*** TURN *** [Qh Kh 7s] [4d]
+Richcopford: checks
+Mózna: bets $0.08
+Richcopford: folds
+Uncalled bet ($0.08) returned to Mózna
+Mózna collected $0.35 from pot
+Mózna: doesn't show hand
+*** SUMMARY ***
+Total pot $0.36 | Rake $0.01
+Board [Qh Kh 7s 4d]
+Seat 2: Vadimirfenix folded before Flop (didn't bet)
+Seat 3: gapparov93 (button) folded before Flop (didn't bet)
+Seat 4: Richcopford (small blind) folded on the Turn
+Seat 5: Mózna (big blind) collected ($0.35)
+
+
+PokerStars Hand #233175200341:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:15:10 ET
+Table 'Aaltje' 9-max Seat #4 is the button
+Seat 2: Vadimirfenix ($2.13 in chips)
+Seat 3: gapparov93 ($2.86 in chips)
+Seat 4: Richcopford ($0.41 in chips)
+Seat 5: Mózna ($1.26 in chips)
+Mózna: posts small blind $0.01
+Vadimirfenix: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+Mózna: posts the ante $0.01
+*** HOLE CARDS ***
+gapparov93: folds
+Richcopford: calls $0.02
+Mózna: calls $0.01
+Vadimirfenix: raises $0.04 to $0.06
+Richcopford: folds
+Mózna: folds
+Uncalled bet ($0.04) returned to Vadimirfenix
+Vadimirfenix collected $0.10 from pot
+Vadimirfenix: doesn't show hand
+*** SUMMARY ***
+Total pot $0.10 | Rake $0
+Seat 2: Vadimirfenix (big blind) collected ($0.10)
+Seat 3: gapparov93 folded before Flop (didn't bet)
+Seat 4: Richcopford (button) folded before Flop
+Seat 5: Mózna (small blind) folded before Flop
+
+
+PokerStars Hand #233175205432:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:15:25 ET
+Table 'Aaltje' 9-max Seat #5 is the button
+Seat 2: Vadimirfenix ($2.20 in chips)
+Seat 3: gapparov93 ($2.85 in chips)
+Seat 4: Richcopford ($0.38 in chips)
+Seat 5: Mózna ($1.23 in chips)
+Vadimirfenix: posts small blind $0.01
+gapparov93: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+Mózna: posts the ante $0.01
+*** HOLE CARDS ***
+Richcopford: calls $0.02
+Mózna: calls $0.02
+Vadimirfenix: calls $0.01
+gapparov93: checks
+*** FLOP *** [4h 3c Qd]
+Vadimirfenix: checks
+gapparov93: checks
+Richcopford: checks
+Mózna: checks
+*** TURN *** [4h 3c Qd] [3d]
+Vadimirfenix: checks
+gapparov93: checks
+Richcopford: checks
+Mózna: checks
+*** RIVER *** [4h 3c Qd 3d] [5d]
+Vadimirfenix: checks
+gapparov93: bets $0.10
+Richcopford: folds
+Mózna: folds
+Vadimirfenix: folds
+Uncalled bet ($0.10) returned to gapparov93
+gapparov93 collected $0.12 from pot
+gapparov93: doesn't show hand
+*** SUMMARY ***
+Total pot $0.12 | Rake $0
+Board [4h 3c Qd 3d 5d]
+Seat 2: Vadimirfenix (small blind) folded on the River
+Seat 3: gapparov93 (big blind) collected ($0.12)
+Seat 4: Richcopford folded on the River
+Seat 5: Mózna (button) folded on the River
+
+
+PokerStars Hand #233175215983:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:15:56 ET
+Table 'Aaltje' 9-max Seat #2 is the button
+Seat 2: Vadimirfenix ($2.17 in chips)
+Seat 3: gapparov93 ($2.94 in chips)
+Seat 4: Richcopford ($0.35 in chips)
+Seat 5: Mózna ($1.20 in chips)
+gapparov93: posts small blind $0.01
+Richcopford: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+Mózna: posts the ante $0.01
+*** HOLE CARDS ***
+Mózna: calls $0.02
+Vadimirfenix: folds
+gapparov93: calls $0.01
+Richcopford: checks
+*** FLOP *** [7s Jc 5c]
+gapparov93: checks
+Richcopford: checks
+Mózna: checks
+*** TURN *** [7s Jc 5c] [2h]
+gapparov93: checks
+Richcopford: checks
+Mózna: bets $0.02
+gapparov93: raises $0.02 to $0.04
+Richcopford: folds
+Mózna: calls $0.02
+*** RIVER *** [7s Jc 5c 2h] [Js]
+gapparov93: checks
+Mózna: checks
+*** SHOW DOWN ***
+gapparov93: shows [7d 5h] (two pair, Jacks and Sevens)
+Mózna: mucks hand
+gapparov93 collected $0.17 from pot
+*** SUMMARY ***
+Total pot $0.18 | Rake $0.01
+Board [7s Jc 5c 2h Js]
+Seat 2: Vadimirfenix (button) folded before Flop (didn't bet)
+Seat 3: gapparov93 (small blind) showed [7d 5h] and won ($0.17) with two pair, Jacks and Sevens
+Seat 4: Richcopford (big blind) folded on the Turn
+Seat 5: Mózna mucked
+
+
+PokerStars Hand #233175227822:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:16:31 ET
+Table 'Aaltje' 9-max Seat #3 is the button
+Seat 2: Vadimirfenix ($2.16 in chips)
+Seat 3: gapparov93 ($3.04 in chips)
+Seat 4: Richcopford ($0.32 in chips)
+Seat 5: Mózna ($1.13 in chips)
+Richcopford: posts small blind $0.01
+Mózna: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+Mózna: posts the ante $0.01
+*** HOLE CARDS ***
+Vadimirfenix: calls $0.02
+gapparov93: calls $0.02
+Richcopford: calls $0.01
+Mózna: checks
+*** FLOP *** [2d 4c 9h]
+Richcopford: checks
+Mózna: checks
+Vadimirfenix: checks
+gapparov93: checks
+*** TURN *** [2d 4c 9h] [7s]
+Richcopford: checks
+Mózna: checks
+Vadimirfenix: checks
+gapparov93: checks
+*** RIVER *** [2d 4c 9h 7s] [3c]
+Richcopford: checks
+Mózna: checks
+Vadimirfenix: bets $0.02
+gapparov93: folds
+Richcopford: folds
+Mózna: calls $0.02
+*** SHOW DOWN ***
+Vadimirfenix: shows [2h Th] (a pair of Deuces)
+Mózna: shows [Qh 4d] (a pair of Fours)
+Mózna collected $0.15 from pot
+*** SUMMARY ***
+Total pot $0.16 | Rake $0.01
+Board [2d 4c 9h 7s 3c]
+Seat 2: Vadimirfenix showed [2h Th] and lost with a pair of Deuces
+Seat 3: gapparov93 (button) folded on the River
+Seat 4: Richcopford (small blind) folded on the River
+Seat 5: Mózna (big blind) showed [Qh 4d] and won ($0.15) with a pair of Fours
+
+
+PokerStars Hand #233175240504:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:17:08 ET
+Table 'Aaltje' 9-max Seat #4 is the button
+Seat 2: Vadimirfenix ($2.11 in chips)
+Seat 3: gapparov93 ($3.01 in chips)
+Seat 4: Richcopford ($0.29 in chips)
+Seat 5: Mózna ($1.23 in chips)
+Mózna: posts small blind $0.01
+Vadimirfenix: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+Mózna: posts the ante $0.01
+*** HOLE CARDS ***
+gapparov93: calls $0.02
+Richcopford: calls $0.02
+Mózna: calls $0.01
+Vadimirfenix: checks
+*** FLOP *** [4h 9h Th]
+Mózna: checks
+Vadimirfenix: checks
+gapparov93: bets $0.04
+Richcopford: folds
+Mózna: folds
+Vadimirfenix: calls $0.04
+*** TURN *** [4h 9h Th] [Ac]
+Vadimirfenix: bets $0.02
+gapparov93: calls $0.02
+*** RIVER *** [4h 9h Th Ac] [Jd]
+Vadimirfenix: checks
+gapparov93: checks
+*** SHOW DOWN ***
+Vadimirfenix: shows [Ad 4d] (two pair, Aces and Fours)
+gapparov93: mucks hand
+Vadimirfenix collected $0.23 from pot
+*** SUMMARY ***
+Total pot $0.24 | Rake $0.01
+Board [4h 9h Th Ac Jd]
+Seat 2: Vadimirfenix (big blind) showed [Ad 4d] and won ($0.23) with two pair, Aces and Fours
+Seat 3: gapparov93 mucked
+Seat 4: Richcopford (button) folded on the Flop
+Seat 5: Mózna (small blind) folded on the Flop
+
+
+PokerStars Hand #233175257526:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:17:58 ET
+Table 'Aaltje' 9-max Seat #5 is the button
+Seat 2: Vadimirfenix ($2.25 in chips)
+Seat 3: gapparov93 ($2.92 in chips)
+Seat 4: Richcopford ($0.26 in chips)
+Seat 5: Mózna ($1.20 in chips)
+Vadimirfenix: posts small blind $0.01
+gapparov93: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+Mózna: posts the ante $0.01
+*** HOLE CARDS ***
+Richcopford: calls $0.02
+Mózna: folds
+Vadimirfenix: calls $0.01
+gapparov93: checks
+*** FLOP *** [Tc 6s 9h]
+Vadimirfenix: bets $0.02
+gapparov93: raises $0.02 to $0.04
+Richcopford: folds
+Vadimirfenix: calls $0.02
+*** TURN *** [Tc 6s 9h] [Qs]
+Vadimirfenix: bets $0.08
+gapparov93: calls $0.08
+*** RIVER *** [Tc 6s 9h Qs] [Td]
+Vadimirfenix: checks
+gapparov93: checks
+*** SHOW DOWN ***
+Vadimirfenix: shows [9c Qc] (two pair, Queens and Tens)
+gapparov93: mucks hand
+Vadimirfenix collected $0.33 from pot
+*** SUMMARY ***
+Total pot $0.34 | Rake $0.01
+Board [Tc 6s 9h Qs Td]
+Seat 2: Vadimirfenix (small blind) showed [9c Qc] and won ($0.33) with two pair, Queens and Tens
+Seat 3: gapparov93 (big blind) mucked
+Seat 4: Richcopford folded on the Flop
+Seat 5: Mózna (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #233175270757:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:18:37 ET
+Table 'Aaltje' 9-max Seat #2 is the button
+Seat 2: Vadimirfenix ($2.43 in chips)
+Seat 3: gapparov93 ($2.77 in chips)
+Seat 4: Richcopford ($0.23 in chips)
+Seat 5: Mózna ($1.19 in chips)
+gapparov93: posts small blind $0.01
+Richcopford: posts big blind $0.02
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+Mózna: posts the ante $0.01
+*** HOLE CARDS ***
+Mózna: calls $0.02
+Vadimirfenix: calls $0.02
+gapparov93: calls $0.01
+Richcopford: checks
+*** FLOP *** [8s Qs 2s]
+gapparov93: checks
+Richcopford: checks
+Mózna: checks
+Vadimirfenix: bets $0.02
+hipponextdoor joins the table at seat #1
+gapparov93: calls $0.02
+Richcopford: calls $0.02
+Mózna: calls $0.02
+*** TURN *** [8s Qs 2s] [Kc]
+gapparov93: checks
+Richcopford: checks
+Mózna: checks
+Vadimirfenix: checks
+*** RIVER *** [8s Qs 2s Kc] [2d]
+gapparov93: bets $0.08
+Richcopford: folds
+Mózna: folds
+Vadimirfenix: folds
+Uncalled bet ($0.08) returned to gapparov93
+gapparov93 collected $0.19 from pot
+gapparov93: doesn't show hand
+*** SUMMARY ***
+Total pot $0.20 | Rake $0.01
+Board [8s Qs 2s Kc 2d]
+Seat 2: Vadimirfenix (button) folded on the River
+Seat 3: gapparov93 (small blind) collected ($0.19)
+Seat 4: Richcopford (big blind) folded on the River
+Seat 5: Mózna folded on the River
+
+
+PokerStars Hand #233175289785:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:19:35 ET
+Table 'Aaltje' 9-max Seat #3 is the button
+Seat 1: hipponextdoor ($1.20 in chips)
+Seat 2: Vadimirfenix ($2.38 in chips)
+Seat 3: gapparov93 ($2.91 in chips)
+Seat 4: Richcopford ($0.18 in chips)
+Seat 5: Mózna ($1.14 in chips)
+Richcopford: posts small blind $0.01
+Mózna: posts big blind $0.02
+hipponextdoor: posts big blind $0.02
+hipponextdoor: posts the ante $0.01
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+Mózna: posts the ante $0.01
+*** HOLE CARDS ***
+hipponextdoor: raises $0.02 to $0.04
+Vadimirfenix: folds
+gapparov93: calls $0.04
+Richcopford: folds
+Mózna: calls $0.02
+*** FLOP *** [8h Th Ts]
+Mózna: checks
+hipponextdoor: bets $0.17
+gapparov93: folds
+Mózna: calls $0.17
+*** TURN *** [8h Th Ts] [3d]
+Mózna: checks
+hipponextdoor: bets $0.02
+Mózna: calls $0.02
+*** RIVER *** [8h Th Ts 3d] [9s]
+Mózna: checks
+hipponextdoor: checks
+*** SHOW DOWN ***
+Mózna: shows [9h 7h] (two pair, Tens and Nines)
+hipponextdoor: mucks hand
+Mózna collected $0.54 from pot
+*** SUMMARY ***
+Total pot $0.56 | Rake $0.02
+Board [8h Th Ts 3d 9s]
+Seat 1: hipponextdoor mucked
+Seat 2: Vadimirfenix folded before Flop (didn't bet)
+Seat 3: gapparov93 (button) folded on the Flop
+Seat 4: Richcopford (small blind) folded before Flop
+Seat 5: Mózna (big blind) showed [9h 7h] and won ($0.54) with two pair, Tens and Nines
+
+
+PokerStars Hand #233175321862:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:21:09 ET
+Table 'Aaltje' 9-max Seat #4 is the button
+Seat 1: hipponextdoor ($0.96 in chips)
+Seat 2: Vadimirfenix ($2.37 in chips)
+Seat 3: gapparov93 ($2.86 in chips)
+Seat 4: Richcopford ($0.16 in chips)
+Seat 5: Mózna ($1.44 in chips)
+Mózna: posts small blind $0.01
+hipponextdoor: posts big blind $0.02
+hipponextdoor: posts the ante $0.01
+Vadimirfenix: posts the ante $0.01
+gapparov93: posts the ante $0.01
+Richcopford: posts the ante $0.01
+Mózna: posts the ante $0.01
+*** HOLE CARDS ***
+Vadimirfenix: folds
+gapparov93: calls $0.02
+Richcopford: calls $0.02
+Mózna: calls $0.01
+hipponextdoor: checks
+*** FLOP *** [2h 4d 3h]
+Mózna: checks
+hipponextdoor: bets $0.06
+gapparov93: folds
+Richcopford: folds
+Mózna: calls $0.06
+*** TURN *** [2h 4d 3h] [Td]
+Mózna: checks
+hipponextdoor: checks
+*** RIVER *** [2h 4d 3h Td] [9d]
+Mózna: checks
+hipponextdoor: checks
+*** SHOW DOWN ***
+Mózna: shows [Ah 6c] (high card Ace)
+hipponextdoor: shows [6d 4h] (a pair of Fours)
+hipponextdoor collected $0.24 from pot
+*** SUMMARY ***
+Total pot $0.25 | Rake $0.01
+Board [2h 4d 3h Td 9d]
+Seat 1: hipponextdoor (big blind) showed [6d 4h] and won ($0.24) with a pair of Fours
+Seat 2: Vadimirfenix folded before Flop (didn't bet)
+Seat 3: gapparov93 folded on the Flop
+Seat 4: Richcopford (button) folded on the Flop
+Seat 5: Mózna (small blind) showed [Ah 6c] and lost with high card Ace
+
+
+PokerStars Hand #233175343385:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:22:13 ET
+Table 'Aaltje' 9-max Seat #5 is the button
+Seat 1: hipponextdoor ($1.11 in chips)
+Seat 2: Vadimirfenix ($2.36 in chips)
+Seat 4: Richcopford ($0.13 in chips)
+Seat 5: Mózna ($1.35 in chips)
+hipponextdoor: posts small blind $0.01
+Vadimirfenix: posts big blind $0.02
+hipponextdoor: posts the ante $0.01
+Vadimirfenix: posts the ante $0.01
+Richcopford: posts the ante $0.01
+Mózna: posts the ante $0.01
+*** HOLE CARDS ***
+Richcopford: calls $0.02
+Mózna: calls $0.02
+hipponextdoor: calls $0.01
+Vadimirfenix: checks
+*** FLOP *** [Th 4s Qs]
+hipponextdoor: bets $0.02
+Vadimirfenix: folds
+Richcopford: folds
+Mózna: raises $0.08 to $0.10
+hipponextdoor: calls $0.08
+*** TURN *** [Th 4s Qs] [Td]
+hipponextdoor: bets $0.10
+Mózna: calls $0.10
+*** RIVER *** [Th 4s Qs Td] [2h]
+hipponextdoor: bets $0.10
+Mózna: calls $0.10
+*** SHOW DOWN ***
+hipponextdoor: shows [4h 3s] (two pair, Tens and Fours)
+Mózna: shows [3c Qd] (two pair, Queens and Tens)
+Mózna collected $0.69 from pot
+*** SUMMARY ***
+Total pot $0.72 | Rake $0.03
+Board [Th 4s Qs Td 2h]
+Seat 1: hipponextdoor (small blind) showed [4h 3s] and lost with two pair, Tens and Fours
+Seat 2: Vadimirfenix (big blind) folded on the Flop
+Seat 4: Richcopford folded on the Flop
+Seat 5: Mózna (button) showed [3c Qd] and won ($0.69) with two pair, Queens and Tens
+
+
+PokerStars Hand #233175361450:  Hold'em No Limit ($0.01/$0.02 USD) - 2022/01/15 20:23:06 ET
+Table 'Aaltje' 9-max Seat #1 is the button
+Seat 1: hipponextdoor ($0.78 in chips)
+Seat 2: Vadimirfenix ($2.33 in chips)
+Seat 4: Richcopford ($0.10 in chips)
+Vadimirfenix: posts small blind $0.01
+Richcopford: posts big blind $0.02
+hipponextdoor: posts the ante $0.01
+Vadimirfenix: posts the ante $0.01
+Richcopford: posts the ante $0.01
+*** HOLE CARDS ***
+Mózna leaves the table
+hipponextdoor: raises $0.02 to $0.04
+Vadimirfenix: calls $0.03
+Richcopford: raises $0.05 to $0.09 and is all-in
+hipponextdoor: calls $0.05
+Vadimirfenix: calls $0.05
+*** FLOP *** [2h 3h 4d]
+Vadimirfenix: checks
+hipponextdoor: bets $0.10
+Vadimirfenix: raises $2.13 to $2.23 and is all-in
+hipponextdoor: calls $0.58 and is all-in
+Uncalled bet ($1.55) returned to Vadimirfenix
+*** TURN *** [2h 3h 4d] [2c]
+*** RIVER *** [2h 3h 4d 2c] [4h]
+*** SHOW DOWN ***
+Vadimirfenix: shows [6d 5h] (a straight, Deuce to Six)
+hipponextdoor: shows [4c Ts] (a full house, Fours full of Deuces)
+hipponextdoor collected $1.31 from side pot
+Richcopford: shows [Qs Jh] (two pair, Fours and Deuces)
+hipponextdoor collected $0.29 from main pot
+Richcopford cashed out the hand for $0.02
+*** SUMMARY ***
+Total pot $1.66 Main pot $0.29. Side pot $1.31. | Rake $0.06
+Board [2h 3h 4d 2c 4h]
+Seat 1: hipponextdoor (button) showed [4c Ts] and won ($1.60) with a full house, Fours full of Deuces
+Seat 2: Vadimirfenix (small blind) showed [6d 5h] and lost with a straight, Deuce to Six
+Seat 4: Richcopford (big blind) showed [Qs Jh] and lost with two pair, Fours and Deuces (cashed out).
+
+
