@@ -1,0 +1,9 @@
+[flake8]
+exclude =
+    data,
+    doc,
+    img,
+    tex,
+    env,
+    venv,
+    .git,

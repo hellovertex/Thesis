@@ -87,6 +87,7 @@ implement pypoker.PokerObservation.last_moves()
 - [-] 
 
 [[Misc]]
+- 02-17: policy parameterization by pretraining -> prior knowledge
 - 02-11: consider training for each num_players separately (with lower dimensional input)
 - 01-31: build DataParser and Processor
 - 01-31: deal with two hero scenario

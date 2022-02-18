@@ -1,0 +1,1 @@
+This folder documents steps I took to set up and run the python code on Azure and Azure Machine Learning
