@@ -63,8 +63,8 @@ class RLStateEncoder(Encoder):
         assert sb.type == 'small blind'
         bb = blinds[1]
         assert bb.type == 'big blind'
-        return int(float(sb.amount.split(self._currency_symbol)[1])) * multiply_by, \
-               int(float(bb.amount.split(self._currency_symbol)[1])) * multiply_by
+        return int(float(sb.amount.split(self._currency_symbol)[1]) * multiply_by), \
+               int(float(bb.amount.split(self._currency_symbol)[1])* multiply_by)
 
     def make_board_cards(self, board_cards: str):
         """Return 5 cards that we can prepend to the card deck so that the board will be drawn.
@@ -190,7 +190,7 @@ class RLStateEncoder(Encoder):
         actions = []
         showdown_players = [player.name for player in episode.showdown_hands]
         it = 0
-
+        debug_action_list = []
         while not done:
             action = episode.actions_total['as_sequence'][it]
             action_formatted = self.build_action(action)
@@ -211,6 +211,7 @@ class RLStateEncoder(Encoder):
                         action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
                         # actions.append((ActionType.FOLD.value, -1))  # replace action with FOLD for now
                     actions.append(action_label)
+            debug_action_list.append(action_formatted)
             obs, _, done, _ = env.step(action_formatted)
             it += 1
         if not observations:
@@ -228,6 +229,7 @@ class RLStateEncoder(Encoder):
         # Initialize environment for simulation of PokerEpisode
         # todo: pass env_cls as argument (N_BOARD_CARDS etc. gets accessible)
         self._init_wrapped_env(table, ante=episode.ante)
+
         self._wrapped_env.SMALL_BLIND, self._wrapped_env.BIG_BLIND = self.make_blinds(episode.blinds, multiply_by=100)
         self._wrapped_env.ANTE = self._make_ante(episode.ante)
         cards_state_dict = self._build_cards_state_dict(table, episode)
