@@ -217,6 +217,11 @@ class TxtParser(Parser):
                 return sbl
         raise ValueError("Currency symbol not supported")
 
+    def get_ante(self, episode: str):
+        ante = 0.0
+        # todo parse ante if exists
+        return ante
+
     def _parse_episode(self, episode: str, showdown: str):
         """UnderConstruction"""
         hand_id = self.get_hand_id(episode)
@@ -224,6 +229,7 @@ class TxtParser(Parser):
         winners, showdown_hands = self.get_winner(showdown)
         # blinds = self.get_blinds(episode)
         blinds = [Blind(*blind) for blind in self.get_blinds(episode)]
+        ante = self.get_ante(episode)
         btn = self.get_button(episode)
         player_stacks = [PlayerStack(*stack) for stack in self.get_player_stacks(episode)]
         num_players = len(player_stacks)
@@ -237,6 +243,7 @@ class TxtParser(Parser):
                             currency_symbol=currency_symbol,
                             num_players=num_players,
                             blinds=blinds,
+                            ante=ante,
                             player_stacks=player_stacks,
                             btn_idx=btn_idx,
                             board_cards=board_cards,

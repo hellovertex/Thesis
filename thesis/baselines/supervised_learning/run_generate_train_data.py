@@ -32,7 +32,7 @@ def main(filenames: list):
 if __name__ == '__main__':
     # UNZIPPED_DATA_DIR = DATA_DIR + '/0.25-0.50'
     UNZIPPED_DATA_DIR = DATA_DIR + '/examples_unprocessed'
-    filenames_recursively = glob.glob(UNZIPPED_DATA_DIR.__str__() + '/**/*.txt', recursive=True)
+    filenames_recursively = glob.glob(DATA_DIR.__str__() + '/**/*.txt', recursive=True)
 
     # os.walk here to generate list of files
     main(filenames_recursively)

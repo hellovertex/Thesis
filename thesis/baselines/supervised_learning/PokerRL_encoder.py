@@ -158,7 +158,7 @@ class RLStateEncoder(Encoder):
                 'board': board,  # np.ndarray(shape=(n_cards, 2))
                 'hand': player_hands}
 
-    def _init_wrapped_env(self, table: Tuple[PlayerInfo], multiply_by=100):
+    def _init_wrapped_env(self, table: Tuple[PlayerInfo], ante, multiply_by=100):
         """Initializes environment used to generate observations.
         Assumes Btn is at index 0."""
         # get starting stacks, starting with button at index 0
@@ -180,6 +180,7 @@ class RLStateEncoder(Encoder):
         """Under Construction."""
         showdown_players = [player.name for player in episode.showdown_hands]
         state_dict = {'deck_state_dict': cards_state_dict, 'table': table}
+
         obs, _, done, _ = env.reset(config=state_dict)
 
         # --- Step Environment with action --- #
@@ -222,7 +223,7 @@ class RLStateEncoder(Encoder):
 
         # Initialize environment for simulation of PokerEpisode
         # todo: pass env_cls as argument (N_BOARD_CARDS etc. gets accessible)
-        self._init_wrapped_env(table)
+        self._init_wrapped_env(table, ante=episode.ante)
         self._wrapped_env.SMALL_BLIND, self._wrapped_env.BIG_BLIND = self.make_blinds(episode.blinds, multiply_by=100)
         cards_state_dict = self._build_cards_state_dict(table, episode)
 
