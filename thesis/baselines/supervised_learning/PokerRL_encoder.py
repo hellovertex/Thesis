@@ -176,17 +176,21 @@ class RLStateEncoder(Encoder):
         # will be used for naming feature index in training data vector
         self._feature_names = list(self._wrapped_env.obs_idx_dict.keys())
 
+    def _make_ante(self, ante:str, multiply_by=100) -> float:
+        """Converts ante string to float, e.g. '$0.00' -> float(0.00)"""
+        return float(ante.split(self._currency_symbol)[1]) * multiply_by
+
     def _simulate_environment(self, env, episode, cards_state_dict, table):
         """Under Construction."""
-        showdown_players = [player.name for player in episode.showdown_hands]
         state_dict = {'deck_state_dict': cards_state_dict, 'table': table}
-
         obs, _, done, _ = env.reset(config=state_dict)
 
         # --- Step Environment with action --- #
         observations = []
         actions = []
+        showdown_players = [player.name for player in episode.showdown_hands]
         it = 0
+
         while not done:
             action = episode.actions_total['as_sequence'][it]
             action_formatted = self.build_action(action)
@@ -225,6 +229,7 @@ class RLStateEncoder(Encoder):
         # todo: pass env_cls as argument (N_BOARD_CARDS etc. gets accessible)
         self._init_wrapped_env(table, ante=episode.ante)
         self._wrapped_env.SMALL_BLIND, self._wrapped_env.BIG_BLIND = self.make_blinds(episode.blinds, multiply_by=100)
+        self._wrapped_env.ANTE = self._make_ante(episode.ante)
         cards_state_dict = self._build_cards_state_dict(table, episode)
 
         # Collect observations and actions, observations are possibly augmented

@@ -8,7 +8,7 @@ from core.parser import Parser, PokerEpisode, Action, ActionType, PlayerStack, B
 # REGEX templates
 # PLAYER_NAME_TEMPLATE = r'([a-zA-Z0-9_.@#!-]+\s?[-@#!_.a-zA-Z0-9]*)'
 PLAYER_NAME_TEMPLATE = r'([a-zA-Z0-9_.@#!-]+\s?[-@#!_.a-zA-Z0-9]*\s?[-@#!_.a-zA-Z0-9]*)'
-STARTING_STACK_TEMPLATE = r'\(([$€]\d+.?\d*)\sin chips\)'
+STARTING_STACK_TEMPLATE = r'\(([$€￡]\d+.?\d*)\sin chips\)'
 MATCH_ANY = r'.*?'  # not the most efficient way, but we prefer readabiliy (parsing is one time job)
 POKER_CARD_TEMPLATE = r'[23456789TJQKAjqka][SCDHscdh]'
 CURRENCY_SYMBOLS = ['$', '€', '￡']  # only these are currently supported
@@ -217,10 +217,16 @@ class TxtParser(Parser):
                 return sbl
         raise ValueError("Currency symbol not supported")
 
-    def get_ante(self, episode: str):
+    def get_ante(self, currency_symbol: str, episode: str):
         ante = 0.0
-        # todo parse ante if exists
-        return ante
+        pattern = re.compile(r'.*? posts the ante ([$€￡]\d+.?\d*)\n')
+        res_ante = pattern.findall(episode)
+        if res_ante:
+            # every player posts the same ante
+            assert res_ante[0] == res_ante[-1], "First and last player posted different amount of ante"
+            return res_ante[0]
+        else:
+            return currency_symbol + '0.00'
 
     def _parse_episode(self, episode: str, showdown: str):
         """UnderConstruction"""
@@ -229,7 +235,7 @@ class TxtParser(Parser):
         winners, showdown_hands = self.get_winner(showdown)
         # blinds = self.get_blinds(episode)
         blinds = [Blind(*blind) for blind in self.get_blinds(episode)]
-        ante = self.get_ante(episode)
+        ante = self.get_ante(currency_symbol, episode)
         btn = self.get_button(episode)
         player_stacks = [PlayerStack(*stack) for stack in self.get_player_stacks(episode)]
         num_players = len(player_stacks)

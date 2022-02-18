@@ -53,7 +53,7 @@ class PokerEpisode(NamedTuple):
     currency_symbol: str  # '$' or '€'  or '￡'
     num_players: int
     blinds: List[Blind]
-    ante: float
+    ante: str
     player_stacks: List[PlayerStack]
     btn_idx: int
     board_cards: str
