@@ -6,7 +6,7 @@ import os
 import glob
 import pathlib
 
-DATA_DIR = './data/'
+DATA_DIR = '../../../data/'
 
 
 def main(filenames: list):
@@ -32,7 +32,7 @@ def main(filenames: list):
 
 if __name__ == '__main__':
     # UNZIPPED_DATA_DIR = DATA_DIR + '/0.25-0.50'
-   UNZIPPED_DATA_DIR = DATA_DIR + '0.25-0.50/unzipped'
+   UNZIPPED_DATA_DIR = DATA_DIR # + '0.25-0.50/unzipped'
    print(pathlib.Path(UNZIPPED_DATA_DIR).resolve())
    filenames_recursively = glob.glob(UNZIPPED_DATA_DIR.__str__() + '/**/*.txt', recursive=True)
    print(filenames_recursively)

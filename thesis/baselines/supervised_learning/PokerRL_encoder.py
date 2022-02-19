@@ -55,7 +55,7 @@ class RLStateEncoder(Encoder):
     @staticmethod
     def build_action(action: Action, multiply_by=100):
         """Under Construction."""
-        return action.action_type.value, int(float(action.raise_amount) * multiply_by)
+        return action.action_type.value, round(float(action.raise_amount) * multiply_by)
 
     def make_blinds(self, blinds: List[Blind], multiply_by: int = 100):
         """Under Construction."""
@@ -192,8 +192,8 @@ class RLStateEncoder(Encoder):
         it = 0
         debug_action_list = []
         while not done:
-            if episode.hand_id == 233174710941:
-                debug = 1
+            # if episode.hand_id == 233174710941:
+            #     debug = 1
             action = episode.actions_total['as_sequence'][it]
             action_formatted = self.build_action(action)
             # store up to two actions per player per stage
