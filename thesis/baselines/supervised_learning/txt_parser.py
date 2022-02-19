@@ -251,6 +251,8 @@ class TxtParser(Parser):
         board_cards = self.get_board_cards(episode)
         actions_total = self._parse_actions(episode)
 
+        self._metadata['n_showdowns_no_mucks'] += 1
+
         return PokerEpisode(date='',  # todo
                             hand_id=hand_id,
                             variant=self._variant,
@@ -281,8 +283,16 @@ class TxtParser(Parser):
                 self._metadata['n_mucks'] += 1
                 continue
 
-            self._metadata['n_showdowns_no_mucks'] += 1
-            yield self._parse_episode(current, showdown)
+            try:
+                yield self._parse_episode(current, showdown)
+            except AssertionError as e:
+                # todo log here,
+                # if an AssertionError is thrown, we have encountered some weird player name like
+                #  é=mc².Fin  é=mc³.Start
+                # we can parse unicode characters and very exotic names including those
+                # with multiple whitespaces but this name finally broke our nameparser
+                # Hence we skip these _very_ rare cases where the name is unparsable without further efforts
+                continue
 
     def parse_file(self, file_path):
         # self._reset_metadata_counts()
