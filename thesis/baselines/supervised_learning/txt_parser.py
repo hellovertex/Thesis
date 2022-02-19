@@ -10,10 +10,10 @@ from core.parser import Parser, PokerEpisode, Action, ActionType, PlayerStack, B
 # PLAYER_NAME_TEMPLATE = r'([óa-zA-Z0-9_.@#!-]+\s?[-@#!_.a-zA-Z0-9ó]*\s?[-@#!_.a-zA-Z0-9ó]*)'
 # compile this with re.UNICODE to match any unicode char like é ó etc
 PLAYER_NAME_TEMPLATE = r'([\w_.@#!-]+\s?[-@#!_.\w]*\s?[-@#!_.\w]*)'
-STARTING_STACK_TEMPLATE = r'\(([$€￡]\d+.?\d*)\sin chips\)'
+STARTING_STACK_TEMPLATE = r'\(([$€￡Â£]+\d+.?\d*)\sin chips\)'
 MATCH_ANY = r'.*?'  # not the most efficient way, but we prefer readabiliy (parsing is one time job)
 POKER_CARD_TEMPLATE = r'[23456789TJQKAjqka][SCDHscdh]'
-CURRENCY_SYMBOLS = ['$', '€', '￡']  # only these are currently supported
+CURRENCY_SYMBOLS = ['$', '€', '￡', 'Â£']  # only these are currently supported
 
 
 # ---------------------------- PokerStars-Parser ---------------------------------
@@ -39,6 +39,9 @@ class TxtParser(Parser):
 
     class _PlayerLeavesDuringPotContribution(ValueError):
         """Edge case that player leaves before rundown"""
+
+    class _CurrencyNotSupportedError(ValueError):
+        """We only parse EUR, USD, GBP games"""
 
     def __init__(self):
         # todo consider making TxtParser another abstract class and make derived PokerStars-Parser
@@ -243,12 +246,11 @@ class TxtParser(Parser):
                 'river': actions_river,
                 'as_sequence': as_sequence}
 
-    @staticmethod
-    def get_currency_symbol(episode: str):
+    def get_currency_symbol(self, episode: str):
         for sbl in CURRENCY_SYMBOLS:
             if sbl in episode:
                 return sbl
-        raise ValueError("Currency symbol not supported")
+        raise self._CurrencyNotSupportedError("Currency symbol not supported")
 
     def get_ante(self, currency_symbol: str, episode: str):
         ante = 0.0
@@ -331,7 +333,9 @@ class TxtParser(Parser):
             except self._PlayerLeavesDuringPotContribution:
                 # Edge case that player leaves before rundown
                 continue
-
+            except self._CurrencyNotSupportedError:
+                # Only parse EUR, USD, GBP games
+                continue
 
     def parse_file(self, file_path):
         # self._reset_metadata_counts()
