@@ -168,7 +168,8 @@ class TxtParser(Parser):
         stacks = pattern.findall(line)
         if not len(stacks) == len(amounts.findall(line)):
             raise self._InvalidPlayerName(
-                "This error is raised, when we encountered a very exotic player name like 'é=mc².Fin  é=mc³.Start' ")
+                "This error is raised, when we encountered a very exotic player name "
+                "that cant be parsed by re.Unicode, like 'é=mc².Fin  é=mc³.Start' ")
         return pattern.findall(line)
 
     def get_blinds(self, episode: str) -> List[Tuple[str]]:
