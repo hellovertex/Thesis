@@ -9,7 +9,7 @@ from core.parser import Parser, PokerEpisode, Action, ActionType, PlayerStack, B
 # PLAYER_NAME_TEMPLATE = r'([a-zA-Z0-9_.@#!-]+\s?[-@#!_.a-zA-Z0-9]*)'
 #PLAYER_NAME_TEMPLATE = r'([óa-zA-Z0-9_.@#!-]+\s?[-@#!_.a-zA-Z0-9ó]*\s?[-@#!_.a-zA-Z0-9ó]*)'
 # compile this with re.UNICODE to match any unicode char like é ó etc
-PLAYER_NAME_TEMPLATE = r'(\w+\s?\w*\s?\w*)'
+PLAYER_NAME_TEMPLATE = r'([\w_.@#!-]+\s?[-@#!_.\w]*\s?[-@#!_.\w]*)'
 STARTING_STACK_TEMPLATE = r'\(([$€￡]\d+.?\d*)\sin chips\)'
 MATCH_ANY = r'.*?'  # not the most efficient way, but we prefer readabiliy (parsing is one time job)
 POKER_CARD_TEMPLATE = r'[23456789TJQKAjqka][SCDHscdh]'

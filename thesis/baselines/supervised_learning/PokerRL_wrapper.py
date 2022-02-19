@@ -64,7 +64,6 @@ class ActionHistoryWrapper(WrapperPokerRL):
         # experimental
         self._actions_per_stage_discretized = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
 
-
     # _______________________________ Overridden ________________________________
     def _before_step(self, action):
         """
