@@ -37,6 +37,9 @@ class TxtParser(Parser):
         because our env does not support them."""
         pass
 
+    class _PlayerLeavesDuringPotContribution(ValueError):
+        """Edge case that player leaves before rundown"""
+
     def __init__(self):
         # todo consider making TxtParser another abstract class and make derived PokerStars-Parser
         self._variant = None
@@ -260,6 +263,10 @@ class TxtParser(Parser):
 
     def _parse_episode(self, episode: str, showdown: str):
         """UnderConstruction"""
+        # edge case that player leaves before rundown should be skipped
+        if "leaves the table" in episode:
+            raise self._PlayerLeavesDuringPotContribution
+
         hand_id = self.get_hand_id(episode)
         currency_symbol = self.get_currency_symbol(episode)
         winners, showdown_hands = self.get_winner(showdown)
@@ -321,6 +328,10 @@ class TxtParser(Parser):
                 # <'player posts small & big blinds'>. We skip these games
                 # because our env does not support them.
                 continue
+            except self._PlayerLeavesDuringPotContribution:
+                # Edge case that player leaves before rundown
+                continue
+
 
     def parse_file(self, file_path):
         # self._reset_metadata_counts()
