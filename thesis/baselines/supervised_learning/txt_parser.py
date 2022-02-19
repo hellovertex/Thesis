@@ -13,7 +13,7 @@ PLAYER_NAME_TEMPLATE = r'([\w_.@#!-]+\s?[-@#!_.\w]*\s?[-@#!_.\w]*)'
 STARTING_STACK_TEMPLATE = r'\(([$€￡Â£]+\d+.?\d*)\sin chips\)'
 MATCH_ANY = r'.*?'  # not the most efficient way, but we prefer readabiliy (parsing is one time job)
 POKER_CARD_TEMPLATE = r'[23456789TJQKAjqka][SCDHscdh]'
-CURRENCY_SYMBOLS = ['$', '€', '￡', 'Â£']  # only these are currently supported
+CURRENCY_SYMBOLS = ['$', '€', '￡', 'Â£']  # only these are currently supported, â‚¬ is € encoded
 
 
 # ---------------------------- PokerStars-Parser ---------------------------------
@@ -22,7 +22,7 @@ class TxtParser(Parser):
     """Reads .txt files with poker games crawled from Pokerstars.com and parses them to
     PokerEpisodes."""
 
-    class _InvalidPlayerName(ValueError):
+    class _InvalidPlayerNameError(ValueError):
         """We can encounter some weird player names like <'é=mc².Fin  é=mc³.Start'>
            We can parse unicode characters and very exotic names including those
            with multiple whitespaces but this name finally broke our nameparser
@@ -30,18 +30,23 @@ class TxtParser(Parser):
            additional efforts"""
         pass
 
-    class _InvalidGameType(ValueError):
+    class _InvalidGameTypeError(ValueError):
         """We can encounter games where not only small blind,
         big blind, and ante are posted, but that contain lines like
         <'player posts small & big blinds'>. We skip these games
         because our env does not support them."""
         pass
 
-    class _PlayerLeavesDuringPotContribution(ValueError):
+    class _PlayerLeavesDuringPotContributionError(ValueError):
         """Edge case that player leaves before rundown"""
 
     class _CurrencyNotSupportedError(ValueError):
         """We only parse EUR, USD, GBP games"""
+
+    class _Utf8NotSupportedError(ValueError):
+        """A _very_ small fraction of txt files encodes the €-sign as <â‚¬>.
+        Since it would be extra effort to adjust the parser accordingly, we skip these games."""
+        pass
 
     def __init__(self):
         # todo consider making TxtParser another abstract class and make derived PokerStars-Parser
@@ -173,7 +178,7 @@ class TxtParser(Parser):
         amounts = re.compile(rf'{STARTING_STACK_TEMPLATE}')
         stacks = pattern.findall(line)
         if not len(stacks) == len(amounts.findall(line)):
-            raise self._InvalidPlayerName(
+            raise self._InvalidPlayerNameError(
                 "This error is raised, when we encountered a very exotic player name "
                 "that cant be parsed by re.Unicode, like 'é=mc².Fin  é=mc³.Start' ")
         return pattern.findall(line)
@@ -188,7 +193,7 @@ class TxtParser(Parser):
         # pattern = re.compile(r"([a-zA-Z0-9]+): posts (small blind|big blind) ([$€]\d+.?\d*)")
 
         if "posts small & big blinds" in episode:
-            raise self._InvalidGameType
+            raise self._InvalidGameTypeError
 
         pattern = re.compile(
             rf"{PLAYER_NAME_TEMPLATE}: posts (small blind|big blind) ([$€]\d+.?\d*)", re.UNICODE)
@@ -267,7 +272,7 @@ class TxtParser(Parser):
         """UnderConstruction"""
         # edge case that player leaves before rundown should be skipped
         if "leaves the table" in episode:
-            raise self._PlayerLeavesDuringPotContribution
+            raise self._PlayerLeavesDuringPotContributionError
 
         hand_id = self.get_hand_id(episode)
         currency_symbol = self.get_currency_symbol(episode)
@@ -277,6 +282,8 @@ class TxtParser(Parser):
         ante = self.get_ante(currency_symbol, episode)
         btn = self.get_button(episode)
         player_stacks = [PlayerStack(*stack) for stack in self.get_player_stacks(episode)]
+        if not player_stacks:
+            raise self._Utf8NotSupportedError("utf8 encoded currency symbols are currently not supported")
         num_players = len(player_stacks)
         btn_idx = self.get_btn_idx(player_stacks, btn)
         board_cards = self.get_board_cards(episode)
@@ -316,25 +323,29 @@ class TxtParser(Parser):
 
             try:
                 yield self._parse_episode(current, showdown)
-            except self._InvalidPlayerName as e:
+            except self._InvalidPlayerNameError as e:
                 # todo log here
-                # if an AssertionError is thrown, we have encountered some weird player name like
+                # if an _InvalidPlayerNameError is thrown, we have encountered some weird player name like
                 #  é=mc².Fin  é=mc³.Start
                 # we can parse unicode characters and very exotic names including those
                 # with multiple whitespaces but this name finally broke our nameparser
                 # Hence we skip these _very_ rare cases where the name is unparsable without further efforts
                 continue
-            except self._InvalidGameType as e:
+            except self._InvalidGameTypeError as e:
                 # We can encounter games where not only small blind,
                 # big blind, and ante are posted, but that contain lines like
                 # <'player posts small & big blinds'>. We skip these games
                 # because our env does not support them.
                 continue
-            except self._PlayerLeavesDuringPotContribution:
+            except self._PlayerLeavesDuringPotContributionError:
                 # Edge case that player leaves before rundown
                 continue
             except self._CurrencyNotSupportedError:
                 # Only parse EUR, USD, GBP games
+                continue
+            except self._Utf8NotSupportedError:
+                # A _very_ small fraction of txt files encodes the €-sign as <â‚¬>.
+                # Since it would be extra effort to adjust the parser accordingly, we skip these games.
                 continue
 
     def parse_file(self, file_path):
