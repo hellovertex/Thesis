@@ -7,7 +7,9 @@ from core.parser import Parser, PokerEpisode, Action, ActionType, PlayerStack, B
 
 # REGEX templates
 # PLAYER_NAME_TEMPLATE = r'([a-zA-Z0-9_.@#!-]+\s?[-@#!_.a-zA-Z0-9]*)'
-PLAYER_NAME_TEMPLATE = r'([a-zA-Z0-9_.@#!-]+\s?[-@#!_.a-zA-Z0-9]*\s?[-@#!_.a-zA-Z0-9]*)'
+#PLAYER_NAME_TEMPLATE = r'([óa-zA-Z0-9_.@#!-]+\s?[-@#!_.a-zA-Z0-9ó]*\s?[-@#!_.a-zA-Z0-9ó]*)'
+# compile this with re.UNICODE to match any unicode char like é ó etc
+PLAYER_NAME_TEMPLATE = r'(\w+\s?\w*\s?\w*)'
 STARTING_STACK_TEMPLATE = r'\(([$€￡]\d+.?\d*)\sin chips\)'
 MATCH_ANY = r'.*?'  # not the most efficient way, but we prefer readabiliy (parsing is one time job)
 POKER_CARD_TEMPLATE = r'[23456789TJQKAjqka][SCDHscdh]'
@@ -61,9 +63,9 @@ class TxtParser(Parser):
     def get_winner(showdown: str) -> Tuple[List[PlayerWithCards], List[PlayerWithCards]]:
         """Return player name of player that won showdown."""
         re_showdown_hands = re.compile(
-            rf'Seat \d: {PLAYER_NAME_TEMPLATE}{MATCH_ANY} showed (\[{POKER_CARD_TEMPLATE} {POKER_CARD_TEMPLATE}])')
+            rf'Seat \d: {PLAYER_NAME_TEMPLATE}{MATCH_ANY} showed (\[{POKER_CARD_TEMPLATE} {POKER_CARD_TEMPLATE}])', re.UNICODE)
         re_winner = re.compile(
-            rf'Seat \d: {PLAYER_NAME_TEMPLATE}{MATCH_ANY} showed (\[{POKER_CARD_TEMPLATE} {POKER_CARD_TEMPLATE}]) and won')
+            rf'Seat \d: {PLAYER_NAME_TEMPLATE}{MATCH_ANY} showed (\[{POKER_CARD_TEMPLATE} {POKER_CARD_TEMPLATE}]) and won', re.UNICODE)
         showdown_hands = re_showdown_hands.findall(showdown)
         winners = re_winner.findall(showdown)
 
@@ -139,7 +141,7 @@ class TxtParser(Parser):
                           ('Seat 4', 'kjs609', '$200 ')]
         """
         # pattern = re.compile(rf"(Seat \d): {PLAYER_NAME_TEMPLATE}\s\(([$€]\d+.?\d*)\sin chips\)")
-        pattern = re.compile(rf"(Seat \d): {PLAYER_NAME_TEMPLATE}\s{STARTING_STACK_TEMPLATE}")
+        pattern = re.compile(rf"(Seat \d): {PLAYER_NAME_TEMPLATE}\s{STARTING_STACK_TEMPLATE}", re.UNICODE)
         amounts = re.compile(rf'{STARTING_STACK_TEMPLATE}')
         stacks = pattern.findall(line)
         assert len(stacks) == len(amounts.findall(line))
@@ -155,7 +157,7 @@ class TxtParser(Parser):
         """
         # pattern = re.compile(r"([a-zA-Z0-9]+): posts (small blind|big blind) ([$€]\d+.?\d*)")
         pattern = re.compile(
-            rf"{PLAYER_NAME_TEMPLATE}: posts (small blind|big blind) ([$€]\d+.?\d*)")
+            rf"{PLAYER_NAME_TEMPLATE}: posts (small blind|big blind) ([$€]\d+.?\d*)", re.UNICODE)
         return pattern.findall(episode)
 
     @staticmethod

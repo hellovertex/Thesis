@@ -192,6 +192,8 @@ class RLStateEncoder(Encoder):
         it = 0
         debug_action_list = []
         while not done:
+            if episode.hand_id == 233174710941:
+                debug = 1
             action = episode.actions_total['as_sequence'][it]
             action_formatted = self.build_action(action)
             # store up to two actions per player per stage
@@ -212,6 +214,7 @@ class RLStateEncoder(Encoder):
                         # actions.append((ActionType.FOLD.value, -1))  # replace action with FOLD for now
                     actions.append(action_label)
             debug_action_list.append(action_formatted)
+
             obs, _, done, _ = env.step(action_formatted)
             it += 1
         if not observations:
@@ -230,8 +233,8 @@ class RLStateEncoder(Encoder):
         # todo: pass env_cls as argument (N_BOARD_CARDS etc. gets accessible)
         self._init_wrapped_env(table, ante=episode.ante)
 
-        self._wrapped_env.SMALL_BLIND, self._wrapped_env.BIG_BLIND = self.make_blinds(episode.blinds, multiply_by=100)
-        self._wrapped_env.ANTE = self._make_ante(episode.ante)
+        self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = self.make_blinds(episode.blinds, multiply_by=100)
+        self._wrapped_env.env.ANTE = self._make_ante(episode.ante)
         cards_state_dict = self._build_cards_state_dict(table, episode)
 
         # Collect observations and actions, observations are possibly augmented
