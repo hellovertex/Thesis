@@ -108,7 +108,13 @@ class TxtParser(Parser):
         actions = []
         for maybe_action in possible_actions:
             if len(maybe_action) == 2:
-                action_type, raise_amount = TxtParser._get_action_type(maybe_action[1])
+                action_type = maybe_action[1]
+                # skip actions like 'Kaya1113 said, ":'(" which happens to have length 2 as well
+                is_valid = [a_type for a_type in ['folds', 'checks', 'calls', 'bets', 'raises'] if
+                            (a_type in action_type)]
+                if not is_valid:
+                    continue
+                action_type, raise_amount = TxtParser._get_action_type(action_type)
                 action = Action(player_name=maybe_action[0],
                                 action_type=action_type,
                                 raise_amount=raise_amount,
