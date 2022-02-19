@@ -35,6 +35,19 @@ class ActionHistory:
                 lambda: deque(maxlen=max_actions_per_player_per_stage),
                 keys=['preflop', 'flop', 'turn', 'river'])
 
+    def __str__(self):
+        representation = ""
+        for player_seat_id in range(self._max_players):
+            representation += f'--- Player {player_seat_id}:---\n' + \
+                              f'Actions preflop: {self.deque[player_seat_id]["preflop"]}\n' + \
+                              f'Actions flop: {self.deque[player_seat_id]["flop"]}\n' + \
+                              f'Actions turn: {self.deque[player_seat_id]["turn"]}\n' + \
+                              f'Actions river: {self.deque[player_seat_id]["river"]}\n'
+        return representation
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class ActionHistoryWrapper(WrapperPokerRL):
 
@@ -47,8 +60,10 @@ class ActionHistoryWrapper(WrapperPokerRL):
         self._player_hands = []
         self._rounds = ['preflop', 'flop', 'turn', 'river']
         self._actions_per_stage = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
-        self._actions_per_stage_discretized = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
         self._player_who_acted = None
+        # experimental
+        self._actions_per_stage_discretized = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
+
 
     # _______________________________ Overridden ________________________________
     def _before_step(self, action):
@@ -124,7 +139,7 @@ class AugmentObservationWrapper(ActionHistoryWrapper):
 
     def get_current_obs(self, env_obs):
         obs = self._vectorizer.vectorize(env_obs, self._player_who_acted, action_history=self._actions_per_stage,
-                                          player_hands=self._player_hands, normalization=self._normalization_sum)
+                                         player_hands=self._player_hands, normalization=self._normalization_sum)
         # self.print_augmented_obs(obs)
         return obs
 
