@@ -40,7 +40,7 @@ class CsvGenerator(Generator):
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        print(exc_type, exc_value, exc_traceback)
+        # print(exc_type, exc_value, exc_traceback)
         if self._write_azure:
             self._run.complete()
 
@@ -118,7 +118,7 @@ class CsvGenerator(Generator):
         # write to cloud
         if self._write_azure:
             self._write_to_azure(file_path)
-
+        
         df = pd.read_csv(file_path)
         print(f"Data created: and written to {file_path}, "
               f"metadata information is found at {file_path_metadata}")
