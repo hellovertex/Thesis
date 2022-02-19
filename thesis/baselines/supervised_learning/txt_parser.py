@@ -153,8 +153,7 @@ class TxtParser(Parser):
         button = ptn_button.findall(episode)[0][6]
         return int(button)  # 1-indexed
 
-    @staticmethod
-    def get_player_stacks(line: str):
+    def get_player_stacks(self, line: str):
         """Returns stacks for each player.
             Args:
                 :episode string representation of played episode as gotten from .txt files
@@ -168,7 +167,7 @@ class TxtParser(Parser):
         amounts = re.compile(rf'{STARTING_STACK_TEMPLATE}')
         stacks = pattern.findall(line)
         if not len(stacks) == len(amounts.findall(line)):
-            raise ValueError(
+            raise self._InvalidPlayerName(
                 "This error is raised, when we encountered a very exotic player name like 'é=mc².Fin  é=mc³.Start' ")
         return pattern.findall(line)
 
