@@ -7,7 +7,7 @@ from core.parser import Parser, PokerEpisode, Action, ActionType, PlayerStack, B
 
 # REGEX templates
 # PLAYER_NAME_TEMPLATE = r'([a-zA-Z0-9_.@#!-]+\s?[-@#!_.a-zA-Z0-9]*)'
-#PLAYER_NAME_TEMPLATE = r'([óa-zA-Z0-9_.@#!-]+\s?[-@#!_.a-zA-Z0-9ó]*\s?[-@#!_.a-zA-Z0-9ó]*)'
+# PLAYER_NAME_TEMPLATE = r'([óa-zA-Z0-9_.@#!-]+\s?[-@#!_.a-zA-Z0-9ó]*\s?[-@#!_.a-zA-Z0-9ó]*)'
 # compile this with re.UNICODE to match any unicode char like é ó etc
 PLAYER_NAME_TEMPLATE = r'([\w_.@#!-]+\s?[-@#!_.\w]*\s?[-@#!_.\w]*)'
 STARTING_STACK_TEMPLATE = r'\(([$€￡]\d+.?\d*)\sin chips\)'
@@ -21,6 +21,21 @@ CURRENCY_SYMBOLS = ['$', '€', '￡']  # only these are currently supported
 class TxtParser(Parser):
     """Reads .txt files with poker games crawled from Pokerstars.com and parses them to
     PokerEpisodes."""
+
+    class _InvalidPlayerName(ValueError):
+        """We can encounter some weird player names like <'é=mc².Fin  é=mc³.Start'>
+           We can parse unicode characters and very exotic names including those
+           with multiple whitespaces but this name finally broke our nameparser
+           Hence we skip these _very_ rare cases where the name is unparsable without
+           additional efforts"""
+        pass
+
+    class _InvalidGameType(ValueError):
+        """We can encounter games where not only small blind,
+        big blind, and ante are posted, but that contain lines like
+        <'player posts small & big blinds'>. We skip these games
+        because our env does not support them."""
+        pass
 
     def __init__(self):
         # todo consider making TxtParser another abstract class and make derived PokerStars-Parser
@@ -63,9 +78,11 @@ class TxtParser(Parser):
     def get_winner(showdown: str) -> Tuple[List[PlayerWithCards], List[PlayerWithCards]]:
         """Return player name of player that won showdown."""
         re_showdown_hands = re.compile(
-            rf'Seat \d: {PLAYER_NAME_TEMPLATE}{MATCH_ANY} showed (\[{POKER_CARD_TEMPLATE} {POKER_CARD_TEMPLATE}])', re.UNICODE)
+            rf'Seat \d: {PLAYER_NAME_TEMPLATE}{MATCH_ANY} showed (\[{POKER_CARD_TEMPLATE} {POKER_CARD_TEMPLATE}])',
+            re.UNICODE)
         re_winner = re.compile(
-            rf'Seat \d: {PLAYER_NAME_TEMPLATE}{MATCH_ANY} showed (\[{POKER_CARD_TEMPLATE} {POKER_CARD_TEMPLATE}]) and won', re.UNICODE)
+            rf'Seat \d: {PLAYER_NAME_TEMPLATE}{MATCH_ANY} showed (\[{POKER_CARD_TEMPLATE} {POKER_CARD_TEMPLATE}]) and won',
+            re.UNICODE)
         showdown_hands = re_showdown_hands.findall(showdown)
         winners = re_winner.findall(showdown)
 
@@ -150,11 +167,12 @@ class TxtParser(Parser):
         pattern = re.compile(rf"(Seat \d): {PLAYER_NAME_TEMPLATE}\s{STARTING_STACK_TEMPLATE}", re.UNICODE)
         amounts = re.compile(rf'{STARTING_STACK_TEMPLATE}')
         stacks = pattern.findall(line)
-        assert len(stacks) == len(amounts.findall(line))
+        if not len(stacks) == len(amounts.findall(line)):
+            raise ValueError(
+                "This error is raised, when we encountered a very exotic player name like 'é=mc².Fin  é=mc³.Start' ")
         return pattern.findall(line)
 
-    @staticmethod
-    def get_blinds(episode: str) -> List[Tuple[str]]:
+    def get_blinds(self, episode: str) -> List[Tuple[str]]:
         """Returns blinds for current hand.
         Args:
             :episode string representation of played episode as gotten from .txt files
@@ -162,6 +180,10 @@ class TxtParser(Parser):
             Example: [('HHnguyen15', 'small blind', '$1'), ('kjs609', 'big blind', '$2')]
         """
         # pattern = re.compile(r"([a-zA-Z0-9]+): posts (small blind|big blind) ([$€]\d+.?\d*)")
+
+        if "posts small & big blinds" in episode:
+            raise self._InvalidGameType
+
         pattern = re.compile(
             rf"{PLAYER_NAME_TEMPLATE}: posts (small blind|big blind) ([$€]\d+.?\d*)", re.UNICODE)
         return pattern.findall(episode)
@@ -285,13 +307,19 @@ class TxtParser(Parser):
 
             try:
                 yield self._parse_episode(current, showdown)
-            except AssertionError as e:
-                # todo log here,
+            except self._InvalidPlayerName as e:
+                # todo log here
                 # if an AssertionError is thrown, we have encountered some weird player name like
                 #  é=mc².Fin  é=mc³.Start
                 # we can parse unicode characters and very exotic names including those
                 # with multiple whitespaces but this name finally broke our nameparser
                 # Hence we skip these _very_ rare cases where the name is unparsable without further efforts
+                continue
+            except self._InvalidGameType as e:
+                # We can encounter games where not only small blind,
+                # big blind, and ante are posted, but that contain lines like
+                # <'player posts small & big blinds'>. We skip these games
+                # because our env does not support them.
                 continue
 
     def parse_file(self, file_path):
