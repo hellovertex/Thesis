@@ -48,6 +48,11 @@ class TxtParser(Parser):
         Since it would be extra effort to adjust the parser accordingly, we skip these games."""
         pass
 
+    class _NoSmallAndBigBlindGameTypeError(ValueError):
+        """Only games with a single small blind a single big blind are accepted.
+        Text files included games with multiple small blinds. Maybe a bug in their crawler.
+        We skip these games"""
+
     def __init__(self):
         # todo consider making TxtParser another abstract class and make derived PokerStars-Parser
         self._variant = None
@@ -196,8 +201,13 @@ class TxtParser(Parser):
             raise self._InvalidGameTypeError
 
         pattern = re.compile(
-            rf"{PLAYER_NAME_TEMPLATE}: posts (small blind|big blind) ([$€]\d+.?\d*)", re.UNICODE)
-        return pattern.findall(episode)
+            rf"{PLAYER_NAME_TEMPLATE}: posts (small blind|big blind) ([$€Â£￡]\d+.?\d*)", re.UNICODE)
+        blinds = pattern.findall(episode)
+
+        if not len(blinds) == 2:
+            raise self._NoSmallAndBigBlindGameTypeError(f"Given blinds are invalid: {blinds}")
+
+        return blinds
 
     @staticmethod
     def get_btn_idx(player_stacks: List[PlayerStack], btn_seat_num: int):
@@ -252,8 +262,9 @@ class TxtParser(Parser):
                 'as_sequence': as_sequence}
 
     def get_currency_symbol(self, episode: str):
+        header = episode.split("\n")[0]
         for sbl in CURRENCY_SYMBOLS:
-            if sbl in episode:
+            if sbl in header:
                 return sbl
         raise self._CurrencyNotSupportedError("Currency symbol not supported")
 
@@ -346,6 +357,11 @@ class TxtParser(Parser):
             except self._Utf8NotSupportedError:
                 # A _very_ small fraction of txt files encodes the €-sign as <â‚¬>.
                 # Since it would be extra effort to adjust the parser accordingly, we skip these games.
+                continue
+            except self._NoSmallAndBigBlindGameTypeError:
+                # Only games with a single small blind a single big blind are accepted.
+                # Text files included games with multiple small blinds. Maybe a bug in their crawler.
+                # We skip these games.
                 continue
 
     def parse_file(self, file_path):

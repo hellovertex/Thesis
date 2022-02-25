@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 import numpy as np
 from core.parser import PokerEpisode, Action, ActionType, Blind
 from core.encoder import Encoder
@@ -29,14 +29,28 @@ DICT_SUITE = {'': -127,
 
 
 class RLStateEncoder(Encoder):
-    Observations = List[List]
-    Actions_Taken = List[Tuple[int, int]]
+    Observations = Optional[List[List]]
+    Actions_Taken = Optional[List[Tuple[int, int]]]
 
     def __init__(self, env_wrapper_cls=None):
         self.env_wrapper_cls = env_wrapper_cls
         self._wrapped_env = None
         self._currency_symbol = None
         self._feature_names = None
+
+    class _EnvironmentEdgeCaseEncounteredError(ValueError):
+        """This error is thrown in rare cases where the PokerEnv written by Erich Steinberger,
+        fails due to edge cases. I filtered these edge cases by hand, and labelled them with the hand id.
+        """
+        edge_case_one = {216163387520: """Player 3 (UTG) folds
+                                Player 4 (MP) calls BB and is all-in
+                                Player 5 (CU) folds
+                                Player 0 (Button) folds
+                                Player 1 (SB) folds
+                                Player 2 (BB) - ENV is waiting for Player 2s action but the text file does not contain that action,
+                                because it is implictly given:
+                                BB can only check because the other player called the big blind and is all in anyway."""
+                         }
 
     @property
     def feature_names(self):
@@ -59,12 +73,13 @@ class RLStateEncoder(Encoder):
 
     def make_blinds(self, blinds: List[Blind], multiply_by: int = 100):
         """Under Construction."""
+        assert len(blinds) == 2
         sb = blinds[0]
         assert sb.type == 'small blind'
         bb = blinds[1]
         assert bb.type == 'big blind'
         return int(float(sb.amount.split(self._currency_symbol)[1]) * multiply_by), \
-               int(float(bb.amount.split(self._currency_symbol)[1])* multiply_by)
+               int(float(bb.amount.split(self._currency_symbol)[1]) * multiply_by)
 
     def make_board_cards(self, board_cards: str):
         """Return 5 cards that we can prepend to the card deck so that the board will be drawn.
@@ -175,13 +190,23 @@ class RLStateEncoder(Encoder):
         self._wrapped_env = self.env_wrapper_cls(env)
         # will be used for naming feature index in training data vector
         self._feature_names = list(self._wrapped_env.obs_idx_dict.keys())
+        return starting_stack_sizes_list
 
-    def _make_ante(self, ante:str, multiply_by=100) -> float:
+    def _make_ante(self, ante: str, multiply_by=100) -> float:
         """Converts ante string to float, e.g. '$0.00' -> float(0.00)"""
         return float(ante.split(self._currency_symbol)[1]) * multiply_by
 
-    def _simulate_environment(self, env, episode, cards_state_dict, table):
+    def _simulate_environment(self, env, episode, cards_state_dict, table, starting_stack_sizes_list):
         """Under Construction."""
+        #if episode.hand_id == 216163387520 or episode.hand_id == 214211025466:
+        for s in starting_stack_sizes_list:
+            if s == env.env.SMALL_BLIND or s == env.env.BIG_BLIND:
+                # skip edge case of player all in by calling big blind to avoid further instances
+                raise self._EnvironmentEdgeCaseEncounteredError("Edge case 1 encountered. See docstring for details.")
+
+        if episode.hand_id == 213304492236:
+            debug = 1
+
         state_dict = {'deck_state_dict': cards_state_dict, 'table': table}
         obs, _, done, _ = env.reset(config=state_dict)
 
@@ -192,8 +217,6 @@ class RLStateEncoder(Encoder):
         it = 0
         debug_action_list = []
         while not done:
-            # if episode.hand_id == 233174710941:
-            #     debug = 1
             action = episode.actions_total['as_sequence'][it]
             action_formatted = self.build_action(action)
             # store up to two actions per player per stage
@@ -231,14 +254,19 @@ class RLStateEncoder(Encoder):
 
         # Initialize environment for simulation of PokerEpisode
         # todo: pass env_cls as argument (N_BOARD_CARDS etc. gets accessible)
-        self._init_wrapped_env(table, ante=episode.ante)
+        starting_stack_sizes_list = self._init_wrapped_env(table, ante=episode.ante)
 
-        self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = self.make_blinds(episode.blinds, multiply_by=100)
+        self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = self.make_blinds(episode.blinds,
+                                                                                              multiply_by=100)
         self._wrapped_env.env.ANTE = self._make_ante(episode.ante)
         cards_state_dict = self._build_cards_state_dict(table, episode)
 
         # Collect observations and actions, observations are possibly augmented
-        return self._simulate_environment(env=self._wrapped_env,
-                                          episode=episode,
-                                          cards_state_dict=cards_state_dict,
-                                          table=table)
+        try:
+            return self._simulate_environment(env=self._wrapped_env,
+                                              episode=episode,
+                                              cards_state_dict=cards_state_dict,
+                                              table=table,
+                                              starting_stack_sizes_list=starting_stack_sizes_list)
+        except self._EnvironmentEdgeCaseEncounteredError:
+            return None, None

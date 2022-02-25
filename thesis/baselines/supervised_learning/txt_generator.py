@@ -21,7 +21,8 @@ class CsvGenerator(Generator):
                  parser: Parser,
                  encoder: Encoder,
                  out_filename: str,
-                 write_azure: bool):
+                 write_azure: bool,
+                 logfile="log.txt"):
         self._out_filename = out_filename
         self._out_dir = out_dir
         self._data_dir = data_dir
@@ -29,10 +30,17 @@ class CsvGenerator(Generator):
         self._encoder = encoder
         self._write_azure = write_azure
         self._experiment = None
+        self._logfile = logfile
+        self._n_files_written_this_run = 0
+        self._num_lines_written = 0
+
+        with open(self._data_dir + logfile, "r") as f:
+            self._n_files_already_encoded = len(f.readlines())
+            print(f'reinitializing with {self._n_files_already_encoded} files already encoded')
+
         if write_azure:
             self._experiment = Experiment(workspace=self.get_workspace(),
                                           name="supervised-baseline")
-        self._num_lines_written = 0
 
     def __enter__(self):
         if self._write_azure:
@@ -62,8 +70,8 @@ class CsvGenerator(Generator):
 
     def _write_metadata(self, file_dir):
         file_path_metadata = os.path.join(file_dir, f"{self._out_filename}.meta")
-        with open(file_path_metadata, "w") as file:
-            file.write(self._parser.metadata.__repr__())
+        with open(file_path_metadata, "a") as file:
+            file.write(self._parser.metadata.__repr__()+"\n")
         return file_path_metadata
 
     def _write_train_data(self, data, labels, out_subdir):
@@ -81,6 +89,11 @@ class CsvGenerator(Generator):
 
     def _write_to_azure(self, abs_filepath):
         self._run.upload_file(name="output.csv", path_or_stream=abs_filepath)
+
+    def _log_progress(self, abs_filepath):
+        with open(self._data_dir + self._logfile, "a") as f:
+            f.write(abs_filepath + "\n")
+        self._n_files_written_this_run += 1
 
     def generate_from_file(self, abs_filepath, out_subdir='0.25_0.50'):
         """Docstring"""
@@ -100,15 +113,17 @@ class CsvGenerator(Generator):
                     labels = np.concatenate((labels, actions), axis=0)
                 except Exception as e:
                     print(e)
+            self._num_lines_written += len(observations)
             print("Simulating environment", end='') if i == 0 else print('.', end='')
 
-        self._num_lines_written += i
         # some rare cases, where the file did not contain showdown plays
         if training_data is None:
             return None
-        print(f"\nExtracted {len(training_data)} training samples from {i + 1} poker hands"
-              f"in file {abs_filepath}...")
 
+        print(f"\nExtracted {len(training_data)} training samples from {i + 1} poker hands"
+              f"in file {self._n_files_written_this_run + self._n_files_already_encoded} {abs_filepath}...")
+
+        self._log_progress(abs_filepath)
         # write train data
         file_dir, file_path = self._write_train_data(training_data, labels, out_subdir=out_subdir)
 
@@ -118,8 +133,8 @@ class CsvGenerator(Generator):
         # write to cloud
         if self._write_azure:
             self._write_to_azure(file_path)
-        
-        df = pd.read_csv(file_path)
-        print(f"Data created: and written to {file_path}, "
-              f"metadata information is found at {file_path_metadata}")
-        print(df.head())
+
+        # df = pd.read_csv(file_path)
+        # print(f"Data created: and written to {file_path}, "
+        #       f"metadata information is found at {file_path_metadata}")
+        # print(df.head())
