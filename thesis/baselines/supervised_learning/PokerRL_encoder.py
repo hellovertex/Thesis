@@ -51,7 +51,12 @@ class RLStateEncoder(Encoder):
                                 because it is implictly given:
                                 BB can only check because the other player called the big blind and is all in anyway."""
                          }
+        edge_case_two = {213304492236: """Side Pots not split properly..."""}
 
+    class _EnvironmentDidNotTerminateInTimeError(IndexError):
+        """Edge cases we dont want to handle because we have enough training data already."""
+        # '../../../data/0.25-0.50/BulkHands-14686/unzipped/PokerStars-NoLimitHoldem-0.25-0.50-6Max-Regular-20200505- 1 (0)/Ilmari IV-0.25-0.50-USD-NoLimitHoldem-PokerStars-5-5-2020.txt'
+        # 213304492236
     @property
     def feature_names(self):
         return self._feature_names
@@ -198,12 +203,12 @@ class RLStateEncoder(Encoder):
 
     def _simulate_environment(self, env, episode, cards_state_dict, table, starting_stack_sizes_list):
         """Under Construction."""
-        #if episode.hand_id == 216163387520 or episode.hand_id == 214211025466:
+        # if episode.hand_id == 216163387520 or episode.hand_id == 214211025466:
         for s in starting_stack_sizes_list:
             if s == env.env.SMALL_BLIND or s == env.env.BIG_BLIND:
                 # skip edge case of player all in by calling big blind to avoid further instances
                 raise self._EnvironmentEdgeCaseEncounteredError("Edge case 1 encountered. See docstring for details.")
-
+        #
         if episode.hand_id == 213304492236:
             debug = 1
 
@@ -217,7 +222,11 @@ class RLStateEncoder(Encoder):
         it = 0
         debug_action_list = []
         while not done:
+            # try:
             action = episode.actions_total['as_sequence'][it]
+            # except IndexError:
+            #     raise self._EnvironmentDidNotTerminateInTimeError
+
             action_formatted = self.build_action(action)
             # store up to two actions per player per stage
             # self._actions_per_stage[action.player_name][action.stage].append(action_formatted)
@@ -237,9 +246,9 @@ class RLStateEncoder(Encoder):
                         # actions.append((ActionType.FOLD.value, -1))  # replace action with FOLD for now
                     actions.append(action_label)
             debug_action_list.append(action_formatted)
-
             obs, _, done, _ = env.step(action_formatted)
             it += 1
+
         if not observations:
             print(actions)
             raise RuntimeError("Seems we need more debugging")
@@ -269,4 +278,6 @@ class RLStateEncoder(Encoder):
                                               table=table,
                                               starting_stack_sizes_list=starting_stack_sizes_list)
         except self._EnvironmentEdgeCaseEncounteredError:
+            return None, None
+        except self._EnvironmentDidNotTerminateInTimeError:
             return None, None

@@ -232,15 +232,16 @@ class AugmentObservationWrapper(ActionHistoryWrapper):
         # _______________________________  Private Cards (i.e. players hands)  ______________________________
         # add to parts_dict for possible slicing for agents
         _handcards_space = []
-        _k = next_idx[0]
+
         for i in range(self.max_players):
+            _k = next_idx[0]
             for k in range(self.env.N_HOLE_CARDS):
                 x = []
                 for j in range(self.env.N_RANKS):  # .................................................... rank
                     x.append(get_discrete(1, str(i) + f"th_player_card_{k}_rank_" + str(j), next_idx))
 
                 for j in range(self.env.N_SUITS):  # .................................................... suit
-                    x.append(get_discrete(1, str(i) + f"th_board_card_{k}_suit_" + str(j), next_idx))
+                    x.append(get_discrete(1, str(i) + f"th_player_card_{k}_suit_" + str(j), next_idx))
 
                 _handcards_space += x
 
@@ -256,8 +257,9 @@ class AugmentObservationWrapper(ActionHistoryWrapper):
         # preflop_player_0_action_1_what_1
         # preflop_player_0_action_1_what_2
         _action_history_space = []
-        _k = next_idx[0]
+
         for i in range(len(self._rounds)):
+            _k = next_idx[0]
             for j in range(self.max_players):
                 for a in [0, 1]:
                     _action_history_space.append(

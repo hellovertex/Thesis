@@ -154,10 +154,12 @@ class CanonicalVectorizer(Vectorizer):
         except Exception as e:
             bits = np.zeros(self.num_players)
 
-        # move self to index 0
-        bits = np.roll(bits, -self._player_who_acted)
         # zero padding
         bits = np.resize(bits, self._max_players)
+
+        # move self to index 0
+        bits = np.roll(bits, -self._player_who_acted)
+
         # copy from original observation with zero padding
         self._obs[self._start_side_pots:self.offset] = bits
 
@@ -187,18 +189,18 @@ class CanonicalVectorizer(Vectorizer):
         # extract from original observation
         bits = np.array(obs[start_orig:end_orig])
         # zero padding
-
         bits_per_player = np.split(bits, self.num_players)
         bits_to_pad_in_between = np.zeros(self._max_players - self.num_players)
         padded_in_between = np.array([np.append(s, bits_to_pad_in_between) for s in bits_per_player])
+        padded_in_between = np.concatenate((padded_in_between, np.zeros((self._max_players - self.num_players, 10))))
         padded_in_between = np.hstack(padded_in_between)  # flattened
         # todo fix this
+        # padded_in_between = np.resize(padded_in_between, self._bits_player_stats)
         # move self to index 0
-        padded_in_between = np.roll(padded_in_between, -self._player_who_acted * self._bits_stats_per_player_original)
-        # zero padding for missing players
+        padded_in_between = np.roll(padded_in_between, -self._player_who_acted * self._bits_stats_per_player)
 
         # copy from original observation with zero padding
-        self._obs[self._start_player_stats:self.offset] = np.resize(padded_in_between, self._bits_player_stats)
+        self._obs[self._start_player_stats:self.offset] = padded_in_between
 
     def encode_board(self, obs):
         """Example:
@@ -326,7 +328,6 @@ class CanonicalVectorizer(Vectorizer):
         self._obs[self._start_player_hands:self.offset] = hand_bits
 
     def _vectorize_deque(self, dict_with_deque, normalization):
-
         vectorized = np.zeros(self._bits_action_history_one_player)
         if not 'preflop' in dict_with_deque.keys():
             # action history is yet empty
@@ -335,16 +336,20 @@ class CanonicalVectorizer(Vectorizer):
         for stage in dict_with_deque.keys():
             if stage == 'keys':
                 continue
+            j = 0  # todo offset by stage count
             for i, action in enumerate(dict_with_deque[stage]):
-                vectorized[action[0] + i * self._bits_per_action] = 1
-                vectorized[3 + i * self._bits_per_action] = action[1] / normalization
+                # set amount
+                vectorized[(j*48) + i * self._bits_per_action] = action[1] / normalization
+                # set action one hot
+                vectorized[(j*48) + action[0] + 1 + i * self._bits_per_action] = 1
+            j += 1
         return vectorized
 
     def encode_action_history(self, obs, normalization):
         """Example:"""
         self.offset += self._bits_action_history
         assert self.offset == self._obs_len
-        idxs = [i for i in range(self.num_players)]
+        idxs = [i for i in range(self._max_players)]
         # indices relative to self
         idxs = np.roll(idxs, -self._player_who_acted)
         bits = None
