@@ -51,12 +51,14 @@ class RLStateEncoder(Encoder):
                                 because it is implictly given:
                                 BB can only check because the other player called the big blind and is all in anyway."""
                          }
-        edge_case_two = {213304492236: """Side Pots not split properly..."""}
+        # fixed: edge_case_two = {213304492236: """Side Pots not split properly..."""}
 
     class _EnvironmentDidNotTerminateInTimeError(IndexError):
         """Edge cases we dont want to handle because we have enough training data already."""
-        # '../../../data/0.25-0.50/BulkHands-14686/unzipped/PokerStars-NoLimitHoldem-0.25-0.50-6Max-Regular-20200505- 1 (0)/Ilmari IV-0.25-0.50-USD-NoLimitHoldem-PokerStars-5-5-2020.txt'
-        # 213304492236
+        # '../../../data/0.25-0.50/BulkHands-14686/unzipped/PokerStars-NoLimitHoldem-0.25-0.50-6Max-Regular-20200505- 1 (0)/Parenago III-0.25-0.50-USD-NoLimitHoldem-PokerStars-5-5-2020.txt'
+        # 213347137341: Player Folded when he could have checked
+
+
     @property
     def feature_names(self):
         return self._feature_names
@@ -209,8 +211,8 @@ class RLStateEncoder(Encoder):
                 # skip edge case of player all in by calling big blind to avoid further instances
                 raise self._EnvironmentEdgeCaseEncounteredError("Edge case 1 encountered. See docstring for details.")
         #
-        if episode.hand_id == 213304492236:
-            debug = 1
+        #if episode.hand_id == 213304492236:
+        #    debug = 1
 
         state_dict = {'deck_state_dict': cards_state_dict, 'table': table}
         obs, _, done, _ = env.reset(config=state_dict)
@@ -222,10 +224,10 @@ class RLStateEncoder(Encoder):
         it = 0
         debug_action_list = []
         while not done:
-            # try:
-            action = episode.actions_total['as_sequence'][it]
-            # except IndexError:
-            #     raise self._EnvironmentDidNotTerminateInTimeError
+            try:
+                action = episode.actions_total['as_sequence'][it]
+            except IndexError:
+                raise self._EnvironmentDidNotTerminateInTimeError
 
             action_formatted = self.build_action(action)
             # store up to two actions per player per stage

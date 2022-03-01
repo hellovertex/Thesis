@@ -77,7 +77,7 @@ class CsvGenerator(Generator):
     def _write_train_data(self, data, labels, out_subdir):
         file_dir = os.path.join(self._out_dir, out_subdir)
         # create new file every 100k lines
-        file_name = self._out_filename + '_' + str(int(self._num_lines_written / 100000))
+        file_name = self._out_filename + '_' + str(int(self._num_lines_written / 50000))
         file_path = os.path.join(file_dir, file_name)
         if not os.path.exists(file_path):
             os.makedirs(os.path.realpath(file_dir), exist_ok=True)
