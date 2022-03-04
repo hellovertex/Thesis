@@ -208,7 +208,7 @@ class RLStateEncoder(Encoder):
         # if episode.hand_id == 216163387520 or episode.hand_id == 214211025466:
         for s in starting_stack_sizes_list:
             if s == env.env.SMALL_BLIND or s == env.env.BIG_BLIND:
-                # skip edge case of player all in by calling big blind to avoid further instances
+                # skip edge case of player all in by calling big blind
                 raise self._EnvironmentEdgeCaseEncounteredError("Edge case 1 encountered. See docstring for details.")
         #
         #if episode.hand_id == 213304492236:
