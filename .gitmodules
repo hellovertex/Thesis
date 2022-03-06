@@ -1,3 +1,6 @@
 [submodule "PokerRL"]
 	path = thesis/PokerEnv
 	url = https://github.com/hellovertex/PokerRL
+[submodule "thesis/ui/PyPokerGUI"]
+	path = thesis/ui/PyPokerGUI
+	url = https://github.com/hellovertex/PyPokerGUI
