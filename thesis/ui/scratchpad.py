@@ -5,16 +5,17 @@ IMAGES_FOLDER = "/home/cawa/Documents/github.com/hellovertex/Thesis/thesis/ui/im
 CARDS_FOLDER = IMAGES_FOLDER + "/cards"
 TABLE_TOP = os.path.join(IMAGES_FOLDER, "TABLE_TOP.png")
 TABLE = os.path.join(IMAGES_FOLDER, "TABLE.png")
-WIDTH, HEIGHT = 1200, 850
+WIDTH, HEIGHT = 1600, 900
 size = (WIDTH, HEIGHT)
 
 WIN = pygame.display.set_mode(size=size)
 BG = pygame.transform.scale(surface=pygame.image.load(TABLE_TOP),
                             size=size)
 TBL = pygame.transform.scale(surface=pygame.image.load(TABLE),
-                             size=size)
+                             size=(1200,850))
 
 pygame.display.set_caption("Poker UI")
+pygame.font.init()
 icon = pygame.image.load(os.path.join(IMAGES_FOLDER, "CARD.png"))
 pygame.display.set_icon(icon)
 
@@ -74,23 +75,13 @@ CARDS = {
   'CJ': 'card_CJ.png',
   'DJ': 'card_DJ.png'
 }
-COLORS = {"white": (255, 255, 255)}
-
-# Font
-font_obj = pygame.font.Font('freesansbold.ttf', 32)
-text_surface_obj = font_obj.render('Hello World!', True)
-text_rect_obj = text_surface_obj.get_rect()
-text_rect_obj.center = (200, 150)
+COLORS = {"white": (255, 255, 255),
+          "blue": (0, 0, 180),
+          "black": (0, 0, 0),
+          "bg": (40, 50, 45)}
 
 # Cursor
 pygame.mouse.set_cursor(*pygame.cursors.tri_left)
-
-flop_list = []
-
-
-def flop():
-  global flop_list
-  flop_list = [CARDS['S8'], CARDS['HQ'], CARDS['DK']]
 
 
 class CARD:
@@ -116,25 +107,66 @@ class CARD:
       pass
 
 
+def draw_player_names(names, window, seats=None):
+  names = ['John Wayne',
+           "John Travolta",
+           "Mark Twain",
+           "Shanaia Twain",
+           "Christina Aguilera",
+           "Roxanne Truth"]
+  toprights = [(500,240), (870, 240)]
+
+  pl_1_sfc = pygame.font.Font('freesansbold.ttf', 24).render(names[0], True, COLORS["bg"])
+  pl_rct = pl_1_sfc.get_rect()
+  pl_rct.topright = (500,240)
+  window.blit(pl_1_sfc, pl_rct)
+
+  pl_2_sfc = pygame.font.Font('freesansbold.ttf', 24).render(names[1], True, COLORS["bg"])
+  pl_rct = pl_2_sfc.get_rect()
+  pl_rct.topright = (870, 240)
+  window.blit(pl_2_sfc, pl_rct)
+
+  pl_3_sfc = pygame.font.Font('freesansbold.ttf', 24).render(names[3], True, COLORS["bg"])
+  pl_rct = pl_3_sfc.get_rect()
+  pl_rct.topright = (1100, 470)
+  window.blit(pl_3_sfc, pl_rct)
+  # for i, name in enumerate(names):
+  #   centers = [(200, 200),
+  #                 (400, 200),
+  #                 (800, 400),
+  #                 (400, 800),
+  #                 (200, 800),
+  #                 (100, 400)]
+  #   pl_sfc = pygame.font.Font(
+  #     'freesansbold.ttf', 32).render(name, True, COLORS["bg"])
+  #   pl_rct = pl_sfc.get_rect()
+  #   pl_rct.center = centers[i]
+  #   window.blit(pl_sfc, pl_rct)
+
+
 def draw_card_backs(window):
+  first_row = 100
+  second_row = 330
+  third_row = 610
   # SEAT 0
-  CARD("XX", x=350, y=100).draw(WIN)
-  CARD("XX", x=420, y=100).draw(WIN)
+  CARD("XX", x=350, y=first_row).draw(WIN)
+  CARD("XX", x=420, y=first_row).draw(WIN)
   # SEAT 1
-  CARD("XX", x=720, y=100).draw(WIN)
-  CARD("XX", x=790, y=100).draw(WIN)
+  CARD("XX", x=720, y=first_row).draw(WIN)
+  CARD("XX", x=790, y=first_row).draw(WIN)
   # SEAT 2
-  CARD("XX", x=930, y=330).draw(WIN)
-  CARD("XX", x=1000, y=330).draw(WIN)
+  CARD("XX", x=930, y=second_row).draw(WIN)
+  CARD("XX", x=1000, y=second_row).draw(WIN)
   # SEAT 3
-  CARD("XX", x=720, y=610).draw(WIN)
-  CARD("XX", x=790, y=610).draw(WIN)
+  CARD("XX", x=720, y=third_row).draw(WIN)
+  CARD("XX", x=790, y=third_row).draw(WIN)
   # SEAT 4
-  CARD("XX", x=350, y=610).draw(WIN)
-  CARD("XX", x=420, y=610).draw(WIN)
+  CARD("XX", x=350, y=third_row).draw(WIN)
+  CARD("XX", x=420, y=third_row).draw(WIN)
   # SEAT 5
-  CARD("XX", x=90, y=330).draw(WIN)
-  CARD("XX", x=160, y=330).draw(WIN)
+  CARD("XX", x=90, y=second_row).draw(WIN)
+  CARD("XX", x=160, y=second_row).draw(WIN)
+
 
 def draw_board(cards, window):
   CARD("HJ", x=340, y=300).draw(WIN)
@@ -143,22 +175,19 @@ def draw_board(cards, window):
   CARD("DQ", x=640, y=300).draw(WIN)
   CARD("DK", x=740, y=300).draw(WIN)
 
+
 def main():
   run = True
-  FPS = 30
+  FPS = 5
   clock = pygame.time.Clock()
+
 
   def redraw():
     # WIN.blit(BG, (0, 0))
     WIN.blit(TBL, (0, 0))
-    WIN.blit(text_surface_obj, text_rect_obj)
     draw_card_backs(WIN)
+    draw_player_names([], WIN)
     draw_board(cards=[], window=WIN)
-    # CARD("HQ", x=300, y=100).draw(WIN)
-    # CARD("DK", x=400, y=100).draw(WIN)
-    # CARD("XX", x=700, y=100).draw(WIN)
-    # CARD("XX", x=770, y=100).draw(WIN)
-    flop()
     pygame.display.update()
 
   while run:
