@@ -3,6 +3,14 @@ import pygame
 
 IMAGES_FOLDER = "/home/cawa/Documents/github.com/hellovertex/Thesis/thesis/ui/img"
 CARDS_FOLDER = IMAGES_FOLDER + "/cards"
+TABLE_TOP = os.path.join(IMAGES_FOLDER, "TABLE_TOP.png")
+WIDTH, HEIGHT = 1200, 850
+size = WIDTH, HEIGHT
+
+WIN = pygame.display.set_mode(size=size)
+BG = pygame.transform.scale(surface=pygame.image.load(TABLE_TOP),
+                            size=size)
+
 pygame.display.set_caption("Poker UI")
 icon = pygame.image.load(os.path.join(IMAGES_FOLDER, "CARD.png"))
 
@@ -62,4 +70,25 @@ CARDS = {
   'DJ': 'card_DJ.png'
 }
 COLORS = {"white": (255, 255, 255)}
-print(len(CARDS))
+
+
+def main():
+  run = True
+  FPS = 30
+  clock = pygame.time.Clock()
+
+  def redraw():
+    pass
+
+  while run:
+    clock.tick(FPS)
+    redraw()
+
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:
+        run = False
+
+
+if __name__ == '__main__':
+  main()
+ 
