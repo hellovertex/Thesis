@@ -56,6 +56,7 @@ implement pypoker.PokerObservation.last_moves()
 
 
 [TODOS]
+03-10: set up supervised learning pipeline using text data and make sure it is checkpointed regularly
 02-16: docker image: steps:
  - 1. clone repo
  - 2. pip install requests
@@ -153,3 +154,5 @@ equity rollouts wie oft gewinnen sie den pot
 erstmal genug haende kaufen, teuer warten auf geld
 
 [[2022-19-01]]
+
+[DONE]

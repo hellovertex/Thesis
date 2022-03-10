@@ -1,12 +1,12 @@
 from txt_generator import CsvGenerator
 from txt_parser import TxtParser
-from PokerRL_encoder import RLStateEncoder
-from PokerRL_wrapper import AugmentObservationWrapper
+from baselines.supervised_learning.data.PokerRL_encoder import RLStateEncoder
+from baselines.supervised_learning.data.PokerRL_wrapper import AugmentObservationWrapper
 import os
 import glob
 import pathlib
 
-DATA_DIR = '../../../data/'
+DATA_DIR = '../../../../data/'
 
 
 def main(filenames: list):

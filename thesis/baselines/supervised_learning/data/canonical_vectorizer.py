@@ -1,4 +1,4 @@
-from core.vectorizer import Vectorizer
+from baselines.supervised_learning.data.core import Vectorizer
 from PokerRL.game.Poker import Poker
 import numpy as np
 

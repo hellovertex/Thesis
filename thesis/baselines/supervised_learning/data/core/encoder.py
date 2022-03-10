@@ -1,7 +1,7 @@
 """Module to consume from Parser classes. Encoders will make observations from PokerEpisodes."""
 import enum
 from typing import NamedTuple
-from core.parser import PokerEpisode
+from .parser import PokerEpisode
 
 
 class Positions6Max(enum.IntEnum):

@@ -1,15 +1,13 @@
 import os
-import sys
 
 import numpy as np
 import pandas as pd
 from azureml.core import Experiment
 from azureml.core import Workspace
 
-from core.encoder import Encoder
-from core.generator import Generator
-from core.parser import Parser
-from contextlib import contextmanager
+from baselines.supervised_learning.data.core import Encoder
+from baselines.supervised_learning.data.core import Generator
+from baselines.supervised_learning.data.core import Parser
 
 
 class CsvGenerator(Generator):
