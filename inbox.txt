@@ -56,6 +56,7 @@ implement pypoker.PokerObservation.last_moves()
 
 
 [TODOS]
+(!) 03-10: REWRITE txt_generator.py
 03-10: set up supervised learning pipeline using text data and make sure it is checkpointed regularly
 02-16: docker image: steps:
  - 1. clone repo
@@ -72,20 +73,7 @@ implement pypoker.PokerObservation.last_moves()
 02-07: reward as fraction of starting stack (blinds small negativ and lost all in is -1)
 02-06: write environment wrapper with augmented observation
 02-06: write environment wrapper with seer mode for RL with openboard
-02-06: 2. Implement Observation augmentation
-02-06: 1. Implement build_action [x]
-02-07: also get observation and action for showdown [x]
-[[24-01 Replace equity calculator inside neuron_poker package]]
- - postponed and set to [Optional], didnt find a full ring equity calculator
-[[24-01 Obtain Baselines]]
-- 1. 0.5/0.6 equity agents
-- 2. Dont use Nash Equilibrium agent as this will not contribute to exploitability
-- 3. Implement TA/LA, TP/LP
-[[24-01 Environment features]]
-- dynamic number of betting rounds [hold incrementing stage index]
-- SEER mode
-- [-] Specify Texas Hold Em No-Limit vs Poker taxonomy in docstrings
-- [-] 
+
 
 [[Misc]]
 - 02-17: policy parameterization by pretraining -> prior knowledge
@@ -156,3 +144,15 @@ erstmal genug haende kaufen, teuer warten auf geld
 [[2022-19-01]]
 
 [DONE]
+02-06: 2. Implement Observation augmentation
+02-06: 1. Implement build_action [x]
+02-07: also get observation and action for showdown [x]
+01-24: Replace equity calculator inside neuron_poker package
+- postponed and set to [Optional], didnt find a full ring equity calculator
+01-24: Obtain Baselines
+- 1. 0.5/0.6 equity agents
+- 2. Dont use Nash Equilibrium agent as this will not contribute to exploitability
+- 3. Implement TA/LA, TP/LP
+24-01 Environment features
+- dynamic number of betting rounds [hold incrementing stage index]
+- SEER mode
