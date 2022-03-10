@@ -1,11 +1,12 @@
-from collections import defaultdict, deque
-from baselines.supervised_learning.data.core import Positions6Max
-from baselines.supervised_learning.data.core import WrapperPokerRL
-from baselines.supervised_learning.data.canonical_vectorizer import CanonicalVectorizer
-from PokerRL.game.Poker import Poker
 import enum
 import numpy as np
 from gym import spaces
+from collections import defaultdict, deque
+from PokerRL.game.Poker import Poker
+
+from thesis.baselines.supervised_learning.data.core.encoder import Positions6Max
+from thesis.baselines.supervised_learning.data.core.wrapper import WrapperPokerRL
+from thesis.baselines.supervised_learning.data.canonical_vectorizer import CanonicalVectorizer
 
 
 class ActionSpace(enum.IntEnum):

@@ -1,6 +1,7 @@
-from baselines.supervised_learning.data.core import Vectorizer
-from PokerRL.game.Poker import Poker
 import numpy as np
+from PokerRL.game.Poker import Poker
+
+from thesis.baselines.supervised_learning.data.core.vectorizer import Vectorizer
 
 
 class CanonicalVectorizer(Vectorizer):

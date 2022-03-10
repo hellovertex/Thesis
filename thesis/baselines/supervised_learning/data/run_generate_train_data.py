@@ -28,7 +28,7 @@ def main(filenames: list):
             #       f"{filename}")
             skip_file = False
             # skip already encoded files
-            with open(DATA_DIR + logfile, "r") as f:
+            with open(DATA_DIR + logfile, "a+") as f:
                 files_written = f.readlines().__reversed__()
                 for fw in files_written:
                     if filename in fw:

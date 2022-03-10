@@ -3,7 +3,8 @@
  - parse them to create corresponding environment states. """
 from typing import List, Tuple, Dict
 import re
-from baselines.supervised_learning.data.core import Parser, PokerEpisode, Action, ActionType, PlayerStack, Blind, PlayerWithCards
+from thesis.baselines.supervised_learning.data.core.parser import Parser, \
+    PokerEpisode, Action, ActionType, PlayerStack, Blind, PlayerWithCards
 
 # REGEX templates
 # PLAYER_NAME_TEMPLATE = r'([a-zA-Z0-9_.@#!-]+\s?[-@#!_.a-zA-Z0-9]*)'
@@ -28,14 +29,12 @@ class TxtParser(Parser):
            with multiple whitespaces but this name finally broke our nameparser
            Hence we skip these _very_ rare cases where the name is unparsable without
            additional efforts"""
-        pass
 
     class _InvalidGameTypeError(ValueError):
         """We can encounter games where not only small blind,
         big blind, and ante are posted, but that contain lines like
         <'player posts small & big blinds'>. We skip these games
         because our env does not support them."""
-        pass
 
     class _PlayerLeavesDuringPotContributionError(ValueError):
         """Edge case that player leaves before rundown"""
@@ -46,7 +45,6 @@ class TxtParser(Parser):
     class _Utf8NotSupportedError(ValueError):
         """A _very_ small fraction of txt files encodes the €-sign as <â‚¬>.
         Since it would be extra effort to adjust the parser accordingly, we skip these games."""
-        pass
 
     class _NoSmallAndBigBlindGameTypeError(ValueError):
         """Only games with a single small blind a single big blind are accepted.
@@ -268,16 +266,15 @@ class TxtParser(Parser):
                 return sbl
         raise self._CurrencyNotSupportedError("Currency symbol not supported")
 
-    def get_ante(self, currency_symbol: str, episode: str):
-        ante = 0.0
+    @staticmethod
+    def get_ante(currency_symbol: str, episode: str):
         pattern = re.compile(r'.*? posts the ante ([$€￡]\d+.?\d*)\n')
         res_ante = pattern.findall(episode)
         if res_ante:
             # every player posts the same ante
             assert res_ante[0] == res_ante[-1], "First and last player posted different amount of ante"
             return res_ante[0]
-        else:
-            return currency_symbol + '0.00'
+        return currency_symbol + '0.00'
 
     def _parse_episode(self, episode: str, showdown: str):
         """UnderConstruction"""

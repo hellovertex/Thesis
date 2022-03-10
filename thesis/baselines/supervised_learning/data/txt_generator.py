@@ -5,9 +5,9 @@ import pandas as pd
 from azureml.core import Experiment
 from azureml.core import Workspace
 
-from baselines.supervised_learning.data.core import Encoder
-from baselines.supervised_learning.data.core import Generator
-from baselines.supervised_learning.data.core import Parser
+from thesis.baselines.supervised_learning.data.core.encoder import Encoder
+from thesis.baselines.supervised_learning.data.core.generator import Generator
+from thesis.baselines.supervised_learning.data.core.parser import Parser
 
 
 class CsvGenerator(Generator):
@@ -32,7 +32,7 @@ class CsvGenerator(Generator):
         self._n_files_written_this_run = 0
         self._num_lines_written = 0
 
-        with open(self._data_dir + logfile, "r") as f:
+        with open(self._data_dir + logfile, "a+") as f:
             self._n_files_already_encoded = len(f.readlines())
             print(f'reinitializing with {self._n_files_already_encoded} files already encoded')
 
@@ -77,11 +77,13 @@ class CsvGenerator(Generator):
         # create new file every 100k lines
         file_name = self._out_filename + '_' + str(int(self._num_lines_written / 50000))
         file_path = os.path.join(file_dir, file_name)
+        columns = None
         if not os.path.exists(file_path):
             os.makedirs(os.path.realpath(file_dir), exist_ok=True)
+            columns = self._encoder.feature_names
         pd.DataFrame(data=data,
                      index=labels,
-                     columns=self._encoder.feature_names).to_csv(
+                     columns=columns).to_csv(
             file_path, index_label='label', mode='a')
         return file_dir, file_path
 
@@ -115,24 +117,22 @@ class CsvGenerator(Generator):
             print("Simulating environment", end='') if i == 0 else print('.', end='')
 
         # some rare cases, where the file did not contain showdown plays
-        if training_data is None:
-            return None
+        if training_data is not None:
+            print(f"\nExtracted {len(training_data)} training samples from {i + 1} poker hands"
+                  f"in file {self._n_files_written_this_run + self._n_files_already_encoded} {abs_filepath}...")
 
-        print(f"\nExtracted {len(training_data)} training samples from {i + 1} poker hands"
-              f"in file {self._n_files_written_this_run + self._n_files_already_encoded} {abs_filepath}...")
+            self._log_progress(abs_filepath)
+            # write train data
+            file_dir, file_path = self._write_train_data(training_data, labels, out_subdir=out_subdir)
 
-        self._log_progress(abs_filepath)
-        # write train data
-        file_dir, file_path = self._write_train_data(training_data, labels, out_subdir=out_subdir)
+            # write meta data
+            file_path_metadata = self._write_metadata(file_dir=file_dir)
 
-        # write meta data
-        file_path_metadata = self._write_metadata(file_dir=file_dir)
+            # write to cloud
+            if self._write_azure:
+                self._write_to_azure(file_path)
 
-        # write to cloud
-        if self._write_azure:
-            self._write_to_azure(file_path)
-
-        # df = pd.read_csv(file_path)
-        # print(f"Data created: and written to {file_path}, "
-        #       f"metadata information is found at {file_path_metadata}")
-        # print(df.head())
+            # df = pd.read_csv(file_path)
+            # print(f"Data created: and written to {file_path}, "
+            #       f"metadata information is found at {file_path_metadata}")
+            # print(df.head())
