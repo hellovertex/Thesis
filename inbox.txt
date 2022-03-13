@@ -56,6 +56,11 @@ implement pypoker.PokerObservation.last_moves()
 
 
 [TODOS]
+03-13: implement multiple file dataset, dataloader
+03-13: implement model and train script
+03-13: implement mlflow support
+03-13: implement azure ml integration
+03-13: launch training locally and inside
 (!) 03-10: REWRITE txt_generator.py
 03-10: set up supervised learning pipeline using text data and make sure it is checkpointed regularly
 02-16: docker image: steps:
