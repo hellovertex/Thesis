@@ -56,8 +56,8 @@ implement pypoker.PokerObservation.last_moves()
 
 
 [TODOS]
-03-13: implement multiple file dataset, dataloader
-03-13: implement model and train script
+03-13: implement multiple file dataset, dataloader [x]
+03-13: implement model and train script            [x]
 03-13: implement mlflow support
 03-13: implement azure ml integration
 03-13: launch training locally and inside

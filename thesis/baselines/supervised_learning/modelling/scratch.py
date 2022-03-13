@@ -4,6 +4,8 @@ import argparse
 from functools import partial
 from os import listdir, mkdir
 from os.path import isfile, join, abspath, basename, exists
+
+import psutil
 from torch.utils.data import ConcatDataset, DataLoader
 from typing import Tuple
 
@@ -12,6 +14,7 @@ import pandas as pd
 import torch
 
 DATA_DIR = '../../../../data/'
+BATCH_SIZE = 64
 
 
 class SingleTxtFileDataset(torch.utils.data.Dataset):
@@ -74,29 +77,56 @@ if __name__ == "__main__":
     if args.train_dir is None:
         train_dir = DATA_DIR + 'train_data/0.25_0.50/preprocessed'
 
-    # # write to disk [args.preprocessed_dir]
-    # preprocessed_dir = args.preprocessed_dir
-    # if preprocessed_dir is None:
-    #     preprocessed_dir = DATA_DIR + 'train_data/0.25_0.50/preprocessed/'
-
     # get list of .txt-files inside train_dir
     train_dir_files = [join(train_dir, f) for f in listdir(train_dir) if isfile(join(train_dir, f))]
 
     # by convention, any .txt files inside this folder
     # that do not have .meta in their name, contain training data
-    train_files = [abspath(f) for f in train_dir_files if ".meta" not in f]
+    train_dir_files = [abspath(f) for f in train_dir_files if ".meta" not in f]
 
     print(train_dir_files)
-    print(train_files)
+    print(f'{len(train_dir_files)} train files loaded')
 
-    list_of_datasets = [SingleTxtFileDataset(train_file) for train_file in train_files]
-    multiple_file_dataset = ConcatDataset(list_of_datasets)
-    loader = DataLoader(dataset=multiple_file_dataset, batch_size=1)
-    print(len(list_of_datasets))
-    print(len(multiple_file_dataset))
-    for batch_ndx, sample in enumerate(loader):
-        print('batch_ndx:', batch_ndx, 'sample:', sample)
-        break
+    # splits
+    total_count = len(train_dir_files)
+    train_count = int(0.7 * total_count)
+    valid_count = int(0.2 * total_count)
+    test_count = total_count - train_count - valid_count
+
+    # splits filepaths
+    train_files = train_dir_files[:train_count]
+    valid_files = train_dir_files[train_count:train_count + valid_count]
+    test_files = train_dir_files[-test_count:]
+
+    # splits datasets
+    train_dataset = ConcatDataset(
+        [SingleTxtFileDataset(train_file) for train_file in train_files])
+    valid_dataset = ConcatDataset(
+        [SingleTxtFileDataset(train_file) for train_file in valid_files])
+    test_dataset = ConcatDataset(
+        [SingleTxtFileDataset(train_file) for train_file in test_files])
+
+    print(f'Number of files loaded = {len(train_files) + len(test_files) + len(valid_files)}')
+    print(f'For a total number of {len(test_dataset) + len(train_dataset) + len(valid_dataset)} examples')
+
+    train_dataset_loader = torch.utils.data.DataLoader(
+        train_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=psutil.cpu_count(logical=False)
+    )
+    # valid_dataset_loader = torch.utils.data.DataLoader(
+    #     valid_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=psutil.cpu_count(logical=False)
+    # )
+    # test_dataset_loader = torch.utils.data.DataLoader(
+    #     test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=psutil.cpu_count(logical=False)
+    # )
+    # dataloaders = {
+    #     "train": train_dataset_loader,
+    #     "val": valid_dataset_loader,
+    #     "test": test_dataset_loader,
+    # }
+
+    for batch_ndx, (data, labels) in enumerate(train_dataset_loader):
+        print('batch_ndx:', batch_ndx, 'sample:', (data, labels))
+
 
     # def one_time_fix():
     #     for file_path in train_files:
