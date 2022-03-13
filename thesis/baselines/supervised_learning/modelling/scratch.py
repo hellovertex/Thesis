@@ -13,6 +13,8 @@ import numpy as np
 import pandas as pd
 import torch
 
+import train
+
 DATA_DIR = '../../../../data/'
 BATCH_SIZE = 64
 
@@ -62,21 +64,13 @@ class SingleTxtFileDataset(torch.utils.data.Dataset):
         return self._len
 
 
-if __name__ == "__main__":
-    argparser = argparse.ArgumentParser(
-        description="Provide model pipeline with necessary arguments: "
-                    "- path to training data "
-                    "-whatever else comes to my mind later")
-    argparser.add_argument('-t', '--train_dir',
-                           help='abs or rel path to .txt files with raw training samples.')
-    argparser.add_argument('-p', '--preprocessed_dir',
-                           help='abs or rel path to .txt files with preprocessed training samples.')
-
-    args, _ = argparser.parse_known_args()
-    train_dir = args.train_dir
-    if args.train_dir is None:
-        train_dir = DATA_DIR + 'train_data/0.25_0.50/preprocessed'
-
+def get_dataloaders(train_dir):
+    """Makes torch dataloaders by reading training directory files.
+    1: Load training data files
+    2: Create train, val, test splits
+    3: Make datasets for each split
+    4: Return dataloaders for each dataset
+    """
     # get list of .txt-files inside train_dir
     train_dir_files = [join(train_dir, f) for f in listdir(train_dir) if isfile(join(train_dir, f))]
 
@@ -112,35 +106,50 @@ if __name__ == "__main__":
     train_dataset_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=psutil.cpu_count(logical=False)
     )
-    # valid_dataset_loader = torch.utils.data.DataLoader(
-    #     valid_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=psutil.cpu_count(logical=False)
-    # )
-    # test_dataset_loader = torch.utils.data.DataLoader(
-    #     test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=psutil.cpu_count(logical=False)
-    # )
-    # dataloaders = {
-    #     "train": train_dataset_loader,
-    #     "val": valid_dataset_loader,
-    #     "test": test_dataset_loader,
-    # }
+    valid_dataset_loader = torch.utils.data.DataLoader(
+        valid_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=psutil.cpu_count(logical=False)
+    )
+    test_dataset_loader = torch.utils.data.DataLoader(
+        test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=psutil.cpu_count(logical=False)
+    )
+    dataloaders = {
+        "train": train_dataset_loader,
+        "val": valid_dataset_loader,
+        "test": test_dataset_loader,
+    }
 
-    for batch_ndx, (data, labels) in enumerate(train_dataset_loader):
-        print('batch_ndx:', batch_ndx, 'sample:', (data, labels))
+    return dataloaders
 
 
-    # def one_time_fix():
-    #     for file_path in train_files:
-    #         df = pd.read_csv(file_path, sep=",")
-    #         fn_to_numeric = partial(pd.to_numeric, errors="coerce")
-    #         df = df.apply(fn_to_numeric).dropna().astype(dtype=np.float32)
-    #         out_file = abspath(preprocessed_dir + basename(file_path))
-    #         if not exists(preprocessed_dir):
-    #             mkdir(preprocessed_dir)
-    #         df.to_csv(out_file, index_label='label', mode='w+')
-    #         print(f'written to {out_file}')
-    # one_time_fix()
+if __name__ == "__main__":
+    argparser = argparse.ArgumentParser(
+        description="Provide model pipeline with necessary arguments: "
+                    "- path to training data "
+                    "-whatever else comes to my mind later")
+    argparser.add_argument('-t', '--train_dir',
+                           help='abs or rel path to .txt files with raw training samples.')
+    argparser.add_argument('-p', '--preprocessed_dir',
+                           help='abs or rel path to .txt files with preprocessed training samples.')
 
-    # check kaggle for visualization tips
-    # check machine learning from multiple text files
-    # setup mlflow locally
-    # setup mlflow in azure asai runs locally
+    args, _ = argparser.parse_known_args()
+    train_dir = args.train_dir
+    if args.train_dir is None:
+        train_dir = DATA_DIR + 'train_data/0.25_0.50/preprocessed'
+
+    dataloaders = get_dataloaders(train_dir)
+    train_loader = dataloaders['train']
+    test_loader = dataloaders['test']
+    train.driver(train_loader, test_loader)
+
+
+# def one_time_fix():
+#     for file_path in train_files:
+#         df = pd.read_csv(file_path, sep=",")
+#         fn_to_numeric = partial(pd.to_numeric, errors="coerce")
+#         df = df.apply(fn_to_numeric).dropna().astype(dtype=np.float32)
+#         out_file = abspath(preprocessed_dir + basename(file_path))
+#         if not exists(preprocessed_dir):
+#             mkdir(preprocessed_dir)
+#         df.to_csv(out_file, index_label='label', mode='w+')
+#         print(f'written to {out_file}')
+# one_time_fix()
