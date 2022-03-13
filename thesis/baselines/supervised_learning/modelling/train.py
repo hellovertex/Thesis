@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import tempfile
 from functools import partial
 from os import listdir
@@ -8,7 +9,6 @@ from os.path import isfile, join, abspath
 
 import mlflow
 import mlflow.pytorch
-import numpy as np
 import pandas as pd
 import psutil
 import torch
@@ -184,7 +184,10 @@ def run(train_loader, test_loader):
 
         writer = SummaryWriter(args.output_dir)
         print("Writing TensorBoard events locally to %s\n" % args.output_dir)
-
+        print(
+            "\nLaunch TensorBoard with:\n\ntensorboard --logdir=%s"
+            % os.path.join(mlflow.get_artifact_uri(), "events")
+        )
         for epoch in range(1, args.epochs + 1):
             train(args, model, device, train_loader, optimizer, epoch, writer)
             test(epoch, args, model, test_loader, train_loader, writer)
