@@ -62,7 +62,8 @@ implement pypoker.PokerObservation.last_moves()
  - create mlflow project and mlflow model, see mlflow examples github
  - make sure to use pytorch.utils.tensorboard
  - share via tensorboard dev
- 03-13: run locally
+03-13: run locally
+03-13: TUNE LEARNING RATE
 03-13: then implement azure ml integration
  - connect via mlflow.set_tracking_uri and run on azure
 

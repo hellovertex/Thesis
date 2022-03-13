@@ -1,73 +1,25 @@
+from __future__ import annotations
+
+import argparse
+import tempfile
+from functools import partial
+from os import listdir
+from os.path import isfile, join, abspath
+
 import mlflow
 import mlflow.pytorch
-from mlflow.utils.environment import _mlflow_conda_env
-import warnings
-import cloudpickle
+import numpy as np
+import pandas as pd
+import psutil
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
+from tensorboardX import SummaryWriter
+from torch.utils.data import ConcatDataset
 
+from model import Net, train, test
 
-class Net(nn.Module):
-
-    def __init__(self, input_dim, output_dim, hidden_dim):
-        super(Net, self).__init__()
-        self.input_dim = input_dim
-        self.output_dim = output_dim
-        self.hidden_dim = hidden_dim
-        current_dim = input_dim
-        self.layers = nn.ModuleList()
-        for hdim in hidden_dim:
-            self.layers.append(nn.Linear(current_dim, hdim))
-            current_dim = hdim
-        self.layers.append(nn.Linear(current_dim, output_dim))
-
-    def forward(self, x):
-        for layer in self.layers[:-1]:
-            x = F.relu(layer(x))
-        out = F.softmax(self.layers[-1](x))
-        return out
-
-
-def train(args, model, device, train_loader, optimizer, epoch):
-    model.train()
-    for batch_idx, (data, target) in enumerate(train_loader):
-        data, target = data.to(device), target.to(device)
-        optimizer.zero_grad()
-        output = model(data)
-        loss = F.cross_entropy(output, target)
-        loss.backward()
-        optimizer.step()
-        if batch_idx % args.log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.item()))
-            # Use MLflow logging
-            mlflow.log_metric("epoch_loss", loss.item())
-
-
-def test(args, model, device, test_loader):
-    model.eval()
-    test_loss = 0
-    correct = 0
-    with torch.no_grad():
-        for data, target in test_loader:
-            data, target = data.to(device), target.to(device)
-            output = model(data)
-            # sum up batch loss
-            test_loss += F.nll_loss(output, target, reduction="sum").item()
-            # get the index of the max log-probability
-            pred = output.argmax(dim=1, keepdim=True)
-            correct += pred.eq(target.view_as(pred)).sum().item()
-
-    test_loss /= len(test_loader.dataset)
-    print("\n")
-    print("Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
-        test_loss, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))
-    # Use MLflow logging
-    mlflow.log_metric("average_loss", test_loss)
+DATA_DIR = '../../../../data/'
+BATCH_SIZE = 64
 
 
 class Args(object):
@@ -79,24 +31,131 @@ args = Args()
 setattr(args, 'batch_size', 64)
 setattr(args, 'test_batch_size', 1000)
 setattr(args, 'epochs', 3)
-setattr(args, 'lr', 0.01)
+setattr(args, 'lr', 1e-6)
 setattr(args, 'momentum', 0.5)
-setattr(args, 'no_cuda', True)
+setattr(args, 'use_cuda', torch.cuda.is_available())
 setattr(args, 'seed', 1)
 setattr(args, 'log_interval', 10)
+setattr(args, 'log_artifacts_interval', 10)
 setattr(args, 'save_model', True)
-
-use_cuda = not args.no_cuda and torch.cuda.is_available()
+setattr(args, 'output_dir', tempfile.mkdtemp())
+use_cuda = not args.use_cuda and torch.cuda.is_available()
 
 torch.manual_seed(args.seed)
 
 device = torch.device("cuda" if use_cuda else "cpu")
 
 kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
-# Use Azure Open Datasets for MNIST dataset
 
 
-def driver(train_loader, test_loader):
+class SingleTxtFileDataset(torch.utils.data.Dataset):
+    def __init__(self, file_path: str):
+        print(f"Initializing file {file_path}")
+        self.file_path = file_path
+        self._data: torch.Tensor | None = None
+        self._labels: torch.Tensor | None = None
+        self._len = self._get_len()
+
+    def _get_len(self):
+        """Get line count of large files cheaply"""
+        with open(self.file_path, 'rb') as f:
+            lines = 0
+            buf_size = 1024 * 1024
+            read_f = f.raw.read if hasattr(f, 'raw') and hasattr(f.raw, 'read') else f.read
+
+            buf = read_f(buf_size)
+            while buf:
+                lines += buf.count(b'\n')
+                buf = read_f(buf_size)
+
+        return lines
+
+    def load_file(self):
+        # loading
+        df = pd.read_csv(self.file_path, sep=",")
+
+        # preprocessing
+        fn_to_numeric = partial(pd.to_numeric, errors="coerce")
+        df = df.apply(fn_to_numeric).dropna()
+        labels = None
+        try:
+            # todo remove this when we do not have
+            # todo two label columns by accident anymore
+            labels = df.pop('label.1')
+        except KeyError:
+            labels = df.pop('label')
+        assert len(df.index) > 0
+        self._data = torch.tensor(df.values, dtype=torch.float32)
+        self._labels = torch.tensor(labels.values, dtype=torch.long)
+
+    def __getitem__(self, idx):
+        if self._data is None:
+            self.load_file()
+
+        return self._data[idx], self._labels[idx]
+
+    def __len__(self):
+        return self._len
+
+
+def get_dataloaders(train_dir):
+    """Makes torch dataloaders by reading training directory files.
+    1: Load training data files
+    2: Create train, val, test splits
+    3: Make datasets for each split
+    4: Return dataloaders for each dataset
+    """
+    # get list of .txt-files inside train_dir
+    train_dir_files = [join(train_dir, f) for f in listdir(train_dir) if isfile(join(train_dir, f))]
+
+    # by convention, any .txt files inside this folder
+    # that do not have .meta in their name, contain training data
+    train_dir_files = [abspath(f) for f in train_dir_files if ".meta" not in f][:5]
+
+    print(train_dir_files)
+    print(f'{len(train_dir_files)} train files loaded')
+
+    # splits
+    total_count = len(train_dir_files)
+    train_count = int(0.7 * total_count)
+    valid_count = int(0.2 * total_count)
+    test_count = total_count - train_count - valid_count
+
+    # splits filepaths
+    train_files = train_dir_files[:train_count]
+    valid_files = train_dir_files[train_count:train_count + valid_count]
+    test_files = train_dir_files[-test_count:]
+
+    # splits datasets
+    train_dataset = ConcatDataset(
+        [SingleTxtFileDataset(train_file) for train_file in train_files])
+    valid_dataset = ConcatDataset(
+        [SingleTxtFileDataset(train_file) for train_file in valid_files])
+    test_dataset = ConcatDataset(
+        [SingleTxtFileDataset(train_file) for train_file in test_files])
+
+    print(f'Number of files loaded = {len(train_files) + len(test_files) + len(valid_files)}')
+    print(f'For a total number of {len(test_dataset) + len(train_dataset) + len(valid_dataset)} examples')
+
+    train_dataset_loader = torch.utils.data.DataLoader(
+        train_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=psutil.cpu_count(logical=False)
+    )
+    valid_dataset_loader = torch.utils.data.DataLoader(
+        valid_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=psutil.cpu_count(logical=False)
+    )
+    test_dataset_loader = torch.utils.data.DataLoader(
+        test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=psutil.cpu_count(logical=False)
+    )
+    dataloaders = {
+        "train": train_dataset_loader,
+        "val": valid_dataset_loader,
+        "test": test_dataset_loader,
+    }
+
+    return dataloaders
+
+
+def run(train_loader, test_loader):
     # warnings.filterwarnings("ignore")
     # # Dependencies for deploying the model
     # pytorch_index = "https://download.pytorch.org/whl/"
@@ -105,17 +164,49 @@ def driver(train_loader, test_loader):
     #     "cloudpickle=={}".format(cloudpickle.__version__),
     #     pytorch_index + pytorch_version,
     # ]
-    with mlflow.start_run() as run:
-        model = Net().to(device)
-        optimizer = optim.SGD(
-            model.parameters(),
-            lr=args.lr,
-            momentum=args.momentum)
+
+    with mlflow.start_run():
+        try:
+            # Since the model was logged as an artifact, it can be loaded to make predictions
+            model = mlflow.pytorch.load_model(mlflow.get_artifact_uri("pytorch-model"))
+        except Exception as e:
+            print(e)
+            input_dim = output_dim = hidden_dim = None
+            for data, label in train_loader:
+                input_dim = data.shape[1]
+                output_dim = label.shape[0]
+                hidden_dim = [512, 512]
+                break
+            model = Net(input_dim, output_dim, hidden_dim).to(device)
+
+        optimizer = optim.Adam(model.parameters(), lr=1e-6)
+        # Create a SummaryWriter to write TensorBoard events locally
+
+        writer = SummaryWriter(args.output_dir)
+        print("Writing TensorBoard events locally to %s\n" % args.output_dir)
+
         for epoch in range(1, args.epochs + 1):
-            train(args, model, device, train_loader, optimizer, epoch)
-            test(args, model, device, test_loader)
-        # Log model to run history using MLflow
-        if args.save_model:
-            model_env = _mlflow_conda_env(additional_pip_deps=deps)
-            mlflow.pytorch.log_model(model, "model", conda_env=model_env)
-    return run
+            train(args, model, device, train_loader, optimizer, epoch, writer)
+            test(epoch, args, model, test_loader, train_loader, writer)
+
+
+if __name__ == "__main__":
+    argparser = argparse.ArgumentParser(
+        description="Provide model pipeline with necessary arguments: "
+                    "- path to training data "
+                    "-whatever else comes to my mind later")
+    argparser.add_argument('-t', '--train_dir',
+                           help='abs or rel path to .txt files with raw training samples.')
+    argparser.add_argument('-p', '--preprocessed_dir',
+                           help='abs or rel path to .txt files with preprocessed training samples.')
+
+    cmd_args, _ = argparser.parse_known_args()
+    train_dir = cmd_args.train_dir
+    if cmd_args.train_dir is None:
+        train_dir = DATA_DIR + 'train_data/0.25_0.50/preprocessed'
+
+    dataloaders = get_dataloaders(train_dir)
+    train_loader = dataloaders['train']
+    test_loader = dataloaders['test']
+
+    run(train_loader, test_loader)
