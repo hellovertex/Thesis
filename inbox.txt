@@ -59,7 +59,13 @@ implement pypoker.PokerObservation.last_moves()
 03-13: implement multiple file dataset, dataloader [x]
 03-13: implement model and train script            [x]
 03-13: implement mlflow support
-03-13: implement azure ml integration
+ - create mlflow project and mlflow model, see mlflow examples github
+ - make sure to use pytorch.utils.tensorboard
+ - share via tensorboard dev
+ 03-13: run locally
+03-13: then implement azure ml integration
+ - connect via mlflow.set_tracking_uri and run on azure
+
 03-13: launch training locally and inside azure compute
 03-13: check kaggle for visualization tips
 03-13: write agenda for sebastian, keep in mind FRONTEND
