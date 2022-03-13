@@ -82,17 +82,19 @@ def test(epoch, args, model, test_loader, train_loader, writer):
     log_scalar(writer, "test_accuracy", test_accuracy, step, args.output_dir)
 
 
-def log_scalar(writer, name, value, step, output_dir):
+def log_scalar(writer, name, value, step, output_dir, initial=True):
     """Log a scalar value to both MLflow and TensorBoard"""
     writer.add_scalar(name, value, step)
     mlflow.log_metric(name, value)
     # Upload the TensorBoard event logs as a run artifact
     print("Uploading TensorBoard events as a run artifact...")
     mlflow.log_artifacts(output_dir, artifact_path="events")
-    print(
-        "\nLaunch TensorBoard with:\n\ntensorboard --logdir=%s"
-        % os.path.join(mlflow.get_artifact_uri(), "events")
-    )
+    if initial:
+        print(
+            "\nLaunch TensorBoard with:\n\ntensorboard --logdir=%s"
+            % os.path.join(mlflow.get_artifact_uri(), "events")
+        )
+        initial = False
 
 
 def log_artifacts(model, output_dir):

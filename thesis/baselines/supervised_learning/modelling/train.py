@@ -54,7 +54,7 @@ class SingleTxtFileDataset(torch.utils.data.Dataset):
         self.file_path = file_path
         self._data: torch.Tensor | None = None
         self._labels: torch.Tensor | None = None
-        self._len = self._get_len()
+        self._len = self._get_len() - 1  # subtract one for column names
 
     def _get_len(self):
         """Get line count of large files cheaply"""
