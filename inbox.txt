@@ -70,6 +70,7 @@ implement pypoker.PokerObservation.last_moves()
 03-13: upload training data to azure cloud
 03-13: run on instantiated azure ressources
 03-13: implement multi step procedure using mlflow yaml
+03-13: share via Tensorboard dev
 
 03-13: check kaggle for visualization tips
 03-13: write agenda for sebastian, keep in mind FRONTEND
