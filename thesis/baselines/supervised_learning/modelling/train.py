@@ -93,7 +93,7 @@ if __name__ == "__main__":
     cmd_args, _ = argparser.parse_known_args()
     train_dir = cmd_args.train_dir
     if cmd_args.train_dir is None:
-        train_dir = DATA_DIR + '03_preprocessed/0.25_0.50/preprocessed'
+        train_dir = DATA_DIR + '03_preprocessed/0.25-0.50/preprocessed'
 
     dataloaders = get_dataloaders(train_dir)
     train_loader = dataloaders['train']
