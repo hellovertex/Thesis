@@ -64,8 +64,9 @@ def run(train_loader, test_loader):
                 output_dim = label.shape[0]
                 hidden_dim = [512, 512]
                 break
-            model = Net(input_dim, output_dim, hidden_dim).to(device)
-
+            model = Net(input_dim, output_dim, hidden_dim)
+        if args.use_cuda:
+            model = model.cuda()
         optimizer = optim.Adam(model.parameters(), lr=1e-6)
         # Create a SummaryWriter to write TensorBoard events locally
 
