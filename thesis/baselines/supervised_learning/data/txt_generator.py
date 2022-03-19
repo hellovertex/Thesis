@@ -1,9 +1,9 @@
 import glob
-import os
 import io
+import os
 import zipfile
-import gdown
 
+import gdown
 import numpy as np
 import pandas as pd
 from azureml.core import Experiment
@@ -15,7 +15,7 @@ from thesis.baselines.supervised_learning.data.core.parser import Parser
 
 
 class CsvGenerator(Generator):
-    """This handles creation and population of folders inside train_data, corresponding to encoded
+    """This handles creation and population of training data folders, containing encoded
     PokerEpisode instances. These encodings can be used for supervised learning. """
 
     def __init__(self, data_dir: str,
