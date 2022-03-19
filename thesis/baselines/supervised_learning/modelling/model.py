@@ -88,7 +88,7 @@ def log_scalar(writer, name, value, step, output_dir):
     mlflow.log_metric(name, value)
     # Upload the TensorBoard event logs as a run artifact
     print("Uploading TensorBoard events as a run artifact...")
-    mlflow.log_artifacts(output_dir, artifact_path="events")
+    mlflow.log_artifacts(output_dir, artifact_path=output_dir)
 
 
 def log_artifacts(model, output_dir):
