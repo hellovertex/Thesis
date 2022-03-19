@@ -56,6 +56,10 @@ implement pypoker.PokerObservation.last_moves()
 
 
 [TODOS]
+03-19: postpone spark integration after ui is set up for debugging
+03-20: test vectorizer
+03-20: implement ui
+03-19: todo split repos into supervised poker learning, rl poker learning from baseline, and ui
 03-19: setup mlflow multi step workflow, use distinct artifact stores for etl etc
 03-19: refactored txt_generator to include gdrive [x]
 03-18: access only via share link and only bulk hands -> unzip recursively [x]

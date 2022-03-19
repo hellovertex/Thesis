@@ -91,7 +91,6 @@ def log_scalar(writer, name, value, step, output_dir):
     mlflow.log_artifacts(output_dir, artifact_path="events")
 
 
-
 def log_artifacts(model, output_dir):
     # Log the model as an artifact of the MLflow run.
     print("\nLogging the trained model as a run artifact...")
