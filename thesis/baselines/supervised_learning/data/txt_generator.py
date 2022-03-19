@@ -34,8 +34,9 @@ class CsvGenerator(Generator):
         self._n_files_written_this_run = 0
         self._num_lines_written = 0
         self._which_data_files = None
+        self._hand_counter = 0
 
-        with open(self._data_dir + logfile, "a+") as f:
+        with open(logfile, "a+") as f:
             self._n_files_already_encoded = len(f.readlines())
             print(f'reinitializing with {self._n_files_already_encoded} files already encoded')
 
@@ -52,8 +53,6 @@ class CsvGenerator(Generator):
         # print(exc_type, exc_value, exc_traceback)
         if self._write_azure:
             self._run.complete()
-
-
 
     @staticmethod
     def get_workspace():
@@ -84,6 +83,43 @@ class CsvGenerator(Generator):
     def out_filename(self):
         return self._out_filename
 
+    def _write_to_azure(self, abs_filepath):
+        self._run.upload_file(name="output.csv", path_or_stream=abs_filepath)
+
+    def _log_progress(self, abs_filepath):
+        with open(self._logfile, "a") as f:
+            f.write(abs_filepath + "\n")
+        self._n_files_written_this_run += 1
+
+    def extract(self, filename, out_dir):
+        z = zipfile.ZipFile(filename)
+        for f in z.namelist():
+            try:
+                os.mkdir(out_dir)
+            except FileExistsError:
+                pass
+            # read inner zip file into bytes buffer
+            content = io.BytesIO(z.read(f))
+            zip_file = zipfile.ZipFile(content)
+            for i in zip_file.namelist():
+                zip_file.extract(i, out_dir)
+
+    def _extract_all_zip_data(self, which_data_files, from_gdrive_id):
+        path_to_data = self._data_dir + "01_raw/" + which_data_files
+        if from_gdrive_id:
+            # try to download from_gdrive to out.zip
+            zipfiles = [gdown.download(id=from_gdrive_id,
+                                       output=f"{path_to_data}/bulkhands_{which_data_files}.zip",
+                                       quiet=False)]
+        else:
+            #
+            zipfiles = glob.glob(path_to_data.__str__() + '/*.zip', recursive=False)
+        out_dir = self._data_dir + "01_raw/" + f'{self._which_data_files}/unzipped'
+        # creates out_dir if it does not exist
+        # extracts zip file, only if extracted files with same name do not exist
+        [self.extract(zipfile, out_dir=out_dir) for zipfile in zipfiles]
+        return out_dir
+
     def _write_metadata(self, file_dir):
         file_path_metadata = os.path.join(file_dir, f"{self._out_filename}.meta")
         with open(file_path_metadata, "a") as file:
@@ -105,20 +141,9 @@ class CsvGenerator(Generator):
             file_path, index_label='label', mode='a')
         return file_dir, file_path
 
-    def _write_to_azure(self, abs_filepath):
-        self._run.upload_file(name="output.csv", path_or_stream=abs_filepath)
-
-    def _log_progress(self, abs_filepath):
-        with open(self._data_dir + self._logfile, "a") as f:
-            f.write(abs_filepath + "\n")
-        self._n_files_written_this_run += 1
-
-    def generate_from_file(self, abs_filepath):
-        """Docstring"""
-        parsed_hands = self._parser.parse_file(abs_filepath)
+    def _generate_training_data(self, from_parsed_hands):
         training_data, labels = None, None
-        i = 0  # in case parsed_hands is None
-        for i, hand in enumerate(parsed_hands):
+        for i, hand in enumerate(from_parsed_hands):
             observations, actions = self._encoder.encode_episode(hand)
             if not observations:
                 continue
@@ -133,59 +158,39 @@ class CsvGenerator(Generator):
                     print(e)
             self._num_lines_written += len(observations)
             print("Simulating environment", end='') if i == 0 else print('.', end='')
+            self._hand_counter += 1
+        return training_data, labels
+
+    def generate_from_file(self, abs_filepath):
+        """Docstring"""
+        self._hand_counter = 0
+        parsed_hands = self._parser.parse_file(abs_filepath)
+        training_data, labels = self._generate_training_data(parsed_hands)
 
         # some rare cases, where the file did not contain showdown plays
         if training_data is not None:
-            print(f"\nExtracted {len(training_data)} training samples from {i + 1} poker hands"
+            print(f"\nExtracted {len(training_data)} training samples from {self._hand_counter + 1} poker hands"
                   f"in file {self._n_files_written_this_run + self._n_files_already_encoded} {abs_filepath}...")
 
             self._log_progress(abs_filepath)
             # write train data
             file_dir, file_path = self._write_train_data(training_data, labels)
 
-            # write meta data
-            file_path_metadata = self._write_metadata(file_dir=file_dir)
-
             # write to cloud
             if self._write_azure:
                 self._write_to_azure(file_path)
 
+            # write meta data
+            file_path_metadata = self._write_metadata(file_dir=file_dir)
             # df = pd.read_csv(file_path)
             # print(f"Data created: and written to {file_path}, "
             #       f"metadata information is found at {file_path_metadata}")
             # print(df.head())
 
-    def extract(self, filename, out_dir):
-        z = zipfile.ZipFile(filename)
-        for f in z.namelist():
-            try:
-                os.mkdir(out_dir)
-            except FileExistsError:
-                pass
-            # read inner zip file into bytes buffer
-            content = io.BytesIO(z.read(f))
-            zip_file = zipfile.ZipFile(content)
-            for i in zip_file.namelist():
-                zip_file.extract(i,  out_dir)
-
-    def _extract_all_zip_data(self, which_data_files, from_gdrive):
-        path_to_data = self._data_dir + "01_raw/" + which_data_files
-        if from_gdrive:
-            # try to download from_gdrive to out.zip
-            zipfiles = [gdown.download(from_gdrive,
-                                       f"{path_to_data}/bulkhands_{which_data_files}.zip",
-                                       quiet=True)]
-        else:
-            #
-            zipfiles = glob.glob(path_to_data.__str__() + '/*.zip', recursive=False)
-        out_dir = self._data_dir + "01_raw/" + f'{self._which_data_files}/unzipped'
-        [self.extract(zipfile, out_dir=out_dir) for zipfile in zipfiles]
-        return out_dir
-
-    def run_data_generation(self, which_data_files, from_gdrive):
+    def run_data_generation(self, which_data_files, from_gdrive_id):
         self._which_data_files = which_data_files
         # extract zipfile (.zip is stored locally or downloaded via from_gdrive)
-        unzipped_dir = self._extract_all_zip_data(which_data_files, from_gdrive)
+        unzipped_dir = self._extract_all_zip_data(which_data_files, from_gdrive_id)
         filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
         # parse, encode, vectorize and write the training data from .txt to disk
         for i, filename in enumerate(filenames):

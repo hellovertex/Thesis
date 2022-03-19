@@ -8,7 +8,7 @@ from txt_generator import CsvGenerator
 from txt_parser import TxtParser
 
 DATA_DIR = "../../../../data/"
-LOGFILE = "log.txt"
+LOGFILE = DATA_DIR + "log.txt"
 
 
 @click.command()
@@ -23,13 +23,13 @@ LOGFILE = "log.txt"
               help="Indicates, which folder inside data/01_raw/ "
                    "is searched for .zip files to be extracted."
                    "Possible values are e.g. '0.25-0.50', '0.50-1.00', '1.00-2.00'")
-@click.option("--from_gdrive",
+@click.option("--from_gdrive_id",
               default="",
               type=str,
               help="If a string value is passed, it should contain a DL link for "
                    "google drive to a bulkhands.zip file containing poker hands. "
                    "The generator will try to download the data from there.")
-def main(which_data_files, from_gdrive):
+def main(which_data_files, from_gdrive_id):
     # Creates PokerEpisode instances from raw .txt files
     parser = TxtParser()
 
@@ -48,7 +48,9 @@ def main(which_data_files, from_gdrive):
         # or downloads from gdrive. Extracts found .zip files
         # reads the extracted .txt files for poker hands
         # parses, encodes, vectorizes, and writes them to disk.
-        generator.run_data_generation(which_data_files, from_gdrive=from_gdrive)
+        generator.run_data_generation(which_data_files, from_gdrive_id=from_gdrive_id)
+        # # run example using google drive file id, which also works fine
+        # generator.run_data_generation(which_data_files, from_gdrive_id="18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO")
 
 
 if __name__ == '__main__':

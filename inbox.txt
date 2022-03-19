@@ -56,12 +56,14 @@ implement pypoker.PokerObservation.last_moves()
 
 
 [TODOS]
-03-18: access only via share link and only bulk hands -> unzip recursively
-03-18: make unzipped data available via gdrive downloadlink using gdown
+03-19: setup mlflow multi step workflow, use distinct artifact stores for etl etc
+03-19: refactored txt_generator to include gdrive [x]
+03-18: access only via share link and only bulk hands -> unzip recursively [x]
+03-18: make unzipped data available via gdrive downloadlink using gdown [x]
 03-18: make sure the pipeline can be run on fresh system from start to finish by a single command
 03-18: include PokerRL installation into pipeline
 03-18: add SEER mode to encoder and implement it in vectorizer
-03-18: unify data folder structure -> move UNZIPPED_DATA_DIR to config
+03-18: unify data folder structure -> move UNZIPPED_DATA_DIR to config [x]
 03-13: implement multiple file dataset, dataloader [x]
 03-13: implement model and train script            [x]
 03-13: implement mlflow support                    [x]

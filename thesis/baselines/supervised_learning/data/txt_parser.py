@@ -364,7 +364,7 @@ class TxtParser(Parser):
     def parse_file(self, file_path):
         # self._reset_metadata_counts()
         self._variant = 'NoLimitHoldem'  # todo parse from filename
-        with open(file_path, 'r') as f:  # pylint: disable=invalid-name,unspecified-encoding
+        with open(file_path, 'r', encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
             hand_database = f.read()
             hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
             return self._parse_hands(hands_played)
