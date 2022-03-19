@@ -32,7 +32,7 @@ setattr(args, 'seed', 1)
 setattr(args, 'log_interval', 10)
 setattr(args, 'log_artifacts_interval', 10)
 setattr(args, 'save_model', True)
-setattr(args, 'output_dir', tempfile.mkdtemp())
+setattr(args, 'output_dir', "artifacts")
 use_cuda = not args.use_cuda and torch.cuda.is_available()
 
 torch.manual_seed(args.seed)
