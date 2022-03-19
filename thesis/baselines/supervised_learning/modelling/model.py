@@ -94,7 +94,7 @@ def log_scalar(writer, name, value, step, output_dir):
 def log_artifacts(model, output_dir):
     # Log the model as an artifact of the MLflow run.
     print("\nLogging the trained model as a run artifact...")
-    mlflow.pytorch.log_model(model, artifact_path="pytorch-model", pickle_module=pickle)
+    mlflow.pytorch.log_model(model, artifact_path=output_dir, pickle_module=pickle)
     print(
         "\nThe model is logged at:\n%s" % os.path.join(mlflow.get_artifact_uri(), "pytorch-model")
     )
