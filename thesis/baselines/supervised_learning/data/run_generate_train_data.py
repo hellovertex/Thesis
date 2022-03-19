@@ -1,18 +1,35 @@
-import argparse
-import glob
 import os
+
+import click
 
 from thesis.baselines.supervised_learning.data.steinberger_encoder import RLStateEncoder
 from thesis.baselines.supervised_learning.data.steinberger_wrapper import AugmentObservationWrapper
 from txt_generator import CsvGenerator
 from txt_parser import TxtParser
 
-DATA_DIR = "../../../data/"
+DATA_DIR = "../../../../data/"
 LOGFILE = "log.txt"
 
 
-def main(filenames: list):
-
+@click.command()
+# @click.option("--path-to-bulkhands_zip",
+#               default=DATA_DIR + "01_raw/0.25-0.50/BulkHands_example.zip",
+#               type=str,
+#               help="Path to zip file that was provided by hhsmithy.com "
+#                    "and contains poker hands.")
+@click.option("--which-data-files",
+              default="0.25-0.50",
+              type=str,
+              help="Indicates, which folder inside data/01_raw/ "
+                   "is searched for .zip files to be extracted."
+                   "Possible values are e.g. '0.25-0.50', '0.50-1.00', '1.00-2.00'")
+@click.option("--from_gdrive",
+              default="",
+              type=str,
+              help="If a string value is passed, it should contain a DL link for "
+                   "google drive to a bulkhands.zip file containing poker hands. "
+                   "The generator will try to download the data from there.")
+def main(which_data_files, from_gdrive):
     # Creates PokerEpisode instances from raw .txt files
     parser = TxtParser()
 
@@ -21,39 +38,18 @@ def main(filenames: list):
 
     # Uses the results of parser and encoder to write training data to disk or cloud
     with CsvGenerator(data_dir=DATA_DIR,
-                      out_dir=os.path.join(DATA_DIR + 'train_data'),
+                      # out_dir=os.path.join(DATA_DIR + 'train_data'),
                       parser=parser,
                       encoder=encoder,
-                      out_filename='6MAX_0.25USD_0.50USD_Pokerstars_eu.txt',
+                      out_filename=f'6MAX_{which_data_files}.txt',
                       write_azure=False,
                       logfile=LOGFILE) as generator:
-
-        for i, filename in enumerate(filenames):
-            if not generator.file_has_been_encoded_already(logfile=DATA_DIR + LOGFILE,
-                                                           filename=filename):
-                generator.generate_from_file(filename, out_subdir='0.25_0.50')
+        # Looks for .zip files inside folder derived from "which_data_files"
+        # or downloads from gdrive. Extracts found .zip files
+        # reads the extracted .txt files for poker hands
+        # parses, encodes, vectorizes, and writes them to disk.
+        generator.run_data_generation(which_data_files, from_gdrive=from_gdrive)
 
 
 if __name__ == '__main__':
-    argparser = argparse.ArgumentParser(
-        description="Use to pass the directories for source and target text files.")
-
-    argparser.add_argument('-s', '--source_dir', help='abs or rel path to .txt files')
-    argparser.add_argument('-t', '--target_dir', help='path where generated training .txt files are stored.')
-    args, _ = argparser.parse_known_args()
-
-    if args.source_dir is None:
-        # UNZIPPED_DATA_DIR = DATA_DIR + '/0.25-0.50'
-        # data/0.25-0.50/BulkHands-14686/unzipped
-        UNZIPPED_DATA_DIR = DATA_DIR + '0.25-0.50/unzipped'
-        # UNZIPPED_DATA_DIR = "/home/cawa/Documents/github.com/hellovertex/Thesis/data/6Max_Regular_0.25-0.50_PokerStars_eu/unzipped"
-        # print(pathlib.Path(UNZIPPED_DATA_DIR).resolve())
-        filenames_recursively = glob.glob(UNZIPPED_DATA_DIR.__str__() + '/**/*.txt', recursive=True)
-    else:
-        filenames_recursively = glob.glob(args.source_dir.__str__() + '/**/*.txt', recursive=True)
-    # filenames_recursively = [DATA_DIR + "AAA.txt"]
-    # filenames_recursively = [DATA_DIR + "Aaltje-0.01-0.02-USD-NoLimitHoldem-PokerStars-1-16-2022.txt"]
-    print(filenames_recursively)
-
-    # generate list of files
-    main(filenames_recursively)
+    main()

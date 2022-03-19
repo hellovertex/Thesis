@@ -1,4 +1,8 @@
+import glob
 import os
+import io
+import zipfile
+import gdown
 
 import numpy as np
 import pandas as pd
@@ -15,14 +19,12 @@ class CsvGenerator(Generator):
     PokerEpisode instances. These encodings can be used for supervised learning. """
 
     def __init__(self, data_dir: str,
-                 out_dir,
                  parser: Parser,
                  encoder: Encoder,
                  out_filename: str,
                  write_azure: bool,
                  logfile="log.txt"):
         self._out_filename = out_filename
-        self._out_dir = out_dir
         self._data_dir = data_dir
         self._parser = parser
         self._encoder = encoder
@@ -31,6 +33,7 @@ class CsvGenerator(Generator):
         self._logfile = logfile
         self._n_files_written_this_run = 0
         self._num_lines_written = 0
+        self._which_data_files = None
 
         with open(self._data_dir + logfile, "a+") as f:
             self._n_files_already_encoded = len(f.readlines())
@@ -49,6 +52,8 @@ class CsvGenerator(Generator):
         # print(exc_type, exc_value, exc_traceback)
         if self._write_azure:
             self._run.complete()
+
+
 
     @staticmethod
     def get_workspace():
@@ -82,11 +87,11 @@ class CsvGenerator(Generator):
     def _write_metadata(self, file_dir):
         file_path_metadata = os.path.join(file_dir, f"{self._out_filename}.meta")
         with open(file_path_metadata, "a") as file:
-            file.write(self._parser.metadata.__repr__()+"\n")
+            file.write(self._parser.metadata.__repr__() + "\n")
         return file_path_metadata
 
-    def _write_train_data(self, data, labels, out_subdir):
-        file_dir = os.path.join(self._out_dir, out_subdir)
+    def _write_train_data(self, data, labels):
+        file_dir = os.path.join(self._data_dir + "02_vectorized", self._which_data_files)
         # create new file every 100k lines
         file_name = self._out_filename + '_' + str(int(self._num_lines_written / 50000))
         file_path = os.path.join(file_dir, file_name)
@@ -108,7 +113,7 @@ class CsvGenerator(Generator):
             f.write(abs_filepath + "\n")
         self._n_files_written_this_run += 1
 
-    def generate_from_file(self, abs_filepath, out_subdir='0.25_0.50'):
+    def generate_from_file(self, abs_filepath):
         """Docstring"""
         parsed_hands = self._parser.parse_file(abs_filepath)
         training_data, labels = None, None
@@ -136,7 +141,7 @@ class CsvGenerator(Generator):
 
             self._log_progress(abs_filepath)
             # write train data
-            file_dir, file_path = self._write_train_data(training_data, labels, out_subdir=out_subdir)
+            file_dir, file_path = self._write_train_data(training_data, labels)
 
             # write meta data
             file_path_metadata = self._write_metadata(file_dir=file_dir)
@@ -149,3 +154,41 @@ class CsvGenerator(Generator):
             # print(f"Data created: and written to {file_path}, "
             #       f"metadata information is found at {file_path_metadata}")
             # print(df.head())
+
+    def extract(self, filename, out_dir):
+        z = zipfile.ZipFile(filename)
+        for f in z.namelist():
+            try:
+                os.mkdir(out_dir)
+            except FileExistsError:
+                pass
+            # read inner zip file into bytes buffer
+            content = io.BytesIO(z.read(f))
+            zip_file = zipfile.ZipFile(content)
+            for i in zip_file.namelist():
+                zip_file.extract(i,  out_dir)
+
+    def _extract_all_zip_data(self, which_data_files, from_gdrive):
+        path_to_data = self._data_dir + "01_raw/" + which_data_files
+        if from_gdrive:
+            # try to download from_gdrive to out.zip
+            zipfiles = [gdown.download(from_gdrive,
+                                       f"{path_to_data}/bulkhands_{which_data_files}.zip",
+                                       quiet=True)]
+        else:
+            #
+            zipfiles = glob.glob(path_to_data.__str__() + '/*.zip', recursive=False)
+        out_dir = self._data_dir + "01_raw/" + f'{self._which_data_files}/unzipped'
+        [self.extract(zipfile, out_dir=out_dir) for zipfile in zipfiles]
+        return out_dir
+
+    def run_data_generation(self, which_data_files, from_gdrive):
+        self._which_data_files = which_data_files
+        # extract zipfile (.zip is stored locally or downloaded via from_gdrive)
+        unzipped_dir = self._extract_all_zip_data(which_data_files, from_gdrive)
+        filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
+        # parse, encode, vectorize and write the training data from .txt to disk
+        for i, filename in enumerate(filenames):
+            if not self.file_has_been_encoded_already(logfile=self._logfile,
+                                                      filename=filename):
+                self.generate_from_file(os.path.abspath(filename).__str__())
