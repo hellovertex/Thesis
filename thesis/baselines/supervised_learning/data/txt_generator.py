@@ -62,6 +62,19 @@ class CsvGenerator(Generator):
                              subscription_id=config["subscription_id"],
                              resource_group=config["resource_group"])
 
+    @staticmethod
+    def file_has_been_encoded_already(logfile, filename: str):
+        skip_file = False
+        # skip already encoded files
+        with open(logfile, "a+") as f:
+            files_written = f.readlines().__reversed__()
+            for fw in files_written:
+                if filename in fw:
+                    print(f"Skipping file {filename} because it has already been encoded and written to disk...")
+                    skip_file = True
+                    break
+        return skip_file
+
     @property
     def out_filename(self):
         return self._out_filename

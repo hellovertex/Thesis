@@ -1,12 +1,11 @@
 from typing import List, Tuple, Dict, Optional
+
 import numpy as np
-
-from PokerRL.game.games import NoLimitHoldem
 from PokerRL.game.Poker import Poker
+from PokerRL.game.games import NoLimitHoldem
 
-from thesis.baselines.supervised_learning.data.core.parser import PokerEpisode, Action, ActionType, Blind
 from thesis.baselines.supervised_learning.data.core.encoder import Encoder, PlayerInfo, Positions6Max
-
+from thesis.baselines.supervised_learning.data.core.parser import PokerEpisode, Action, ActionType, Blind
 
 DICT_RANK = {'': -127,
              '2': 0,
