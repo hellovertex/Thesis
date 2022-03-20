@@ -27,6 +27,10 @@ class Net(nn.Module):
         out = F.softmax(self.layers[-1](x))
         return out
 
+    def log_weights(self):
+        """todo: implement as in
+        https://github.com/mlflow/mlflow/blob/master/examples/pytorch/mnist_tensorboard_artifact.py"""
+
 
 def train(args, model, device, train_loader, optimizer, epoch, writer):
     model.train()
@@ -88,14 +92,14 @@ def log_scalar(writer, name, value, step, output_dir):
     mlflow.log_metric(name, value)
     # # Upload the TensorBoard event logs as a run artifact
     # print("Uploading TensorBoard events as a run artifact...")
-    # mlflow.log_artifacts(output_dir, artifact_path=output_dir)
 
 
 def log_artifacts(model, output_dir):
-    pass
+    mlflow.log_artifacts(output_dir, artifact_path="events")
+    mlflow.pytorch.log_model(model, artifact_path="pytorch-model", pickle_module=pickle)
     # # Log the model as an artifact of the MLflow run.
     # print("\nLogging the trained model as a run artifact...")
     # mlflow.pytorch.log_model(model, artifact_path=output_dir, pickle_module=pickle)
-    # print(
-    #     "\nThe model is logged at:\n%s" % os.path.join(mlflow.get_artifact_uri(), "pytorch-model")
-    # )
+    print(
+        "\nThe model is logged at:\n%s" % os.path.join(mlflow.get_artifact_uri(), "pytorch-model")
+    )

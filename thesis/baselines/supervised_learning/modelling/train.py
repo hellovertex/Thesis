@@ -11,6 +11,7 @@ import torch.optim as optim
 from tensorboardX import SummaryWriter
 from dataset import get_dataloaders
 from model import Net, train, test
+from azureml.core import Workspace
 
 DATA_DIR = '../../../../data/'
 BATCH_SIZE = 64
@@ -43,16 +44,10 @@ kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
 
 def run(train_loader, test_loader):
-    # warnings.filterwarnings("ignore")
-    # # Dependencies for deploying the model
-    # pytorch_index = "https://download.pytorch.org/whl/"
-    # pytorch_version = "cpu/torch-1.1.0-cp36-cp36m-linux_x86_64.whl"
-    # deps = [
-    #     "cloudpickle=={}".format(cloudpickle.__version__),
-    #     pytorch_index + pytorch_version,
-    # ]
+    ws = Workspace.from_config()
+    mlflow.set_tracking_uri(ws.get_mlflow_tracking_uri())
 
-    with mlflow.start_run():
+    with mlflow.start_run() as run:
         try:
             # Since the model was logged as an artifact, it can be loaded to make predictions
             model = mlflow.pytorch.load_model(mlflow.get_artifact_uri("pytorch-model"))
@@ -79,25 +74,14 @@ def run(train_loader, test_loader):
         for epoch in range(1, args.epochs + 1):
             train(args, model, device, train_loader, optimizer, epoch, writer)
             test(epoch, args, model, test_loader, train_loader, writer)
+    return run
 
 
 if __name__ == "__main__":
-    argparser = argparse.ArgumentParser(
-        description="Provide model pipeline with necessary arguments: "
-                    "- path to training data "
-                    "-whatever else comes to my mind later")
-    argparser.add_argument('-t', '--train_dir',
-                           help='abs or rel path to .txt files with raw training samples.')
-    argparser.add_argument('-p', '--preprocessed_dir',
-                           help='abs or rel path to .txt files with preprocessed training samples.')
-
-    cmd_args, _ = argparser.parse_known_args()
-    train_dir = cmd_args.train_dir
-    if cmd_args.train_dir is None:
-        train_dir = DATA_DIR + '03_preprocessed/0.25-0.50/preprocessed'
+    train_dir = DATA_DIR + '03_preprocessed/0.25-0.50/preprocessed'
 
     dataloaders = get_dataloaders(train_dir)
     train_loader = dataloaders['train']
     test_loader = dataloaders['test']
 
-    run(train_loader, test_loader)
+    mlflow_run = run(train_loader, test_loader)
