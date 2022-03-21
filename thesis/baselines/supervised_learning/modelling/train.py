@@ -123,7 +123,7 @@ if __name__ == "__main__":
     # # Get the mount point
     # train_dir = mount_ctx.mount_point
     # train_dir = "Users/sascha.lange/github.com/hellovertex/Thesis/data/03_preprocessed/0.25-0.50"
-    train_dir = "Users/sascha.lange/github.com/hellovertex/Thesis/data/03_preprocessed/0.25-0.50/preprocessed"
+    train_dir = "./data/03_preprocessed/0.25-0.50/preprocessed"
     print(f"Train_DIR: {train_dir}")
     print(f'FILES INSIDE: = {os.listdir(train_dir)}')
     # train_dir = DATA_DIR + '03_preprocessed/0.25-0.50/preprocessed'
