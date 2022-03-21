@@ -72,7 +72,7 @@ def get_dataloaders(train_dir):
 
     # by convention, any .txt files inside this folder
     # that do not have .meta in their name, contain training data
-    train_dir_files = [abspath(f) for f in train_dir_files if ".meta" not in f][:5]
+    train_dir_files = [abspath(f) for f in train_dir_files if ".meta" not in f and ".amlignore" not in f][:5]
 
     print(train_dir_files)
     print(f'{len(train_dir_files)} train files loaded')
