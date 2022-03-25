@@ -143,15 +143,15 @@ def get_dataloaders(train_dir):
     print(f'Number of files loaded = {len(train_files) + len(test_files) + len(valid_files)}')
     print(f'For a total number of {len(test_dataset) + len(train_dataset) + len(valid_dataset)} examples')
 
-    # train_dataset_loader = torch.utils.data.DataLoader(
-    #     train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=psutil.cpu_count(logical=False)
-    # )
     train_dataset_loader = torch.utils.data.DataLoader(
-        train_dataset,
-        # batch_size=BATCH_SIZE,
-        sampler=BatchSampler(RandomSampler(train_dataset, True), BATCH_SIZE, False),
-        num_workers=psutil.cpu_count(logical=False)
+        train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=psutil.cpu_count(logical=False)
     )
+    # train_dataset_loader = torch.utils.data.DataLoader(
+    #     train_dataset,
+    #     # batch_size=BATCH_SIZE,
+    #     sampler=BatchSampler(RandomSampler(train_dataset, True), BATCH_SIZE, False),
+    #     num_workers=psutil.cpu_count(logical=False)
+    # )
     valid_dataset_loader = torch.utils.data.DataLoader(
         valid_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=psutil.cpu_count(logical=False)
     )

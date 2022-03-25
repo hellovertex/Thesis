@@ -56,6 +56,11 @@ implement pypoker.PokerObservation.last_moves()
 
 
 [TODOS]
+03-25: eda with vaex and hdf5
+03-25: sklearn rfs and xgboost
+03-25: weight balancer inside loss function
+03-25: seer mode
+
 03-19: postpone spark integration after ui is set up for debugging
 03-20: test vectorizer
 03-20: implement ui
