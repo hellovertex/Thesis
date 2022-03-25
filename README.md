@@ -1,5 +1,6 @@
 # Thesis
 Thesis
+# under heavy construction
 
 ## Training data
 1. Download BulkHands<uuid>.zip from https://www.hhsmithy.com/download
