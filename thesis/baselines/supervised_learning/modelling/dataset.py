@@ -162,10 +162,10 @@ class MultipleParquetFilesDatasetDownsampled(torch.utils.data.Dataset):
             else:
                 self._data = pd.concat([self._data, df])
         self._data = self._downsample()
+        self._len = len(self._data)
         self._labels = self._data.pop('label')
         self._data = torch.tensor(self._data.values, dtype=torch.float32)
         self._labels = torch.tensor(self._labels.values, dtype=torch.long)
-        self._len = len(self._data)
 
     def __getitem__(self, idx):
         return self._data[idx], self._labels[idx]
