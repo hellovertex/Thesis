@@ -109,8 +109,9 @@ class MultipleParquetFilesDatasetDownsampled(torch.utils.data.Dataset):
         self._labels = None
         # loads everything into memory, which we can do only because our
         # azure compute has 64GB ram
-        self._init_load_data(file_paths)
         self._len = None
+        self._init_load_data(file_paths)
+        
 
     def _downsample(self):
         # resample to remove data imbalance
@@ -161,11 +162,16 @@ class MultipleParquetFilesDatasetDownsampled(torch.utils.data.Dataset):
                 self._data = df
             else:
                 self._data = pd.concat([self._data, df])
+        print(f'self._data before downsampling {self._data.head()}')
         self._data = self._downsample()
+        print(f'self._data after downsampling {self._data.head()}')
         self._len = len(self._data)
+        print(f'self_len = {self._len}')
         self._labels = self._data.pop('label')
+        print(f'self._data after popping label {self._data.head()}')
         self._data = torch.tensor(self._data.values, dtype=torch.float32)
         self._labels = torch.tensor(self._labels.values, dtype=torch.long)
+        print(f'self._data after torch.tensor() = {self._data}')
 
     def __getitem__(self, idx):
         return self._data[idx], self._labels[idx]

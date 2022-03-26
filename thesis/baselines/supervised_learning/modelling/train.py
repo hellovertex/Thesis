@@ -67,6 +67,7 @@ def run(train_loader, test_loader, model_name):
     # with mlflow.start_run() as run:
     model_dir = "outputs"
     model_path = "outputs/model.pkl"
+    model_exists = False
     # model_name = "baseline_model"
     try:
         # # does not work apparently in the #*(&#@$ azure cloud
@@ -74,10 +75,11 @@ def run(train_loader, test_loader, model_name):
         # get the registered model
         # todo this probably does not work
         Model(ws, model_name).download(model_dir)
+        model_exists = True
         model = torch.load(model_path)
 
     except Exception as e:
-        print(e)
+        # print(e)
         input_dim = output_dim = hidden_dim = None
         for data, label in train_loader:
             input_dim = data.shape[1]
@@ -99,20 +101,24 @@ def run(train_loader, test_loader, model_name):
         train(args, model, device, train_loader, optimizer, epoch)
         test(epoch, args, model, test_loader, train_loader, device)
         # # does not work apparently in the #*(&#@$ azure cloud
-        # torch.save(model, './outputs/model.pt')
+        
         # register the model
         # model_uri = "runs:/{}/model".format(aml_run.info.run_id)
         # model = mlflow.register_model(model_uri, "baseline_model")
-        torch.save(model, model_path)
+        # torch.save(model, model_path)
         # model = aml_run.register_model(model_name='baseline_model', model_path=model_path)
         # https://stackoverflow.com/questions/70928761/azureml-model-register
-        Model.register(
-            workspace=ws,
-            model_name=model_name,
-            model_path=model_path,
-            model_framework=Model.Framework.PYTORCH,
-            model_framework_version=torch.__version__
-        )
+        # torch.save(model, model_path)
+        if epoch % 10 == 0:
+            Model.register(
+                workspace=ws,
+                model_name=model_name,
+                model_path=model_path,
+                model_framework=Model.Framework.PYTORCH,
+                model_framework_version=torch.__version__
+            )
+
+            
     # return run
 """"
 todo fix this
