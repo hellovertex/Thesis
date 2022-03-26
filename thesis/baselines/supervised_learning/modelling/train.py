@@ -60,14 +60,14 @@ kwargs = {'num_workers': 1, 'pin_memory': True}
 #             zip_file.extract(i, out_dir)
 
 
-def run(train_loader, test_loader):
+def run(train_loader, test_loader, model_name):
     ws = Workspace.from_config()
     # mlflow.set_tracking_uri(ws.get_mlflow_tracking_uri())
 
     # with mlflow.start_run() as run:
     model_dir = "outputs"
     model_path = "outputs/model.pkl"
-    model_name = "baseline_model"
+    # model_name = "baseline_model"
     try:
         # # does not work apparently in the #*(&#@$ azure cloud
         # model = torch.load('./outputs/model.pt')
@@ -130,6 +130,8 @@ if __name__ == "__main__":
                     "-whatever else comes to my mind later")
     argparser.add_argument('-t', '--train_dir',
                            help='abs or rel path to .txt files with raw training samples.')
+    argparser.add_argument('-m', '--model_name',
+                           help='Name of Registered azure ml model. Will be loaded if exists.')
     # todo pass path to setup.py and make setup return mount context here
     # todo mount context can depend on _Offline or Run context
     cmd_args, _ = argparser.parse_known_args()
@@ -151,4 +153,4 @@ if __name__ == "__main__":
     train_loader = dataloaders['train']
     test_loader = dataloaders['test']
 
-    run(train_loader, test_loader)
+    run(train_loader, test_loader, model_name=cmd_args.model_name)
