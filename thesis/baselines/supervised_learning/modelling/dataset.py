@@ -7,6 +7,7 @@ import psutil
 import torch
 from torch.utils.data import ConcatDataset, SubsetRandomSampler, BatchSampler, RandomSampler
 from sklearn.utils import resample
+import numpy as np
 
 BATCH_SIZE = 512
 
@@ -111,7 +112,7 @@ class MultipleParquetFilesDatasetDownsampled(torch.utils.data.Dataset):
         self._init_load_data(file_paths)
         self._len = None
 
-    def _downsample(self, df):
+    def _downsample(self):
         # resample to remove data imbalance
         # caution: happens in memory
 
@@ -121,13 +122,14 @@ class MultipleParquetFilesDatasetDownsampled(torch.utils.data.Dataset):
         RAISE_HALF_POT = 4
         RAISE_POT = 5
         ALL_IN = 6
-        n_samples = df['label'].value_counts()[ALL_IN]  # ALL_IN is rarest class
-        df_fold = df[df['label'] == FOLD]
-        df_checkcall = df[df['label'] == CHECK_CALL]
-        df_raise_min = df[df['label'] == RAISE_MIN_OR_3BB]
-        df_raise_half = df[df['label'] == RAISE_HALF_POT]
-        df_raise_pot = df[df['label'] == RAISE_POT]
-        df_allin = df[df['label'] == ALL_IN]
+        print(f'value_counts = {self._data["label"].value_counts()}')
+        n_samples = self._data['label'].value_counts()[ALL_IN]  # ALL_IN is rarest class
+        df_fold = self._data[self._data['label'] == FOLD]
+        df_checkcall = self._data[self._data['label'] == CHECK_CALL]
+        df_raise_min = self._data[self._data['label'] == RAISE_MIN_OR_3BB]
+        df_raise_half = self._data[self._data['label'] == RAISE_HALF_POT]
+        df_raise_pot = self._data[self._data['label'] == RAISE_POT]
+        df_allin = self._data[self._data['label'] == ALL_IN]
 
         df_fold_downsampled = resample(df_fold, replace=True, n_samples=n_samples, random_state=1)
         df_checkcall_downsampled = resample(df_checkcall, replace=True, n_samples=n_samples, random_state=1)
@@ -148,16 +150,21 @@ class MultipleParquetFilesDatasetDownsampled(torch.utils.data.Dataset):
         have equally many datapoint examples."""
         for i, file_path in enumerate(file_paths):
             print(f'Loading File {i}/{len(file_paths)} into memory...')
-            df = pd.read_parquet(file_path)
+            df = pd.read_parquet(file_path).astype(np.float32)
+            print(f'loaded data = {df}')
+            # print(f'1 = df.head()')
             # preprocessing
             fn_to_numeric = partial(pd.to_numeric, errors="coerce")
             df = df.apply(fn_to_numeric).dropna()
+            # print(f'2 = df.head()')
             if self._data is None:
                 self._data = df
             else:
                 self._data = pd.concat([self._data, df])
-        self._data = self._downsample(self._data)
+        self._data = self._downsample()
         self._labels = self._data.pop('label')
+        self._data = torch.tensor(self._data.values, dtype=torch.float32)
+        self._labels = torch.tensor(self._labels.values, dtype=torch.long)
         self._len = len(self._data)
 
     def __getitem__(self, idx):
@@ -185,20 +192,20 @@ def get_dataloaders(train_dir):
     print(f'{len(train_dir_files)} train files loaded')
 
     # splits
-    total_count = len(train_dir_files)
-    train_count = int(0.7 * total_count)
-    valid_count = int(0.2 * total_count)
-    test_count = total_count - train_count - valid_count
+    # total_count = len(train_dir_files)
+    # train_count = int(0.7 * total_count)
+    # valid_count = int(0.2 * total_count)
+    # test_count = total_count - train_count - valid_count
 
     # splits filepaths
-    train_files = train_dir_files[:train_count]
-    valid_files = train_dir_files[train_count:train_count + valid_count]
-    test_files = train_dir_files[-test_count:]
+    # train_files = train_dir_files[:train_count]
+    # valid_files = train_dir_files[train_count:train_count + valid_count]
+    # test_files = train_dir_files[-test_count:]
 
     # splits datasets
-    train_dataset = MultipleParquetFilesDatasetDownsampled(train_files)
-    valid_dataset = MultipleParquetFilesDatasetDownsampled(valid_files)  # downsampling induces enough randomness
-    test_dataset = MultipleParquetFilesDatasetDownsampled(test_files)    # to generate three sets from one file
+    train_dataset = MultipleParquetFilesDatasetDownsampled(train_dir_files)
+    valid_dataset = MultipleParquetFilesDatasetDownsampled(train_dir_files)  # downsampling induces enough randomness
+    test_dataset = MultipleParquetFilesDatasetDownsampled(train_dir_files)    # to generate three sets from one file
     # train_dataset = ConcatDataset(
     #     [SingleTxtFileDataset(train_file) for train_file in train_files])
     # valid_dataset = ConcatDataset(
@@ -206,7 +213,7 @@ def get_dataloaders(train_dir):
     # test_dataset = ConcatDataset(
     #     [SingleTxtFileDataset(train_file) for train_file in test_files])
 
-    print(f'Number of files loaded = {len(train_files) + len(test_files) + len(valid_files)}')
+    # print(f'Number of files loaded = {len(train_files) + len(test_files) + len(valid_files)}')
     print(f'For a total number of {len(test_dataset) + len(train_dataset) + len(valid_dataset)} examples')
 
     train_dataset_loader = torch.utils.data.DataLoader(
