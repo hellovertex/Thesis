@@ -102,7 +102,7 @@ class MultipleTxtFilesDataset(torch.utils.data.Dataset):
         return self._len
 
 
-class MultipleTxtFilesDatasetDownsampled(torch.utils.data.Dataset):
+class MultipleParquetFilesDatasetDownsampled(torch.utils.data.Dataset):
     def __init__(self, file_paths: list):
         self._data = None
         self._labels = None
@@ -143,7 +143,9 @@ class MultipleTxtFilesDatasetDownsampled(torch.utils.data.Dataset):
                           df_allin])
 
     def _init_load_data(self, file_paths):
-
+        """ Read from 1 up to n .parquet files into pandas
+        dataframe (possibly concatenated) and downsample each class until all classes
+        have equally many datapoint examples."""
         for i, file_path in enumerate(file_paths):
             print(f'Loading File {i}/{len(file_paths)} into memory...')
             df = pd.read_parquet(file_path)
@@ -177,7 +179,7 @@ def get_dataloaders(train_dir):
 
     # by convention, any .txt files inside this folder
     # that do not have .meta in their name, contain training data
-    train_dir_files = [abspath(f) for f in train_dir_files if ".txt" in f and ".aml" not in f]
+    train_dir_files = [abspath(f) for f in train_dir_files if ".parquet" in f and ".aml" not in f]
 
     print(train_dir_files)
     print(f'{len(train_dir_files)} train files loaded')
@@ -194,9 +196,9 @@ def get_dataloaders(train_dir):
     test_files = train_dir_files[-test_count:]
 
     # splits datasets
-    train_dataset = MultipleTxtFilesDataset(train_files)
-    valid_dataset = MultipleTxtFilesDataset(valid_files)
-    test_dataset = MultipleTxtFilesDataset(test_files)
+    train_dataset = MultipleParquetFilesDatasetDownsampled(train_files)
+    valid_dataset = MultipleParquetFilesDatasetDownsampled(valid_files)  # downsampling induces enough randomness
+    test_dataset = MultipleParquetFilesDatasetDownsampled(test_files)    # to generate three sets from one file
     # train_dataset = ConcatDataset(
     #     [SingleTxtFileDataset(train_file) for train_file in train_files])
     # valid_dataset = ConcatDataset(

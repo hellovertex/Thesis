@@ -9,4 +9,5 @@ pip install mlflow
 pip install tensorboardX
 pip install azureml-mlflow
 pip install azureml-tensorboard
+pip install scikit-learn
 echo "Finished setup script"
