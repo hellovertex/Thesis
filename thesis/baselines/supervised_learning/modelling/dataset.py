@@ -6,6 +6,7 @@ import pandas as pd
 import psutil
 import torch
 from torch.utils.data import ConcatDataset, SubsetRandomSampler, BatchSampler, RandomSampler
+from sklearn.utils import resample
 
 BATCH_SIZE = 512
 
@@ -93,6 +94,69 @@ class MultipleTxtFilesDataset(torch.utils.data.Dataset):
             for i, _ in enumerate(data):
                 self._data.append(data[i])
                 self._labels.append(labels[i])
+
+    def __getitem__(self, idx):
+        return self._data[idx], self._labels[idx]
+
+    def __len__(self):
+        return self._len
+
+
+class MultipleTxtFilesDatasetDownsampled(torch.utils.data.Dataset):
+    def __init__(self, file_paths: list):
+        self._data = None
+        self._labels = None
+        # loads everything into memory, which we can do only because our
+        # azure compute has 64GB ram
+        self._init_load_data(file_paths)
+        self._len = None
+
+    def _downsample(self, df):
+        # resample to remove data imbalance
+        # caution: happens in memory
+
+        FOLD = 0
+        CHECK_CALL = 1
+        RAISE_MIN_OR_3BB = 3
+        RAISE_HALF_POT = 4
+        RAISE_POT = 5
+        ALL_IN = 6
+        n_samples = df['label'].value_counts()[ALL_IN]  # ALL_IN is rarest class
+        df_fold = df[df['label'] == FOLD]
+        df_checkcall = df[df['label'] == CHECK_CALL]
+        df_raise_min = df[df['label'] == RAISE_MIN_OR_3BB]
+        df_raise_half = df[df['label'] == RAISE_HALF_POT]
+        df_raise_pot = df[df['label'] == RAISE_POT]
+        df_allin = df[df['label'] == ALL_IN]
+
+        df_fold_downsampled = resample(df_fold, replace=True, n_samples=n_samples, random_state=1)
+        df_checkcall_downsampled = resample(df_checkcall, replace=True, n_samples=n_samples, random_state=1)
+        df_raise_min_downsampled = resample(df_raise_min, replace=True, n_samples=n_samples, random_state=1)
+        df_raise_half_downsampled = resample(df_raise_half, replace=True, n_samples=n_samples, random_state=1)
+        df_raise_pot_downsampled = resample(df_raise_pot, replace=True, n_samples=n_samples, random_state=1)
+
+        return pd.concat([df_fold_downsampled,
+                          df_checkcall_downsampled,
+                          df_raise_min_downsampled,
+                          df_raise_half_downsampled,
+                          df_raise_pot_downsampled,
+                          df_allin])
+
+    def _init_load_data(self, file_paths):
+
+        for i, file_path in enumerate(file_paths):
+            print(f'Loading File {i}/{len(file_paths)} into memory...')
+            df = pd.read_parquet(file_path)
+            # preprocessing
+            fn_to_numeric = partial(pd.to_numeric, errors="coerce")
+            df = df.apply(fn_to_numeric).dropna()
+            if self._data is None:
+                self._data = df
+            else:
+                self._data = pd.concat([self._data, df])
+        self._data = self._downsample(self._data)
+        self._labels = self._data.pop('label')
+        self._len = len(self._data)
 
     def __getitem__(self, idx):
         return self._data[idx], self._labels[idx]
