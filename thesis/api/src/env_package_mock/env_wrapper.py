@@ -126,7 +126,7 @@ class CanonicalVectorizer(Vectorizer):
         # extract from original observation
         bits = obs[start_orig:end_orig]
         # zero padding
-        bits = np.resize(bits, self._max_players)
+        bits = np.pad(bits, (0,self._max_players-self.num_players), 'constant')
         # copy from original observation with zero padding
         self._obs[self._start_next_player:self.offset] = bits
 
@@ -166,7 +166,7 @@ class CanonicalVectorizer(Vectorizer):
             bits = np.zeros(self.num_players)
 
         # zero padding
-        bits = np.resize(bits, self._max_players)
+        bits = np.pad(bits, (0,self._max_players-self.num_players), 'constant')
 
         # move self to index 0
         bits = np.roll(bits, -self._player_who_acted)
@@ -335,7 +335,8 @@ class CanonicalVectorizer(Vectorizer):
             # set suit
             hand_bits[card[1] + offset + self.n_ranks] = 1
         # zero padding
-        hand_bits = np.resize(hand_bits, self._bits_player_hands)
+        hand_bits = np.pad(hand_bits, (0, self._bits_player_hands - len(hand_bits)), 'constant')
+        # hand_bits = np.resize(hand_bits, self._bits_player_hands)
         self._obs[self._start_player_hands:self.offset] = hand_bits
 
     def _vectorize_deque(self, dict_with_deque, normalization):
@@ -350,9 +351,9 @@ class CanonicalVectorizer(Vectorizer):
             j = 0  # todo offset by stage count
             for i, action in enumerate(dict_with_deque[stage]):
                 # set amount
-                vectorized[(j * 48) + i * self._bits_per_action] = action[1] / normalization
+                vectorized[(j*48) + i * self._bits_per_action] = action[1] / normalization
                 # set action one hot
-                vectorized[(j * 48) + action[0] + 1 + i * self._bits_per_action] = 1
+                vectorized[(j*48) + action[0] + 1 + i * self._bits_per_action] = 1
             j += 1
         return vectorized
 
@@ -407,38 +408,40 @@ BTN for Button, SB for Small Blind, etc...
 
 class Wrapper:
 
-    def __init__(self, env):
-        """
-        Args:
-            env:   The environment instance to be wrapped
-        """
-        self.env = env
+  def __init__(self, env):
+    """
+    Args:
+        env:   The environment instance to be wrapped
+    """
+    self.env = env
+    self.env._USE_SIMPLE_HU_OBS = False  # Deactivate, as this would break our vectorizer
 
-    def reset(self, config):
-        """Reset the environment with a new config.
-        Signals environment handlers to reset and restart the environment using
-        a config dict.
-        Args:
-          config: dict, specifying the parameters of the environment to be
-            generated. May contain state_dict to generate a deterministic environment.
-        Returns:
-          observation: A dict containing the full observation state.
-        """
-        raise NotImplementedError("Not implemented in Abstract Base class")
+  def reset(self, config):
+    """Reset the environment with a new config.
+    Signals environment handlers to reset and restart the environment using
+    a config dict.
+    Args:
+      config: dict, specifying the parameters of the environment to be
+        generated. May contain state_dict to generate a deterministic environment.
+    Returns:
+      observation: A dict containing the full observation state.
+    """
+    raise NotImplementedError("Not implemented in Abstract Base class")
 
-    def step(self, action):
-        """Take one step in the game.
-        Args:
-          action: object, mapping to an action taken by an agent.
-        Returns:
-          observation: object, Containing full observation state.
-          reward: float, Reward obtained from taking the action.
-          done: bool, Whether the game is done.
-          info: dict, Optional debugging information.
-        Raises:
-          AssertionError: When an illegal action is provided.
-        """
-        raise NotImplementedError("Not implemented in Abstract Base class")
+  def step(self, action):
+    """Take one step in the game.
+    Args:
+      action: object, mapping to an action taken by an agent.
+    Returns:
+      observation: object, Containing full observation state.
+      reward: float, Reward obtained from taking the action.
+      done: bool, Whether the game is done.
+      info: dict, Optional debugging information.
+    Raises:
+      AssertionError: When an illegal action is provided.
+    """
+    raise NotImplementedError("Not implemented in Abstract Base class")
+
 
 
 class WrapperPokerRL(Wrapper):

@@ -116,7 +116,7 @@ class CanonicalVectorizer(Vectorizer):
         # extract from original observation
         bits = obs[start_orig:end_orig]
         # zero padding
-        bits = np.resize(bits, self._max_players)
+        bits = np.pad(bits, (0,self._max_players-self.num_players), 'constant')
         # copy from original observation with zero padding
         self._obs[self._start_next_player:self.offset] = bits
 
@@ -156,7 +156,7 @@ class CanonicalVectorizer(Vectorizer):
             bits = np.zeros(self.num_players)
 
         # zero padding
-        bits = np.resize(bits, self._max_players)
+        bits = np.pad(bits, (0,self._max_players-self.num_players), 'constant')
 
         # move self to index 0
         bits = np.roll(bits, -self._player_who_acted)
@@ -325,7 +325,8 @@ class CanonicalVectorizer(Vectorizer):
             # set suit
             hand_bits[card[1] + offset + self.n_ranks] = 1
         # zero padding
-        hand_bits = np.resize(hand_bits, self._bits_player_hands)
+        hand_bits = np.pad(hand_bits, (0, self._bits_player_hands - len(hand_bits)), 'constant')
+        # hand_bits = np.resize(hand_bits, self._bits_player_hands)
         self._obs[self._start_player_hands:self.offset] = hand_bits
 
     def _vectorize_deque(self, dict_with_deque, normalization):

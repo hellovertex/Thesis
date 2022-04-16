@@ -82,8 +82,10 @@ class ActionHistoryWrapper(WrapperPokerRL):
     def _before_reset(self, config=None):
         # for the initial case of the environment reset, we manually put player index to 0
         # so that observation will be rolled relative to self
+        if config is not None:
+            self._player_hands = config['deck_state_dict']['hand']
         self._player_who_acted = 0
-        self._player_hands = config['deck_state_dict']['hand']
+
 
     # _______________________________ Action History ________________________________
 
@@ -117,6 +119,7 @@ class ActionHistoryWrapper(WrapperPokerRL):
     def get_current_obs(self, env_obs):
         """Implement this to encode Action History into observation"""
         raise NotImplementedError
+
 
 
 # noinspection DuplicatedCode

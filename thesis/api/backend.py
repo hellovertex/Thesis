@@ -15,7 +15,8 @@ class Backend:
         num_players = config['n_players']
         starting_stack_sizes = [config['starting_stack_size'] for _ in range(num_players)]
         args = NoLimitHoldem.ARGS_CLS(n_seats=num_players,
-                                      starting_stack_sizes_list=starting_stack_sizes)
+                                      starting_stack_sizes_list=starting_stack_sizes,
+                                      use_simplified_headsup_obs=False)
         env = NoLimitHoldem(is_evaluating=True,
                             env_args=args,
                             lut_holder=NoLimitHoldem.get_lut_holder())

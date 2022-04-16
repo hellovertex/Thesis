@@ -11,6 +11,7 @@ router = APIRouter()
 async def configure_environment(request: Request,
                                 n_players: int,
                                 starting_stack_size: int):
+    assert 2 <= n_players <= 6
     # make args for env
     config = {"n_players": n_players,
               "starting_stack_size": starting_stack_size}

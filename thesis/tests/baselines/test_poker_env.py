@@ -25,8 +25,8 @@ class TestPokerEnv(TestCase):
         env.step([1, -1])
         a = env.get_current_obs(is_terminal=False)
         b = env.get_current_obs(is_terminal=False)
-        print(env.print_obs(a))
-        print(env.deck.state_dict())
+        # print(env.print_obs(a))
+        # print(env.deck.state_dict())
         assert np.array_equal(a, b)
 
         # terminal should be all 0
