@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from backend import Backend
 import src.calls.environment.configure
+import src.calls.environment.reset
 
 app = FastAPI()
 
@@ -20,6 +21,9 @@ app.add_middleware(
 
 # register api calls
 app.include_router(src.calls.environment.configure.router)
+app.include_router(src.calls.environment.reset.router)
+
+app.backend = Backend()
 
 
 @app.get("/")

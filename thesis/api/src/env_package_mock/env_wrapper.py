@@ -455,9 +455,12 @@ class WrapperPokerRL(Wrapper):
                                             If an instance of a PokerEnv subclass is passed, the deck, holecards, and
                                             board in this instance will be synchronized from the handed env cls.
         """
-        assert config.get('deck_state_dict')
+        # assert config.get('deck_state_dict')
         self._before_reset(config)
-        env_obs, rew_for_all_players, done, info = self.env.reset(deck_state_dict=config['deck_state_dict'])
+        deck_state_dict = None
+        if config is not None:
+            deck_state_dict = config['deck_state_dict']
+        env_obs, rew_for_all_players, done, info = self.env.reset(deck_state_dict=deck_state_dict)
         return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
 
     def step(self, action):
@@ -588,8 +591,10 @@ class ActionHistoryWrapper(WrapperPokerRL):
     def _before_reset(self, config=None):
         # for the initial case of the environment reset, we manually put player index to 0
         # so that observation will be rolled relative to self
+        if config is not None:
+            self._player_hands = config['deck_state_dict']['hand']
         self._player_who_acted = 0
-        self._player_hands = config['deck_state_dict']['hand']
+
 
     # _______________________________ Action History ________________________________
 

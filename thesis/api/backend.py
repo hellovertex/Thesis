@@ -7,7 +7,7 @@ from src.env_package_mock.env_wrapper import AugmentObservationWrapper
 class Backend:
     def __init__(self):
         self._num_active_environments = 0
-        self._active_ens: List[Optional[Dict[int, Any]]] = []
+        self.active_ens: Optional[Dict[int, Any]] = {}
 
     def make_environment(self, config: dict):
         self._num_active_environments += 1
@@ -22,8 +22,5 @@ class Backend:
         # todo install env + wrapper as a separate package
         env = AugmentObservationWrapper(env)
 
-        self._active_ens.append({env_id: env})
+        self.active_ens[env_id] = env
         return env_id
-
-
-backend = Backend()
