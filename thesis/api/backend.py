@@ -1,7 +1,7 @@
 from typing import Optional, List, Dict, Any
 
 from PokerRL import NoLimitHoldem
-# from baselines.supervised_learning.data.steinberger_wrapper import AugmentObservationWrapper
+from src.env_package_mock.env_wrapper import AugmentObservationWrapper
 
 
 class Backend:
@@ -19,7 +19,8 @@ class Backend:
         env = NoLimitHoldem(is_evaluating=True,
                             env_args=args,
                             lut_holder=NoLimitHoldem.get_lut_holder())
-        # env = AugmentObservationWrapper(env)
+        # todo install env + wrapper as a separate package
+        env = AugmentObservationWrapper(env)
 
         self._active_ens.append({env_id: env})
         return env_id
