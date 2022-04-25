@@ -2,12 +2,12 @@ from pydantic import BaseModel, Field
 
 
 class EnvironmentConfig(BaseModel):
-    env_id: int = Field(
-        ...,
-        example=1,
-        description="The environment unique id "
-                    "used for requesting this specific environment."
-    )
+    # env_id: int = Field(
+    #     ...,
+    #     example=1,
+    #     description="The environment unique id "
+    #                 "used for requesting this specific environment."
+    # )
     num_players: int = Field(
         ...,
         example=6,

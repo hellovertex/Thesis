@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend import Backend
 import src.calls.environment.configure
 import src.calls.environment.reset
+import src.calls.environment.step
+import src.calls.environment.delete
 
 app = FastAPI()
 
@@ -18,12 +20,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.backend = Backend()
 
 # register api calls
 app.include_router(src.calls.environment.configure.router)
 app.include_router(src.calls.environment.reset.router)
+app.include_router(src.calls.environment.step.router)
+app.include_router(src.calls.environment.delete.router)
 
-app.backend = Backend()
+
 
 
 @app.get("/")

@@ -11,8 +11,15 @@ router = APIRouter()
 async def configure_environment(request: Request,
                                 n_players: int,
                                 starting_stack_size: int):
+    """Creates an environment in the backend and returns its unique ID.
+    Use this ID with /reset and /step endpoints to play the game.
+
+    Internal: Calls backend.Backend.make_environment(...),
+    returns its id and config wrapped in EnvironmentConfig Model class"""
     assert 2 <= n_players <= 6
     # make args for env
+    print(n_players)
+    print(starting_stack_size)
     config = {"n_players": n_players,
               "starting_stack_size": starting_stack_size}
 

@@ -747,3 +747,5 @@ class EnvironmentState(BaseModel):
     sixth_player_card_1_suit_1: float
     sixth_player_card_1_suit_2: float
     sixth_player_card_1_suit_3: float
+    human_player_position: int
+    done: bool
