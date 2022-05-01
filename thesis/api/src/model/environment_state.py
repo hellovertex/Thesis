@@ -96,10 +96,16 @@ class PlayerInfo(BaseModel):
     c1: Card
 
 
+class LastAction(BaseModel):
+    action_what: int
+    action_how_much: float
+
+
 class EnvState(BaseModel):
     env_id: int
     n_players: int
     starting_stack_size: int
+    last_action: Optional[LastAction]
     table_info: TableInfo
     p0: PlayerInfo
     p1: PlayerInfo

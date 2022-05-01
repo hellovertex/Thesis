@@ -664,7 +664,7 @@ class AugmentObservationWrapper(ActionHistoryWrapper):
     def get_current_obs(self, env_obs):
         obs = self._vectorizer.vectorize(env_obs, self._player_who_acted, action_history=self._actions_per_stage,
                                          player_hands=self._player_hands, normalization=self._normalization_sum)
-        self.print_augmented_obs(obs)
+        # self.print_augmented_obs(obs)
         return obs
 
     def _construct_obs_space(self):

@@ -34,6 +34,7 @@ async def reset_environment(request: Request, env_id: int):
     result = {'env_id': env_id,
               'n_players': n_players,
               'starting_stack_size': starting_stack_size,
+              'last_action': None,
               'table_info': table_info,
               **player_info,
               'board': board_cards,

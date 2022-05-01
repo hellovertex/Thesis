@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from starlette.requests import Request
 
-from src.model.environment_state import EnvironmentState, EnvState
+from src.model.environment_state import EnvironmentState, EnvState, LastAction
 from .utils import get_table_info, get_board_cards, get_player_stats
 
 router = APIRouter()
@@ -41,6 +41,7 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
     result = {'env_id': body.env_id,
               'n_players': n_players,
               'starting_stack_size': starting_stack_size,
+              'last_action': LastAction(**{'action_what': action[0], 'action_how_much': action[1]}),
               'table_info': table_info,
               **player_info,
               'board': board_cards,
