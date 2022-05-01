@@ -1,7 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
-import numpy as np
+from pydantic import BaseModel
 
 
 class Card(BaseModel):
@@ -79,7 +78,6 @@ class PlayerInfo(BaseModel):
     side_pot_rank_p0_is_3:   0.0
     side_pot_rank_p0_is_4:   0.0
     side_pot_rank_p0_is_5:   0.0
-    # todo add cards
     """
     pid: int
     stack_p: float
