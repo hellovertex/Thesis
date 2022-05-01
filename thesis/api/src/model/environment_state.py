@@ -90,6 +90,8 @@ class PlayerInfo(BaseModel):
     side_pot_rank_p_is_3: int
     side_pot_rank_p_is_4: int
     side_pot_rank_p_is_5: int
+    c0: Card
+    c1: Card
 
 
 class EnvState(BaseModel):
