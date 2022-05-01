@@ -2,6 +2,111 @@ from pydantic import BaseModel, Field
 import numpy as np
 
 
+class Card(BaseModel):
+    name: str
+    suit: int
+    rank: int
+
+
+class Board(BaseModel):
+    b0: Card
+    b1: Card
+    b2: Card
+    b3: Card
+    b4: Card
+
+
+class TableInfo(BaseModel):
+    """"
+    ante:   0.0
+    small_blind:   0.0032992411870509386
+    big_blind:   0.006598482374101877
+    min_raise:   0.013196964748203754
+    pot_amt:   0.0
+    total_to_call:   0.006598482374101877
+    p0_acts_next:   1.0
+    p1_acts_next:   0.0
+    p2_acts_next:   0.0
+    p3_acts_next:   0.0
+    p4_acts_next:   0.0
+    p5_acts_next:   0.0
+    round_preflop:   1.0
+    round_flop:   0.0
+    round_turn:   0.0
+    round_river:   0.0
+    side_pot_0:   0.0
+    side_pot_1:   0.0
+    side_pot_2:   0.0
+    side_pot_3:   0.0
+    side_pot_4:   0.0
+    side_pot_5:   0.0
+    """
+    ante: float
+    small_blind: float
+    big_blind: float
+    min_raise: float
+    pot_amt: float
+    total_to_call: float
+    p0_acts_next: float
+    p1_acts_next: float
+    p2_acts_next: float
+    p3_acts_next: float
+    p4_acts_next: float
+    p5_acts_next: float
+    round_preflop: float
+    round_flop: float
+    round_turn: float
+    round_river: float
+    side_pot_0: float
+    side_pot_1: float
+    side_pot_2: float
+    side_pot_3: float
+    side_pot_4: float
+    side_pot_5: float
+
+
+class PlayerInfo(BaseModel):
+    """"
+    stack_p0:   1.106103539466858
+    curr_bet_p0:   0.0
+    has_folded_this_episode_p0:   0.0
+    is_allin_p0:   0.0
+    side_pot_rank_p0_is_0:   0.0
+    side_pot_rank_p0_is_1:   0.0
+    side_pot_rank_p0_is_2:   0.0
+    side_pot_rank_p0_is_3:   0.0
+    side_pot_rank_p0_is_4:   0.0
+    side_pot_rank_p0_is_5:   0.0
+    # todo add cards
+    """
+    pid: int
+    stack_p: float
+    curr_bet_p: float
+    has_folded_this_episode_p: bool
+    is_allin_p: bool
+    side_pot_rank_p_is_0: int
+    side_pot_rank_p_is_1: int
+    side_pot_rank_p_is_2: int
+    side_pot_rank_p_is_3: int
+    side_pot_rank_p_is_4: int
+    side_pot_rank_p_is_5: int
+
+
+class EnvState(BaseModel):
+    table_info: TableInfo
+    p0: PlayerInfo
+    p1: PlayerInfo
+    p2: PlayerInfo
+    p3: PlayerInfo
+    p4: PlayerInfo
+    p5: PlayerInfo
+    board: Board
+    human_player_position: int
+    # human_player_card_00: str
+    # human_player_card_01: str
+    done: bool
+
+
 class EnvironmentState(BaseModel):
     """
     ante:   0.0
@@ -13,7 +118,7 @@ class EnvironmentState(BaseModel):
     p0_acts_next:   1.0
     p1_acts_next:   0.0
     p2_acts_next:   0.0
-    p3_acts_next:   1.0
+    p3_acts_next:   0.0
     p4_acts_next:   0.0
     p5_acts_next:   0.0
     round_preflop:   1.0
@@ -748,4 +853,6 @@ class EnvironmentState(BaseModel):
     sixth_player_card_1_suit_2: float
     sixth_player_card_1_suit_3: float
     human_player_position: int
+    # human_player_card_00: str
+    # human_player_card_01: str
     done: bool
