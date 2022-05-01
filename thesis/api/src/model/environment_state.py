@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field
 import numpy as np
 
@@ -95,6 +97,9 @@ class PlayerInfo(BaseModel):
 
 
 class EnvState(BaseModel):
+    env_id: int
+    n_players: int
+    starting_stack_size: int
     table_info: TableInfo
     p0: PlayerInfo
     p1: PlayerInfo
@@ -103,8 +108,8 @@ class EnvState(BaseModel):
     p4: PlayerInfo
     p5: PlayerInfo
     board: Board
-    human_player_index: int
-    human_player: str
+    human_player_index: Optional[int]
+    human_player: Optional[str]
     # human_player_card_00: str
     # human_player_card_01: str
     done: bool

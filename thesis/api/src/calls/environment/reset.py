@@ -15,7 +15,9 @@ abbrevs = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth']
             response_model=EnvState,
             operation_id="reset_environment")
 async def reset_environment(request: Request, env_id: int):
-    human_player_position = randint(0, request.app.backend.active_ens[env_id].env.N_SEATS)
+    n_players = request.app.backend.active_ens[env_id].env.N_SEATS
+    human_player_position = randint(0, n_players - 1)
+    starting_stack_size = request.app.backend.active_ens[env_id].env.DEFAULT_STACK_SIZE
     obs, _, _, _ = request.app.backend.active_ens[env_id].reset()
 
     obs_dict = request.app.backend.active_ens[env_id].obs_idx_dict
@@ -29,7 +31,10 @@ async def reset_environment(request: Request, env_id: int):
                                   obs=obs)
     player_info = get_player_stats(obs_keys, obs, start_idx=idx_end_table + 1)
 
-    result = {'table_info': table_info,
+    result = {'env_id': env_id,
+              'n_players': n_players,
+              'starting_stack_size': starting_stack_size,
+              'table_info': table_info,
               **player_info,
               'board': board_cards,
               'human_player_index': human_player_position,
