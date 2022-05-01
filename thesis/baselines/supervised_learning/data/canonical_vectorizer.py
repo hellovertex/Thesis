@@ -1,3 +1,5 @@
+from typing import Optional, List
+
 import numpy as np
 from PokerRL.game.Poker import Poker
 
@@ -31,7 +33,9 @@ class CanonicalVectorizer(Vectorizer):
         self._n_board_cards = n_board_cards
         self._n_hand_cards = n_hand_cards
         self._n_stages = len(['preflop', 'flop', 'turn', 'river'])
-        self._player_hands = None
+        card = List[int]  # 2 cards
+        hand = List[card]
+        self._player_hands: Optional[List[hand]] = None
         self._action_history = None
         self._player_who_acted = None
         # btn_idx is equal to current player offset, since button is at index 0 inside environment
@@ -116,7 +120,7 @@ class CanonicalVectorizer(Vectorizer):
         # extract from original observation
         bits = obs[start_orig:end_orig]
         # zero padding
-        bits = np.pad(bits, (0,self._max_players-self.num_players), 'constant')
+        bits = np.pad(bits, (0, self._max_players - self.num_players), 'constant')
         # copy from original observation with zero padding
         self._obs[self._start_next_player:self.offset] = bits
 
@@ -156,7 +160,7 @@ class CanonicalVectorizer(Vectorizer):
             bits = np.zeros(self.num_players)
 
         # zero padding
-        bits = np.pad(bits, (0,self._max_players-self.num_players), 'constant')
+        bits = np.pad(bits, (0, self._max_players - self.num_players), 'constant')
 
         # move self to index 0
         bits = np.roll(bits, -self._player_who_acted)
@@ -341,9 +345,9 @@ class CanonicalVectorizer(Vectorizer):
             j = 0  # todo offset by stage count
             for i, action in enumerate(dict_with_deque[stage]):
                 # set amount
-                vectorized[(j*48) + i * self._bits_per_action] = action[1] / normalization
+                vectorized[(j * 48) + i * self._bits_per_action] = action[1] / normalization
                 # set action one hot
-                vectorized[(j*48) + action[0] + 1 + i * self._bits_per_action] = 1
+                vectorized[(j * 48) + action[0] + 1 + i * self._bits_per_action] = 1
             j += 1
         return vectorized
 

@@ -37,6 +37,10 @@ class Wrapper:
 
 class WrapperPokerRL(Wrapper):
 
+    def __init__(self, env):
+        super().__init__(env)
+        self._player_hands = []
+
     def reset(self, config=None):
         """
         Resets the state of the game to the standard beginning of the episode. If specified in the args passed,
@@ -55,6 +59,10 @@ class WrapperPokerRL(Wrapper):
         if config is not None:
             deck_state_dict = config['deck_state_dict']
         env_obs, rew_for_all_players, done, info = self.env.reset(deck_state_dict=deck_state_dict)
+        if not self._player_hands:
+            for i in range(self.env.N_SEATS):
+                self._player_hands.append(self.env.get_hole_cards_of_player(i))
+
         return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
 
     def step(self, action):

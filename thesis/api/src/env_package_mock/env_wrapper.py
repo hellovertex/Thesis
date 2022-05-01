@@ -1,4 +1,6 @@
 import enum
+from typing import List, Optional
+
 import numpy as np
 from gym import spaces
 from collections import defaultdict, deque
@@ -41,7 +43,9 @@ class CanonicalVectorizer(Vectorizer):
         self._n_board_cards = n_board_cards
         self._n_hand_cards = n_hand_cards
         self._n_stages = len(['preflop', 'flop', 'turn', 'river'])
-        self._player_hands = None
+        card = List[int]  # 2 cards
+        hand = List[card]
+        self._player_hands: Optional[List[hand]] = None
         self._action_history = None
         self._player_who_acted = None
         # btn_idx is equal to current player offset, since button is at index 0 inside environment
@@ -126,7 +130,7 @@ class CanonicalVectorizer(Vectorizer):
         # extract from original observation
         bits = obs[start_orig:end_orig]
         # zero padding
-        bits = np.pad(bits, (0,self._max_players-self.num_players), 'constant')
+        bits = np.pad(bits, (0, self._max_players - self.num_players), 'constant')
         # copy from original observation with zero padding
         self._obs[self._start_next_player:self.offset] = bits
 
@@ -166,7 +170,7 @@ class CanonicalVectorizer(Vectorizer):
             bits = np.zeros(self.num_players)
 
         # zero padding
-        bits = np.pad(bits, (0,self._max_players-self.num_players), 'constant')
+        bits = np.pad(bits, (0, self._max_players - self.num_players), 'constant')
 
         # move self to index 0
         bits = np.roll(bits, -self._player_who_acted)
@@ -351,9 +355,9 @@ class CanonicalVectorizer(Vectorizer):
             j = 0  # todo offset by stage count
             for i, action in enumerate(dict_with_deque[stage]):
                 # set amount
-                vectorized[(j*48) + i * self._bits_per_action] = action[1] / normalization
+                vectorized[(j * 48) + i * self._bits_per_action] = action[1] / normalization
                 # set action one hot
-                vectorized[(j*48) + action[0] + 1 + i * self._bits_per_action] = 1
+                vectorized[(j * 48) + action[0] + 1 + i * self._bits_per_action] = 1
             j += 1
         return vectorized
 
@@ -408,43 +412,46 @@ BTN for Button, SB for Small Blind, etc...
 
 class Wrapper:
 
-  def __init__(self, env):
-    """
-    Args:
-        env:   The environment instance to be wrapped
-    """
-    self.env = env
-    self.env._USE_SIMPLE_HU_OBS = False  # Deactivate, as this would break our vectorizer
+    def __init__(self, env):
+        """
+        Args:
+            env:   The environment instance to be wrapped
+        """
+        self.env = env
+        self.env._USE_SIMPLE_HU_OBS = False  # Deactivate, as this would break our vectorizer
 
-  def reset(self, config):
-    """Reset the environment with a new config.
-    Signals environment handlers to reset and restart the environment using
-    a config dict.
-    Args:
-      config: dict, specifying the parameters of the environment to be
-        generated. May contain state_dict to generate a deterministic environment.
-    Returns:
-      observation: A dict containing the full observation state.
-    """
-    raise NotImplementedError("Not implemented in Abstract Base class")
+    def reset(self, config):
+        """Reset the environment with a new config.
+        Signals environment handlers to reset and restart the environment using
+        a config dict.
+        Args:
+          config: dict, specifying the parameters of the environment to be
+            generated. May contain state_dict to generate a deterministic environment.
+        Returns:
+          observation: A dict containing the full observation state.
+        """
+        raise NotImplementedError("Not implemented in Abstract Base class")
 
-  def step(self, action):
-    """Take one step in the game.
-    Args:
-      action: object, mapping to an action taken by an agent.
-    Returns:
-      observation: object, Containing full observation state.
-      reward: float, Reward obtained from taking the action.
-      done: bool, Whether the game is done.
-      info: dict, Optional debugging information.
-    Raises:
-      AssertionError: When an illegal action is provided.
-    """
-    raise NotImplementedError("Not implemented in Abstract Base class")
-
+    def step(self, action):
+        """Take one step in the game.
+        Args:
+          action: object, mapping to an action taken by an agent.
+        Returns:
+          observation: object, Containing full observation state.
+          reward: float, Reward obtained from taking the action.
+          done: bool, Whether the game is done.
+          info: dict, Optional debugging information.
+        Raises:
+          AssertionError: When an illegal action is provided.
+        """
+        raise NotImplementedError("Not implemented in Abstract Base class")
 
 
 class WrapperPokerRL(Wrapper):
+
+    def __init__(self, env):
+        super().__init__(env)
+        self._player_hands = []
 
     def reset(self, config=None):
         """
@@ -464,6 +471,10 @@ class WrapperPokerRL(Wrapper):
         if config is not None:
             deck_state_dict = config['deck_state_dict']
         env_obs, rew_for_all_players, done, info = self.env.reset(deck_state_dict=deck_state_dict)
+        if not self._player_hands:
+            for i in range(self.env.N_SEATS):
+                self._player_hands.append(self.env.get_hole_cards_of_player(i))
+
         return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
 
     def step(self, action):
@@ -598,7 +609,6 @@ class ActionHistoryWrapper(WrapperPokerRL):
             self._player_hands = config['deck_state_dict']['hand']
         self._player_who_acted = 0
 
-
     # _______________________________ Action History ________________________________
 
     def discretize(self, action_formatted):
@@ -654,7 +664,7 @@ class AugmentObservationWrapper(ActionHistoryWrapper):
     def get_current_obs(self, env_obs):
         obs = self._vectorizer.vectorize(env_obs, self._player_who_acted, action_history=self._actions_per_stage,
                                          player_hands=self._player_hands, normalization=self._normalization_sum)
-        # self.print_augmented_obs(obs)
+        self.print_augmented_obs(obs)
         return obs
 
     def _construct_obs_space(self):
