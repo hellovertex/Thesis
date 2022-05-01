@@ -103,7 +103,8 @@ class EnvState(BaseModel):
     p4: PlayerInfo
     p5: PlayerInfo
     board: Board
-    human_player_position: int
+    human_player_index: int
+    human_player: str
     # human_player_card_00: str
     # human_player_card_01: str
     done: bool

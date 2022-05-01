@@ -32,7 +32,8 @@ async def reset_environment(request: Request, env_id: int):
     result = {'table_info': table_info,
               **player_info,
               'board': board_cards,
-              'human_player_position': human_player_position,
+              'human_player_index': human_player_position,
+              'human_player': ['p0', 'p1', 'p2', 'p3', 'p4', 'p5'][human_player_position],
               'done': False
               }
     return EnvState(**dict(result))

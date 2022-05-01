@@ -26,7 +26,7 @@ def get_player_cards(idx_start, idx_end, obs, n_suits=4, n_ranks=13):
         # print(f'obs[cur_idx:end_idx] = {obs[cur_idx:end_idx]}')
         if sum(bits) > 0:
             idx = np.where(bits == 1)[0]
-            rank, suit = idx[0], idx[1]
+            rank, suit = idx[0], idx[1]-n_ranks
 
         cards[f'c{i}'] = Card(**{'name': f'c{i}',
                                  'suit': suit,
