@@ -3,8 +3,8 @@ from random import randint
 from fastapi import APIRouter
 from starlette.requests import Request
 
-from src.calls.environment.utils import get_table_info, get_board_cards, get_player_stats, get_player_cards
-from src.model.environment_state import EnvState
+from src.calls.environment.utils import get_table_info, get_board_cards, get_player_stats
+from src.model.environment_state import EnvState, Info
 
 router = APIRouter()
 abbrevs = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth']
@@ -40,6 +40,11 @@ async def reset_environment(request: Request, env_id: int):
               'board': board_cards,
               'human_player_index': human_player_position,
               'human_player': ['p0', 'p1', 'p2', 'p3', 'p4', 'p5'][human_player_position],
-              'done': False
+              'done': False,
+              'info': Info(**{'continue_round': True,
+                              'draw_next_stage': False,
+                              'rundown': False,
+                              'deal_next_hand': False,
+                              'payouts': None})
               }
     return EnvState(**dict(result))

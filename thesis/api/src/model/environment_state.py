@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict
 
 from pydantic import BaseModel
 
@@ -101,10 +101,10 @@ class LastAction(BaseModel):
 
 class Info(BaseModel):
     continue_round: bool
-    next_to_act: int  # only if continue_round = true
+    draw_next_stage: bool
     rundown: bool
-    next_round: bool
-    # payouts: todo
+    deal_next_hand: bool
+    payouts: Optional[Dict[int, float]]
 
 
 class EnvState(BaseModel):
@@ -126,7 +126,7 @@ class EnvState(BaseModel):
     human_player_index: Optional[int]
     human_player: Optional[str]
     done: bool
-    # info: Info
+    info: Info
 
 
 class EnvironmentState(BaseModel):

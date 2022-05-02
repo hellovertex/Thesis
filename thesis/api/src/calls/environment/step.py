@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from starlette.requests import Request
 
-from src.model.environment_state import EnvironmentState, EnvState, LastAction
+from src.model.environment_state import EnvironmentState, EnvState, LastAction, Info
 from .utils import get_table_info, get_board_cards, get_player_stats
 
 router = APIRouter()
@@ -26,7 +26,8 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
     else:
         action = (body.action, body.action_how_much)
 
-    obs, _, done, _ = request.app.backend.active_ens[body.env_id].step(action)
+    obs, _, done, info = request.app.backend.active_ens[body.env_id].step(action)
+    print(f'info = {info}')
     obs_dict = request.app.backend.active_ens[body.env_id].obs_idx_dict
     obs_keys = [k for k in obs_dict.keys()]
 
@@ -47,6 +48,16 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
               'board': board_cards,
               'human_player_index': None,
               'human_player': None,
-              'done': False
+              'done': False,
+              'info': Info(**{'continue_round': True,
+                              'draw_next_stage': False,
+                              'rundown': False,
+                              'deal_next_hand': False,
+                              'payouts': None})
+              # 'info': Info(**{'continue_round': info['continue_round'],
+              #                 'draw_next_stage': info['draw_next_stage'],
+              #                 'rundown': info['rundown'],
+              #                 'deal_next_hand': info['deal_next_hand'],
+              #                 'payouts': info['payouts']})
               }
     return EnvState(**dict(result))
