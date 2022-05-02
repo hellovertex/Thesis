@@ -42,7 +42,7 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
               'n_players': n_players,
               'starting_stack_size': starting_stack_size,
               'last_action': LastAction(**{'action_what': action[0], 'action_how_much': action[1]}),
-              'table_info': table_info,
+              'table': table_info,
               **player_info,
               'board': board_cards,
               'human_player_index': None,

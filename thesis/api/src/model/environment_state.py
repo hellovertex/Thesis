@@ -17,7 +17,7 @@ class Board(BaseModel):
     b4: Card
 
 
-class TableInfo(BaseModel):
+class Table(BaseModel):
     """"
     ante:   0.0
     small_blind:   0.0032992411870509386
@@ -99,12 +99,21 @@ class LastAction(BaseModel):
     action_how_much: float
 
 
+class Info(BaseModel):
+    continue_round: bool
+    next_to_act: int  # only if continue_round = true
+    rundown: bool
+    next_round: bool
+    # payouts: todo
+
+
 class EnvState(BaseModel):
+    # meta
     env_id: int
     n_players: int
     starting_stack_size: int
-    last_action: Optional[LastAction]
-    table_info: TableInfo
+    # game
+    table: Table
     p0: PlayerInfo
     p1: PlayerInfo
     p2: PlayerInfo
@@ -112,11 +121,12 @@ class EnvState(BaseModel):
     p4: PlayerInfo
     p5: PlayerInfo
     board: Board
+    # utils
+    last_action: Optional[LastAction]
     human_player_index: Optional[int]
     human_player: Optional[str]
-    # human_player_card_00: str
-    # human_player_card_01: str
     done: bool
+    # info: Info
 
 
 class EnvironmentState(BaseModel):

@@ -2,7 +2,7 @@ import re
 
 import numpy as np
 
-from src.model.environment_state import PlayerInfo, Card, Board, TableInfo
+from src.model.environment_state import PlayerInfo, Card, Board, Table
 
 
 def maybe_replace_leading_digit(val):
@@ -105,4 +105,4 @@ def get_board_cards(idx_board_start, idx_board_end, obs, n_suits=4, n_ranks=13):
 
 def get_table_info(obs_keys, obs):
     table_kwargs = list(zip(obs_keys, obs))[0:obs_keys.index('side_pot_5') + 1]
-    return TableInfo(**dict(table_kwargs))
+    return Table(**dict(table_kwargs))
