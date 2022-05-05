@@ -56,6 +56,15 @@ implement pypoker.PokerObservation.last_moves()
 
 
 [TODOS]
+backend returns btn indexed references
+backend returns human_offset
+frontend uses human_offset indexed references to draw everything
+should it use btn indexed references to step the game or should it compute human_offset indexed
+05-05: todos frontend:
+ - display names correctly
+ - add text for raise amounts and pot size
+ - add sounds
+ - populate text box with last actions
 03-26: Supervised baseline goal is NOT high accuracy. Instead it should, by the law of large numbers predict
 action other than fold only when it is +EV
 03-25: eda with vaex and hdf5

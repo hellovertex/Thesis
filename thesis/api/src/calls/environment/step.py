@@ -49,6 +49,7 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
               'human_player_index': None,
               'human_player': None,
               'done': False,
+              'p_acts_next': request.app.backend.active_ens[body.env_id].env.current_player.seat_id,
               'info': Info(**{'continue_round': True,
                               'draw_next_stage': False,
                               'rundown': False,

@@ -40,6 +40,7 @@ async def reset_environment(request: Request, env_id: int):
               'board': board_cards,
               'human_player_index': human_player_position,
               'human_player': ['p0', 'p1', 'p2', 'p3', 'p4', 'p5'][human_player_position],
+              'p_acts_next': request.app.backend.active_ens[env_id].env.current_player.seat_id,
               'done': False,
               'info': Info(**{'continue_round': True,
                               'draw_next_stage': False,

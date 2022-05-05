@@ -125,6 +125,7 @@ class EnvState(BaseModel):
     last_action: Optional[LastAction]
     human_player_index: Optional[int]
     human_player: Optional[str]
+    p_acts_next: int
     done: bool
     info: Info
 
