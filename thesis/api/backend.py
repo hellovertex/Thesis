@@ -21,7 +21,7 @@ class Backend:
                             env_args=args,
                             lut_holder=NoLimitHoldem.get_lut_holder())
         # todo install env + wrapper as a separate package
-        env = AugmentObservationWrapper(env)
+        env_wrapped = AugmentObservationWrapper(env)
 
-        self.active_ens[env_id] = env
+        self.active_ens[env_id] = env_wrapped
         return env_id

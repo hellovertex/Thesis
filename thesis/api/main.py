@@ -13,6 +13,7 @@ app = FastAPI()
 origins = [
     "http://localhost:1234",
     "http://localhost:8000",
+    "http://localhost:*",
 ]
 
 app.add_middleware(
@@ -34,6 +35,8 @@ app.include_router(src.calls.environment.delete.router)
 async def root():
     return {"message": "Hello Poker"}
 
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 # if __name__ == "__main__":
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
 #

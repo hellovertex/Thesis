@@ -26,7 +26,9 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
     else:
         action = (body.action, body.action_how_much)
 
-    obs, _, done, info = request.app.backend.active_ens[body.env_id].step(action)
+    obs, a, done, info = request.app.backend.active_ens[body.env_id].step(action)
+    print(f'a = {a}')
+    print(f'done = {done}')
     print(f'info = {info}')
     obs_dict = request.app.backend.active_ens[body.env_id].obs_idx_dict
     obs_keys = [k for k in obs_dict.keys()]
@@ -38,7 +40,8 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
                                   idx_board_end=obs_keys.index('0th_player_card_0_rank_0'),
                                   obs=obs)
     player_info = get_player_stats(obs_keys, obs, start_idx=idx_end_table + 1)
-
+    print(f'current_player = {request.app.backend.active_ens[body.env_id].env.current_player.seat_id}')
+    # players_with_chips_left = [p if not p.is_all_in]
     result = {'env_id': body.env_id,
               'n_players': n_players,
               'starting_stack_size': starting_stack_size,
@@ -48,17 +51,18 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
               'board': board_cards,
               'human_player_index': None,
               'human_player': None,
-              'done': False,
+              'done': done,
+              # todo this jumps from 3 to 1 instead of going from 3 to 4
               'p_acts_next': request.app.backend.active_ens[body.env_id].env.current_player.seat_id,
-              'info': Info(**{'continue_round': True,
-                              'draw_next_stage': False,
-                              'rundown': False,
-                              'deal_next_hand': False,
-                              'payouts': None})
-              # 'info': Info(**{'continue_round': info['continue_round'],
-              #                 'draw_next_stage': info['draw_next_stage'],
-              #                 'rundown': info['rundown'],
-              #                 'deal_next_hand': info['deal_next_hand'],
-              #                 'payouts': info['payouts']})
+              # 'info': Info(**{'continue_round': True,
+              #                 'draw_next_stage': False,
+              #                 'rundown': False,
+              #                 'deal_next_hand': False,
+              #                 'payouts': None})
+              'info': Info(**{'continue_round': info['continue_round'],
+                              'draw_next_stage': info['draw_next_stage'],
+                              'rundown': info['rundown'],
+                              'deal_next_hand': info['deal_next_hand'],
+                              'payouts': info['payouts']})
               }
     return EnvState(**dict(result))
