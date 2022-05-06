@@ -144,6 +144,8 @@ class AugmentObservationWrapper(ActionHistoryWrapper):
         self.print_augmented_obs(obs)
         return obs
 
+    def get_info(self):
+        return self.env.get_info()
     def _construct_obs_space(self):
         """
         The maximum all chip-values can reach is n_seats, because we normalize by dividing by the average starting stack

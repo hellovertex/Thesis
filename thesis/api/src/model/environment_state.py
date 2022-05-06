@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 from pydantic import BaseModel
 
@@ -111,7 +111,7 @@ class EnvState(BaseModel):
     # meta
     env_id: int
     n_players: int
-    starting_stack_size: int
+    stack_sizes: Dict
     # game
     table: Table
     p0: PlayerInfo
