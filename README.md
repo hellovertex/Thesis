@@ -20,3 +20,11 @@ To run the example:
 6. ```pip install PokerRL```
 7. ```cd Thesis/thesis/baselines/supervised_learning```
 8. ```python3 run_generate_train_data.py``` 
+
+## Debugging and Development
+### Python backend
+1. `cd thesis/PokerEnv && pip install --editable .`
+2. `uvicorn main:app --reload --reload--include ../PokerEnv`
+   (Note make sure all requirements especially is installed as otherwise uvicorn may use different versions)
+### nodejs fronend
+1. `npm install axios && npm run start`

@@ -106,6 +106,13 @@ class Info(BaseModel):
     deal_next_hand: bool
     payouts: Optional[Dict[int, float]]
 
+class Players:
+    p0: PlayerInfo
+    p1: PlayerInfo
+    p2: PlayerInfo
+    p3: PlayerInfo
+    p4: PlayerInfo
+    p5: PlayerInfo
 
 class EnvState(BaseModel):
     # meta
