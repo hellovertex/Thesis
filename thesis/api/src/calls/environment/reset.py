@@ -47,7 +47,14 @@ class EnvironmentResetRequestBody(BaseModel):
 async def reset_environment(body: EnvironmentResetRequestBody, request: Request):
     env_id = body.env_id
     n_players = request.app.backend.active_ens[env_id].env.N_SEATS
-    human_player_position = randint(0, n_players - 1)
+
+    if request.app.backend.metadata[env_id]['initial_state']:
+        human_player_position = randint(0, n_players - 1)
+        request.app.backend.metadata[env_id]['initial_state'] = False
+        request.app.backend.metadata[env_id]['human_player_position'] = human_player_position
+    else:
+        human_player_position = min(0, request.app.backend.metadata[env_id]['human_player_position'] - 1)
+        request.app.backend.metadata[env_id]['human_player_position'] = human_player_position
     stack_sizes = body.stack_sizes
     if body.stack_sizes is None:
         default_stack = request.app.backend.active_ens[env_id].env.DEFAULT_STACK_SIZE

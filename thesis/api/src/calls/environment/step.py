@@ -43,6 +43,7 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
     print(f'current_player = {request.app.backend.active_ens[body.env_id].env.current_player.seat_id}')
     seats = request.app.backend.active_ens[body.env_id].env.seats
     stack_sizes = [(f'stack_p{i}', seats[i].stack) for i in range(len(seats))]
+
     # players_with_chips_left = [p if not p.is_all_in]
     result = {'env_id': body.env_id,
               'n_players': n_players,

@@ -8,6 +8,7 @@ class Backend:
     def __init__(self):
         self._num_active_environments = 0
         self.active_ens: Optional[Dict[int, Any]] = {}
+        self.metadata: Optional[Dict[int, Dict]] = {}
 
     def make_environment(self, config: dict):
         self._num_active_environments += 1
@@ -24,4 +25,5 @@ class Backend:
         env_wrapped = AugmentObservationWrapper(env)
 
         self.active_ens[env_id] = env_wrapped
+        self.metadata[env_id] = {'initial_state': True}
         return env_id
