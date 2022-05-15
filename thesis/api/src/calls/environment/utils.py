@@ -30,7 +30,8 @@ def get_player_cards(idx_start, idx_end, obs, n_suits=4, n_ranks=13):
 
         cards[f'c{i}'] = Card(**{'name': f'c{i}',
                                  'suit': suit,
-                                 'rank': rank})
+                                 'rank': rank,
+                                 'index': i})
         cur_idx = end_idx
     assert end_idx == idx_end
     return cards
@@ -91,11 +92,12 @@ def get_board_cards(idx_board_start, idx_board_end, obs, n_suits=4, n_ranks=13):
         bits = obs[cur_idx:end_idx]
         if sum(bits) > 0:
             idx = np.where(bits == 1)[0]
-            rank, suit = idx[0], idx[1]
+            rank, suit = idx[0], idx[1]-n_ranks
 
         cards[f'b{i}'] = Card(**{'name': f'b{i}',
                                  'suit': suit,
-                                 'rank': rank})
+                                 'rank': rank,
+                                 'index': i})
         cur_idx = end_idx
     # print(f'idx_board_end = {idx_board_end}')
     # print(f'end_idx = {end_idx}')

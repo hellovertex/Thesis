@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from starlette.requests import Request
 
 from src.calls.environment.utils import get_table_info, get_board_cards, get_player_stats
-from src.model.environment_state import EnvState, Info
+from src.model.environment_state import EnvironmentState, Info
 
 router = APIRouter()
 abbrevs = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth']
@@ -42,7 +42,7 @@ class EnvironmentResetRequestBody(BaseModel):
 
 
 @router.post("/environment/{env_id}/reset/",
-             response_model=EnvState,
+             response_model=EnvironmentState,
              operation_id="reset_environment")
 async def reset_environment(body: EnvironmentResetRequestBody, request: Request):
     env_id = body.env_id
@@ -89,4 +89,4 @@ async def reset_environment(body: EnvironmentResetRequestBody, request: Request)
                               'deal_next_hand': False,
                               'payouts': None})
               }
-    return EnvState(**dict(result))
+    return EnvironmentState(**dict(result))

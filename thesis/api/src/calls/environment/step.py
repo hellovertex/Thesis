@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from starlette.requests import Request
 
-from src.model.environment_state import EnvironmentState, EnvState, LastAction, Info
+from src.model.environment_state import EnvironmentState, EnvironmentState, LastAction, Info
 from .utils import get_table_info, get_board_cards, get_player_stats
 
 router = APIRouter()
@@ -15,7 +15,7 @@ class EnvironmentStepRequestBody(BaseModel):
 
 
 @router.post("/environment/{env_id}/step",
-             response_model=EnvState,
+             response_model=EnvironmentState,
              operation_id="step_environment")
 async def step_environment(body: EnvironmentStepRequestBody, request: Request):
     n_players = request.app.backend.active_ens[body.env_id].env.N_SEATS
@@ -27,6 +27,10 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
         action = (body.action, body.action_how_much)
 
     obs, a, done, info = request.app.backend.active_ens[body.env_id].step(action)
+    # if action was fold, but player could have checked, the environment internally changes the action
+    # if that happens, we must overwrite last action accordingly
+    action = request.app.backend.active_ens[body.env_id].env.last_action  # [what, how_much, who]
+    action = action[0], action[1]  # drop who
     print(f'a = {a}')
     print(f'done = {done}')
     print(f'info = {info}')
@@ -68,4 +72,4 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
                               'deal_next_hand': info['deal_next_hand'],
                               'payouts': info['payouts']})
               }
-    return EnvState(**dict(result))
+    return EnvironmentState(**dict(result))
