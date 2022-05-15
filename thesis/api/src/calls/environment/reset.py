@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from starlette.requests import Request
 
 from src.calls.environment.utils import get_table_info, get_board_cards, get_player_stats
-from src.model.environment_state import EnvironmentState, Info
+from src.model.environment_state import EnvironmentState, Info, Players
 
 router = APIRouter()
 abbrevs = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth']
@@ -77,7 +77,7 @@ async def reset_environment(body: EnvironmentResetRequestBody, request: Request)
               'stack_sizes': stack_sizes,
               'last_action': None,
               'table': table_info,
-              **player_info,
+              'players': Players(**player_info),
               'board': board_cards,
               'human_player_index': human_player_position,
               'human_player': ['p0', 'p1', 'p2', 'p3', 'p4', 'p5'][human_player_position],

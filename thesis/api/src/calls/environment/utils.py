@@ -37,7 +37,7 @@ def get_player_cards(idx_start, idx_end, obs, n_suits=4, n_ranks=13):
     return cards
 
 
-def get_player_stats(obs_keys, obs, start_idx):
+def get_player_stats(obs_keys, obs, start_idx) -> dict:
     # cards
     cp0 = get_player_cards(idx_start=obs_keys.index("0th_player_card_0_rank_0"),
                            idx_end=obs_keys.index("1th_player_card_0_rank_0"),

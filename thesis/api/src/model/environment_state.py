@@ -108,7 +108,7 @@ class Info(BaseModel):
     payouts: Optional[Dict[int, float]]
 
 
-class Players:
+class Players(BaseModel):
     p0: PlayerInfo
     p1: PlayerInfo
     p2: PlayerInfo
@@ -124,12 +124,7 @@ class EnvironmentState(BaseModel):
     stack_sizes: Dict
     # game
     table: Table
-    p0: PlayerInfo
-    p1: PlayerInfo
-    p2: PlayerInfo
-    p3: PlayerInfo
-    p4: PlayerInfo
-    p5: PlayerInfo
+    players: Players
     board: Board
     # utils
     last_action: Optional[LastAction]
