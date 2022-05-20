@@ -26,12 +26,6 @@ class Table(BaseModel):
     min_raise:   0.013196964748203754
     pot_amt:   0.0
     total_to_call:   0.006598482374101877
-    p0_acts_next:   1.0
-    p1_acts_next:   0.0
-    p2_acts_next:   0.0
-    p3_acts_next:   0.0
-    p4_acts_next:   0.0
-    p5_acts_next:   0.0
     round_preflop:   1.0
     round_flop:   0.0
     round_turn:   0.0
@@ -49,12 +43,6 @@ class Table(BaseModel):
     min_raise: float
     pot_amt: float
     total_to_call: float
-    p0_acts_next: float
-    p1_acts_next: float
-    p2_acts_next: float
-    p3_acts_next: float
-    p4_acts_next: float
-    p5_acts_next: float
     round_preflop: float
     round_flop: float
     round_turn: float
@@ -128,8 +116,6 @@ class EnvironmentState(BaseModel):
     board: Board
     # utils
     last_action: Optional[LastAction]
-    human_player_index: Optional[int]
-    human_player: Optional[str]
     p_acts_next: int
     done: bool
     info: Info

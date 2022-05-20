@@ -2,7 +2,7 @@ import re
 
 import numpy as np
 
-from src.model.environment_state import PlayerInfo, Card, Board, Table
+from src.model.environment_state import PlayerInfo, Card, Board, Table, Players
 
 
 def maybe_replace_leading_digit(val):
@@ -37,7 +37,7 @@ def get_player_cards(idx_start, idx_end, obs, n_suits=4, n_ranks=13):
     return cards
 
 
-def get_player_stats(obs_keys, obs, start_idx) -> dict:
+def get_player_stats(obs_keys, obs, start_idx, offset) -> Players:
     # cards
     cp0 = get_player_cards(idx_start=obs_keys.index("0th_player_card_0_rank_0"),
                            idx_end=obs_keys.index("1th_player_card_0_rank_0"),
@@ -72,13 +72,18 @@ def get_player_stats(obs_keys, obs, start_idx) -> dict:
     p3 = list(zip(obs_keys, obs))[idx_end_p2:idx_end_p3]
     p4 = list(zip(obs_keys, obs))[idx_end_p3:idx_end_p4]
     p5 = list(zip(obs_keys, obs))[idx_end_p4:idx_end_p5]
+    # roll [p0, p1, p2, p3, p4, p5], and [cp0, cp1, cp2, cp3, cp4, cp5]
 
-    return {'p0': PlayerInfo(**{'pid': 0, **dict(p0), **dict(cp0)}),
+    player_info = {'p0': PlayerInfo(**{'pid': 0, **dict(p0), **dict(cp0)}),
             'p1': PlayerInfo(**{'pid': 1, **dict(p1), **dict(cp1)}),
             'p2': PlayerInfo(**{'pid': 2, **dict(p2), **dict(cp2)}),
             'p3': PlayerInfo(**{'pid': 3, **dict(p3), **dict(cp3)}),
             'p4': PlayerInfo(**{'pid': 4, **dict(p4), **dict(cp4)}),
             'p5': PlayerInfo(**{'pid': 5, **dict(p5), **dict(cp5)})}
+
+    p_info_rolled = np.roll(list(player_info.values()), offset, axis=0)
+    p_info_rolled = dict(list(zip(player_info.keys(), p_info_rolled)))
+    return Players(**p_info_rolled)
 
 
 def get_board_cards(idx_board_start, idx_board_end, obs, n_suits=4, n_ranks=13):
@@ -105,6 +110,23 @@ def get_board_cards(idx_board_start, idx_board_end, obs, n_suits=4, n_ranks=13):
     return Board(**cards)
 
 
-def get_table_info(obs_keys, obs):
-    table_kwargs = list(zip(obs_keys, obs))[0:obs_keys.index('side_pot_5') + 1]
-    return Table(**dict(table_kwargs))
+def get_table_info(obs_keys, obs, offset):
+    side_pots = np.roll(obs[obs_keys.index('side_pot_0'),
+                    obs_keys.index('side_pot_1'),
+                    obs_keys.index('side_pot_2'),
+                    obs_keys.index('side_pot_3'),
+                    obs_keys.index('side_pot_4'),
+                    obs_keys.index('side_pot_5')], offset, axis=0)
+    sp_keys = ['side_pot_0', 'side_pot_1', 'side_pot_2', 'side_pot_3', 'side_pot_4', 'side_pot_5']
+    table = {'ante': obs[obs_keys.index('ante')],
+             'small_blind': obs[obs_keys.index('small_blind')],
+             'big_blind': obs[obs_keys.index('big_blind')],
+             'min_raise': obs[obs_keys.index('min_raise')],
+             'pot_amt': obs[obs_keys.index('pot_amt')],
+             'total_to_call': obs[obs_keys.index('total_to_call')],
+             # side pots 0 to 5
+             **dict(list(zip(sp_keys, side_pots)))
+             }
+    # table_kwargs = list(zip(obs_keys, obs))[0:obs_keys.index('side_pot_5') + 1]
+    # return Table(**dict(table_kwargs))
+    return Table(**table)
