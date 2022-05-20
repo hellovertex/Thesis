@@ -111,12 +111,12 @@ def get_board_cards(idx_board_start, idx_board_end, obs, n_suits=4, n_ranks=13):
 
 
 def get_table_info(obs_keys, obs, offset):
-    side_pots = np.roll(obs[obs_keys.index('side_pot_0'),
-                    obs_keys.index('side_pot_1'),
-                    obs_keys.index('side_pot_2'),
-                    obs_keys.index('side_pot_3'),
-                    obs_keys.index('side_pot_4'),
-                    obs_keys.index('side_pot_5')], offset, axis=0)
+    side_pots = np.roll([obs[obs_keys.index('side_pot_0')],
+                    obs[obs_keys.index('side_pot_1')],
+                    obs[obs_keys.index('side_pot_2')],
+                    obs[obs_keys.index('side_pot_3')],
+                    obs[obs_keys.index('side_pot_4')],
+                    obs[obs_keys.index('side_pot_5')]], offset, axis=0)
     sp_keys = ['side_pot_0', 'side_pot_1', 'side_pot_2', 'side_pot_3', 'side_pot_4', 'side_pot_5']
     table = {'ante': obs[obs_keys.index('ante')],
              'small_blind': obs[obs_keys.index('small_blind')],
@@ -124,6 +124,10 @@ def get_table_info(obs_keys, obs, offset):
              'min_raise': obs[obs_keys.index('min_raise')],
              'pot_amt': obs[obs_keys.index('pot_amt')],
              'total_to_call': obs[obs_keys.index('total_to_call')],
+             'round_preflop': obs[obs_keys.index('round_preflop')],
+             'round_flop': obs[obs_keys.index('round_flop')],
+             'round_turn': obs[obs_keys.index('round_turn')],
+             'round_river': obs[obs_keys.index('round_river')],
              # side pots 0 to 5
              **dict(list(zip(sp_keys, side_pots)))
              }
