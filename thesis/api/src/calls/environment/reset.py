@@ -80,7 +80,10 @@ async def reset_environment(body: EnvironmentResetRequestBody, request: Request)
             # only roll stacks, when not in initial state, which is sometimes the case when debugging where
             # we set custom stacks despite not having played before. In this case, rolling does not make sense
             stack_sizes = np.roll(list(body.stack_sizes.dict().values()), -button_index, axis=0)
-            # stack_sizes = [stack.item() for stack in stack_sizes]
+            try:
+                stack_sizes = [stack.item() for stack in stack_sizes]
+            except Exception:
+                pass
             stack_sizes_dict = dict(list(zip(body.stack_sizes.dict().keys(), stack_sizes)))
             # set env_args such that new starting stacks are used
         args = NoLimitHoldem.ARGS_CLS(n_seats=n_players,
