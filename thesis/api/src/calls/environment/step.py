@@ -44,16 +44,20 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
     board_cards = get_board_cards(idx_board_start=obs_keys.index('0th_board_card_rank_0'),
                                   idx_board_end=obs_keys.index('0th_player_card_0_rank_0'),
                                   obs=obs)
-    player_info = get_player_stats(obs_keys, obs, start_idx=idx_end_table + 1, offset=offset)
+    player_info = get_player_stats(obs_keys, obs, start_idx=idx_end_table + 1, offset=offset, n_players=n_players)
     print(f'current_player = {request.app.backend.active_ens[body.env_id].env.current_player.seat_id}')
     seats = request.app.backend.active_ens[body.env_id].env.seats
     stack_sizes = dict([(f'stack_p{i}', seats[i].stack) for i in range(len(seats))])
 
     # move everything relative to hero offset
-    stack_sizes_rolled = np.roll(list(stack_sizes.values()), -offset, axis=0)
+    stack_sizes_rolled = np.roll(list(stack_sizes.values()), offset, axis=0)
+    stack_sizes_rolled = [s.item() for s in stack_sizes_rolled]
     stack_sizes_rolled = dict(list(zip(stack_sizes.keys(), stack_sizes_rolled)))
     payouts_rolled = np.roll(list(info['payouts'].values()), offset, axis=0)
+    payouts_rolled = [p.item() for p in payouts_rolled]
     payouts_rolled = dict(list(zip(info['payouts'].keys(), payouts_rolled)))
+
+    # offset relative to hero
     p_acts_next = request.app.backend.active_ens[body.env_id].env.current_player.seat_id
     pid = offset + p_acts_next
     p_acts_next = pid if pid < n_players else pid - n_players
@@ -66,6 +70,7 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
               'table': table_info,
               'players': player_info,
               'board': board_cards,
+              'button_index': offset,
               'done': done,
               # todo this jumps from 3 to 1 instead of going from 3 to 4
               'p_acts_next': p_acts_next,

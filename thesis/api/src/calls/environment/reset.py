@@ -54,7 +54,7 @@ async def reset_environment(body: EnvironmentResetRequestBody, request: Request)
     n_players = request.app.backend.active_ens[env_id].env.N_SEATS if (body.stack_sizes is None) else len(
         number_non_null_stacks)
 
-    # set button
+    # set button index
     if request.app.backend.metadata[env_id]['initial_state']:
         # 1. randomly determine first button holder
         button_index = randint(0, n_players - 1)
@@ -98,9 +98,9 @@ async def reset_environment(body: EnvironmentResetRequestBody, request: Request)
     board_cards = get_board_cards(idx_board_start=obs_keys.index('0th_board_card_rank_0'),
                                   idx_board_end=obs_keys.index('0th_player_card_0_rank_0'),
                                   obs=obs)
-    player_info = get_player_stats(obs_keys, obs, start_idx=idx_end_table + 1, offset=button_index)
+    player_info = get_player_stats(obs_keys, obs, start_idx=idx_end_table + 1, offset=button_index, n_players=n_players)
 
-    # move everything relative to hero offset
+    # offset relative to hero offset
     p_acts_next = request.app.backend.active_ens[env_id].env.current_player.seat_id
     pid = button_index + p_acts_next
     p_acts_next = pid if pid < n_players else pid - n_players

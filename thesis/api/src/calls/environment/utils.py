@@ -37,7 +37,7 @@ def get_player_cards(idx_start, idx_end, obs, n_suits=4, n_ranks=13):
     return cards
 
 
-def get_player_stats(obs_keys, obs, start_idx, offset) -> Players:
+def get_player_stats(obs_keys, obs, start_idx, offset, n_players) -> Players:
     # cards
     cp0 = get_player_cards(idx_start=obs_keys.index("0th_player_card_0_rank_0"),
                            idx_end=obs_keys.index("1th_player_card_0_rank_0"),
@@ -73,14 +73,15 @@ def get_player_stats(obs_keys, obs, start_idx, offset) -> Players:
     p4 = list(zip(obs_keys, obs))[idx_end_p3:idx_end_p4]
     p5 = list(zip(obs_keys, obs))[idx_end_p4:idx_end_p5]
     # roll [p0, p1, p2, p3, p4, p5], and [cp0, cp1, cp2, cp3, cp4, cp5]
-    pids = np.roll([0,1,2,3,4,5], offset, axis=0)
-    pids = [pid.item() for pid in pids]  # convert np.int32 to python int
-    player_info = {'p0': PlayerInfo(**{'pid': pids[0], **dict(p0), **dict(cp0)}),
-            'p1': PlayerInfo(**{'pid': pids[1], **dict(p1), **dict(cp1)}),
-            'p2': PlayerInfo(**{'pid': pids[2], **dict(p2), **dict(cp2)}),
-            'p3': PlayerInfo(**{'pid': pids[3], **dict(p3), **dict(cp3)}),
-            'p4': PlayerInfo(**{'pid': pids[4], **dict(p4), **dict(cp4)}),
-            'p5': PlayerInfo(**{'pid': pids[5], **dict(p5), **dict(cp5)})}
+    # pids = np.roll(np.arange(n_players), offset, axis=0)
+    # pids = np.pad(pids, (0,6-n_players), 'constant', constant_values=(-1))
+    # pids = [pid.item() for pid in pids]  # convert np.int32 to python int
+    player_info = {'p0': PlayerInfo(**{'pid': 0, **dict(p0), **dict(cp0)}),
+            'p1': PlayerInfo(**{'pid': 1, **dict(p1), **dict(cp1)}),
+            'p2': PlayerInfo(**{'pid': 2, **dict(p2), **dict(cp2)}),
+            'p3': PlayerInfo(**{'pid': 3, **dict(p3), **dict(cp3)}),
+            'p4': PlayerInfo(**{'pid': 4, **dict(p4), **dict(cp4)}),
+            'p5': PlayerInfo(**{'pid': 5, **dict(p5), **dict(cp5)})}
 
     p_info_rolled = np.roll(list(player_info.values()), offset, axis=0)
     p_info_rolled = dict(list(zip(player_info.keys(), p_info_rolled)))
