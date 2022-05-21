@@ -27,7 +27,7 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
         action = (body.action, body.action_how_much)
 
     obs, a, done, info = request.app.backend.active_ens[body.env_id].step(action)
-    offset = request.app.backend.metadata[body.env_id]['human_player_position']
+    offset = request.app.backend.metadata[body.env_id]['button_index']
     # if action was fold, but player could have checked, the environment internally changes the action
     # if that happens, we must overwrite last action accordingly
     action = request.app.backend.active_ens[body.env_id].env.last_action  # [what, how_much, who]
@@ -47,18 +47,21 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
     player_info = get_player_stats(obs_keys, obs, start_idx=idx_end_table + 1, offset=offset)
     print(f'current_player = {request.app.backend.active_ens[body.env_id].env.current_player.seat_id}')
     seats = request.app.backend.active_ens[body.env_id].env.seats
-    stack_sizes = [(f'stack_p{i}', seats[i].stack) for i in range(len(seats))]
+    stack_sizes = dict([(f'stack_p{i}', seats[i].stack) for i in range(len(seats))])
 
+    # move everything relative to hero offset
+    stack_sizes_rolled = np.roll(list(stack_sizes.values()), -offset, axis=0)
+    stack_sizes_rolled = dict(list(zip(stack_sizes.keys(), stack_sizes_rolled)))
     payouts_rolled = np.roll(list(info['payouts'].values()), offset, axis=0)
     payouts_rolled = dict(list(zip(info['payouts'].keys(), payouts_rolled)))
-    # todo: roll table, info.payout
     p_acts_next = request.app.backend.active_ens[body.env_id].env.current_player.seat_id
     pid = offset + p_acts_next
     p_acts_next = pid if pid < n_players else pid - n_players
+
     # players_with_chips_left = [p if not p.is_all_in]
     result = {'env_id': body.env_id,
               'n_players': n_players,
-              'stack_sizes': stack_sizes,
+              'stack_sizes': stack_sizes_rolled,
               'last_action': LastAction(**{'action_what': action[0], 'action_how_much': action[1]}),
               'table': table_info,
               'players': player_info,
@@ -66,11 +69,6 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
               'done': done,
               # todo this jumps from 3 to 1 instead of going from 3 to 4
               'p_acts_next': p_acts_next,
-              # 'info': Info(**{'continue_round': True,
-              #                 'draw_next_stage': False,
-              #                 'rundown': False,
-              #                 'deal_next_hand': False,
-              #                 'payouts': None})
               'info': Info(**{'continue_round': info['continue_round'],
                               'draw_next_stage': info['draw_next_stage'],
                               'rundown': info['rundown'],

@@ -661,12 +661,29 @@ class AugmentObservationWrapper(ActionHistoryWrapper):
                                                obs_idx_dict=self.env.obs_idx_dict,
                                                # btn pos used to return obs relative to self
                                                btn_pos=self.env.BTN_POS)
+    def overwrite_args(self, args):
+        self.env.set_args(args)
+        self._normalization_sum = float(
+            sum([s.starting_stack_this_episode for s in self.env.seats])
+        ) / self.env.N_SEATS
+        self.num_players = self.env.N_SEATS
+        self.observation_space, self.obs_idx_dict, self.obs_parts_idxs_dict = self._construct_obs_space()
+        self._vectorizer = CanonicalVectorizer(num_players=self.num_players,
+                                               obs_idx_dict=self.env.obs_idx_dict,
+                                               # btn pos used to return obs relative to self
+                                               btn_pos=self.env.BTN_POS)
 
     def get_current_obs(self, env_obs):
+        """
+        Args:
+            env_obs: the observation returned by the base PokerEnv.
+            The len(env_obs) is a function of the number of players.
+        """
         obs = self._vectorizer.vectorize(env_obs, self._player_who_acted, action_history=self._actions_per_stage,
                                          player_hands=self._player_hands, normalization=self._normalization_sum)
         # self.print_augmented_obs(obs)
         return obs
+
     def get_info(self):
         return self.env.get_info()
 
