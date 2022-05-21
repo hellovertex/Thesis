@@ -53,9 +53,13 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
     stack_sizes_rolled = np.roll(list(stack_sizes.values()), offset, axis=0)
     stack_sizes_rolled = [s.item() for s in stack_sizes_rolled]
     stack_sizes_rolled = dict(list(zip(stack_sizes.keys(), stack_sizes_rolled)))
-    payouts_rolled = np.roll(list(info['payouts'].values()), offset, axis=0)
-    payouts_rolled = [p.item() for p in payouts_rolled]
-    payouts_rolled = dict(list(zip(info['payouts'].keys(), payouts_rolled)))
+    payouts_rolled = {}
+    for k,v in info['payouts'].items():
+        pid = offset + k if offset + k < n_players else offset + k - n_players
+        payouts_rolled[pid] = v
+    # payouts_rolled = np.roll(list(info['payouts'].values()), offset, axis=0)
+    # payouts_rolled = [p.item() for p in payouts_rolled]
+    # payouts_rolled = dict(list(zip(info['payouts'].keys(), payouts_rolled)))
 
     # offset relative to hero
     p_acts_next = request.app.backend.active_ens[body.env_id].env.current_player.seat_id
