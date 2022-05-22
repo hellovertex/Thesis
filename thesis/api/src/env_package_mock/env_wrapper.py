@@ -47,7 +47,6 @@ class CanonicalVectorizer(Vectorizer):
         hand = List[card]
         self._player_hands: Optional[List[hand]] = None
         self._action_history = None
-        self._player_who_acted = None
         # btn_idx is equal to current player offset, since button is at index 0 inside environment
         # but we encode observation such that player is at index 0
         self._btn_idx = btn_pos
@@ -173,7 +172,7 @@ class CanonicalVectorizer(Vectorizer):
         bits = np.pad(bits, (0, self._max_players - self.num_players), 'constant')
 
         # move self to index 0
-        bits = np.roll(bits, -self._player_who_acted)
+        bits = np.roll(bits, -self._next_player_who_gets_observation)
 
         # copy from original observation with zero padding
         self._obs[self._start_side_pots:self.offset] = bits
@@ -209,10 +208,10 @@ class CanonicalVectorizer(Vectorizer):
         padded_in_between = np.array([np.append(s, bits_to_pad_in_between) for s in bits_per_player])
         padded_in_between = np.concatenate((padded_in_between, np.zeros((self._max_players - self.num_players, 10))))
         padded_in_between = np.hstack(padded_in_between)  # flattened
-        # todo fix this
+        # todo write test for this
         # padded_in_between = np.resize(padded_in_between, self._bits_player_stats)
         # move self to index 0
-        padded_in_between = np.roll(padded_in_between, -self._player_who_acted * self._bits_stats_per_player)
+        padded_in_between = np.roll(padded_in_between, -self._next_player_who_gets_observation * self._bits_stats_per_player)
 
         # copy from original observation with zero padding
         self._obs[self._start_player_stats:self.offset] = padded_in_between
@@ -321,7 +320,7 @@ class CanonicalVectorizer(Vectorizer):
         self.offset += self._bits_player_hands
         assert self.offset == self._start_action_history
         # move own cards to index 0
-        roll_by = -self._player_who_acted
+        roll_by = -self._next_player_who_gets_observation
         rolled_cards = np.roll(self._player_hands, roll_by, axis=0).reshape(-1, self._n_hand_cards)
         # rolled_cards = [[ 5  3], [ 5  0], [12  0], [ 9  1], [ -127  -127], [ -127  -127]]
         # replace NAN with 0
@@ -367,7 +366,7 @@ class CanonicalVectorizer(Vectorizer):
         assert self.offset == self._obs_len
         idxs = [i for i in range(self._max_players)]
         # indices relative to self
-        idxs = np.roll(idxs, -self._player_who_acted)
+        idxs = np.roll(idxs, -self._next_player_who_gets_observation)
         bits = None
         for idx in idxs:
             if not isinstance(bits, np.ndarray):
@@ -383,7 +382,7 @@ class CanonicalVectorizer(Vectorizer):
         self.offset = None
         self._player_hands = player_hands
         self._action_history = action_history
-        self._player_who_acted = player_who_acted
+        self._next_player_who_gets_observation = player_who_acted
         # encode
         self.encode_table(obs)
         self.encode_next_player(obs)
@@ -474,6 +473,8 @@ class WrapperPokerRL(Wrapper):
         if not self._player_hands:
             for i in range(self.env.N_SEATS):
                 self._player_hands.append(self.env.get_hole_cards_of_player(i))
+        # todo move this to proper location
+        self._after_reset()
 
         return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
 
@@ -491,6 +492,7 @@ class WrapperPokerRL(Wrapper):
         # step environment
         env_obs, rew_for_all_players, done, info = self.env.step(action)
 
+        self._after_step(action)
         # call get_current_obs of derived class
         return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
 
@@ -524,6 +526,12 @@ class WrapperPokerRL(Wrapper):
         raise NotImplementedError
 
     def _before_reset(self, config):
+        raise NotImplementedError
+
+    def _after_step(self, action):
+        raise NotImplementedError
+
+    def _after_reset(self):
         raise NotImplementedError
 
     def get_current_obs(self, env_obs):
@@ -585,30 +593,42 @@ class ActionHistoryWrapper(WrapperPokerRL):
         self._player_hands = []
         self._rounds = ['preflop', 'flop', 'turn', 'river']
         self._actions_per_stage = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
-        self._player_who_acted = None
+
+        self._next_player_who_gets_observation = None
         # experimental
         self._actions_per_stage_discretized = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
 
     # _______________________________ Overridden ________________________________
     def _before_step(self, action):
         """
-        Steps the environment from an action of the natural action representation to the environment.
-
-        Returns:
-            obs, reward, done, info
         """
+        pass
+
+    def _after_step(self, action):
+        """Called before observation is computed by vectorizer"""
         # store action in history buffer
         self._pushback_action(action,
                               player_who_acted=self.env.current_player.seat_id,
                               in_which_stage=self.env.current_round)
-        self._player_who_acted = self.env.current_player.seat_id
+        self._next_player_who_gets_observation = self.env.current_player.seat_id
 
     def _before_reset(self, config=None):
+        """Called before observation is computed by vectorizer"""
         # for the initial case of the environment reset, we manually put player index to 0
+        # the player index is used to roll the observation bits relative to the acting player, so that each
+        # observation structure is the same for all agents
+        # after resetting, since no agent acted yet, we set `self._next_player_who_gets_observation` to zero,
+        # indicating that we do not want to roll the initial observation of the environment after resetting
+        # todo this should be not 0 but the first player to act
+        # todo above todo is done but docs should be updated
         # so that observation will be rolled relative to self
         if config is not None:
             self._player_hands = config['deck_state_dict']['hand']
-        self._player_who_acted = 0
+
+
+
+    def _after_reset(self):
+        self._next_player_who_gets_observation = self.env.current_player.seat_id
 
     # _______________________________ Action History ________________________________
 
@@ -679,7 +699,7 @@ class AugmentObservationWrapper(ActionHistoryWrapper):
             env_obs: the observation returned by the base PokerEnv.
             The len(env_obs) is a function of the number of players.
         """
-        obs = self._vectorizer.vectorize(env_obs, self._player_who_acted, action_history=self._actions_per_stage,
+        obs = self._vectorizer.vectorize(env_obs, self._next_player_who_gets_observation, action_history=self._actions_per_stage,
                                          player_hands=self._player_hands, normalization=self._normalization_sum)
         # self.print_augmented_obs(obs)
         return obs

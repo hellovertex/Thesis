@@ -25,7 +25,7 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
         action = (0, -1)
     else:
         action = (body.action, body.action_how_much)
-
+    # observation is always relative to
     obs, a, done, info = request.app.backend.active_ens[body.env_id].step(action)
     offset = request.app.backend.metadata[body.env_id]['button_index']
     # if action was fold, but player could have checked, the environment internally changes the action
@@ -44,6 +44,7 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
     board_cards = get_board_cards(idx_board_start=obs_keys.index('0th_board_card_rank_0'),
                                   idx_board_end=obs_keys.index('0th_player_card_0_rank_0'),
                                   obs=obs)
+    # todo debug players using scratch
     player_info = get_player_stats(obs_keys, obs, start_idx=idx_end_table + 1, offset=offset, n_players=n_players)
     print(f'current_player = {request.app.backend.active_ens[body.env_id].env.current_player.seat_id}')
     seats = request.app.backend.active_ens[body.env_id].env.seats

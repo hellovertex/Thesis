@@ -73,22 +73,33 @@ def get_player_stats(obs_keys, obs, start_idx, offset, n_players) -> Players:
     p4 = list(zip(obs_keys, obs))[idx_end_p3:idx_end_p4]
     p5 = list(zip(obs_keys, obs))[idx_end_p4:idx_end_p5]
     # roll [p0, p1, p2, p3, p4, p5], and [cp0, cp1, cp2, cp3, cp4, cp5]
-    pids = np.roll(np.arange(n_players), offset, axis=0)
+
+    # roll pid backwards
+    pids = np.roll(np.arange(n_players), -offset, axis=0)
     pids = np.pad(pids, (0,6-n_players), 'constant', constant_values=(-1))
     try:
         pids = [pid.item() for pid in pids]  # convert np.int32 to python int
     except Exception:
         pass
+    # example: offset = 2, means the order changes from
+    # [BTN, SB, BB, UTG, MP, CU] to [MP, CU, BTN, SB, BB, UTG], such that BTN is at index 2==offset.
+    # the hero, which always sits at index 0 in the frontend will hence be MP.
+    # backend indices are relative to BTN not HERO
+    # since p0 and cp0 are always data for BTN, we must roll the player info before returning it
+    # in order for the PIDs to match after rolling, we roll them in reverse order prior to rolling the whole data
     player_info = {'p0': PlayerInfo(**{'pid': pids[0], **dict(p0), **dict(cp0)}),
             'p1': PlayerInfo(**{'pid': pids[1], **dict(p1), **dict(cp1)}),
             'p2': PlayerInfo(**{'pid': pids[2], **dict(p2), **dict(cp2)}),
             'p3': PlayerInfo(**{'pid': pids[3], **dict(p3), **dict(cp3)}),
             'p4': PlayerInfo(**{'pid': pids[4], **dict(p4), **dict(cp4)}),
             'p5': PlayerInfo(**{'pid': pids[5], **dict(p5), **dict(cp5)})}
-
+    # roll pid forward together with remaining data
     p_info_rolled = np.roll(list(player_info.values()), offset, axis=0)
     p_info_rolled = dict(list(zip(player_info.keys(), p_info_rolled)))
-    return Players(**p_info_rolled)
+
+    players = Players(**p_info_rolled)
+    assert players.p0.pid == 0
+    return players
 
 
 def get_board_cards(idx_board_start, idx_board_end, obs, n_suits=4, n_ranks=13):
