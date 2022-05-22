@@ -26,7 +26,7 @@ def get_player_cards(idx_start, idx_end, obs, n_suits=4, n_ranks=13):
         # print(f'obs[cur_idx:end_idx] = {obs[cur_idx:end_idx]}')
         if sum(bits) > 0:
             idx = np.where(bits == 1)[0]
-            rank, suit = idx[0], idx[1]-n_ranks
+            rank, suit = idx[0], idx[1] - n_ranks
 
         cards[f'c{i}'] = Card(**{'name': f'c{i}',
                                  'suit': suit,
@@ -38,7 +38,7 @@ def get_player_cards(idx_start, idx_end, obs, n_suits=4, n_ranks=13):
 
 
 def get_player_stats(obs_keys, obs, start_idx, offset, n_players) -> Players:
-    # cards
+    # cards where 0 is always the observing players cards
     cp0 = get_player_cards(idx_start=obs_keys.index("0th_player_card_0_rank_0"),
                            idx_end=obs_keys.index("1th_player_card_0_rank_0"),
                            obs=obs)
@@ -57,7 +57,7 @@ def get_player_stats(obs_keys, obs, start_idx, offset, n_players) -> Players:
     cp5 = get_player_cards(idx_start=obs_keys.index("5th_player_card_0_rank_0"),
                            idx_end=obs_keys.index("preflop_player_0_action_0_how_much"),
                            obs=obs)
-    # stats
+    # stats where first stats are always the observing player stats
     idx_end_p0 = obs_keys.index('side_pot_rank_p0_is_5') + 1
     idx_end_p1 = obs_keys.index('side_pot_rank_p1_is_5') + 1
     idx_end_p2 = obs_keys.index('side_pot_rank_p2_is_5') + 1
@@ -76,7 +76,7 @@ def get_player_stats(obs_keys, obs, start_idx, offset, n_players) -> Players:
 
     # roll pid backwards
     pids = np.roll(np.arange(n_players), -offset, axis=0)
-    pids = np.pad(pids, (0,6-n_players), 'constant', constant_values=(-1))
+    pids = np.pad(pids, (0, 6 - n_players), 'constant', constant_values=(-1))
     try:
         pids = [pid.item() for pid in pids]  # convert np.int32 to python int
     except Exception:
@@ -88,11 +88,11 @@ def get_player_stats(obs_keys, obs, start_idx, offset, n_players) -> Players:
     # since p0 and cp0 are always data for BTN, we must roll the player info before returning it
     # in order for the PIDs to match after rolling, we roll them in reverse order prior to rolling the whole data
     player_info = {'p0': PlayerInfo(**{'pid': pids[0], **dict(p0), **dict(cp0)}),
-            'p1': PlayerInfo(**{'pid': pids[1], **dict(p1), **dict(cp1)}),
-            'p2': PlayerInfo(**{'pid': pids[2], **dict(p2), **dict(cp2)}),
-            'p3': PlayerInfo(**{'pid': pids[3], **dict(p3), **dict(cp3)}),
-            'p4': PlayerInfo(**{'pid': pids[4], **dict(p4), **dict(cp4)}),
-            'p5': PlayerInfo(**{'pid': pids[5], **dict(p5), **dict(cp5)})}
+                   'p1': PlayerInfo(**{'pid': pids[1], **dict(p1), **dict(cp1)}),
+                   'p2': PlayerInfo(**{'pid': pids[2], **dict(p2), **dict(cp2)}),
+                   'p3': PlayerInfo(**{'pid': pids[3], **dict(p3), **dict(cp3)}),
+                   'p4': PlayerInfo(**{'pid': pids[4], **dict(p4), **dict(cp4)}),
+                   'p5': PlayerInfo(**{'pid': pids[5], **dict(p5), **dict(cp5)})}
     # roll pid forward together with remaining data
     p_info_rolled = np.roll(list(player_info.values()), offset, axis=0)
     p_info_rolled = dict(list(zip(player_info.keys(), p_info_rolled)))
@@ -113,7 +113,7 @@ def get_board_cards(idx_board_start, idx_board_end, obs, n_suits=4, n_ranks=13):
         bits = obs[cur_idx:end_idx]
         if sum(bits) > 0:
             idx = np.where(bits == 1)[0]
-            rank, suit = idx[0], idx[1]-n_ranks
+            rank, suit = idx[0], idx[1] - n_ranks
 
         cards[f'b{i}'] = Card(**{'name': f'b{i}',
                                  'suit': suit,
@@ -128,11 +128,11 @@ def get_board_cards(idx_board_start, idx_board_end, obs, n_suits=4, n_ranks=13):
 
 def get_table_info(obs_keys, obs, offset):
     side_pots = np.roll([obs[obs_keys.index('side_pot_0')],
-                    obs[obs_keys.index('side_pot_1')],
-                    obs[obs_keys.index('side_pot_2')],
-                    obs[obs_keys.index('side_pot_3')],
-                    obs[obs_keys.index('side_pot_4')],
-                    obs[obs_keys.index('side_pot_5')]], offset, axis=0)
+                         obs[obs_keys.index('side_pot_1')],
+                         obs[obs_keys.index('side_pot_2')],
+                         obs[obs_keys.index('side_pot_3')],
+                         obs[obs_keys.index('side_pot_4')],
+                         obs[obs_keys.index('side_pot_5')]], offset, axis=0)
     side_pots = [s.item() for s in side_pots]  # convert np.int32 to python int
     sp_keys = ['side_pot_0', 'side_pot_1', 'side_pot_2', 'side_pot_3', 'side_pot_4', 'side_pot_5']
     table = {'ante': obs[obs_keys.index('ante')],
@@ -151,3 +151,14 @@ def get_table_info(obs_keys, obs, offset):
     # table_kwargs = list(zip(obs_keys, obs))[0:obs_keys.index('side_pot_5') + 1]
     # return Table(**dict(table_kwargs))
     return Table(**table)
+
+
+def get_rolled_stack_sizes(request, body, n_players, button_index):
+    seats = request.app.backend.active_ens[body.env_id].env.seats
+    stacks = [seats[i].stack for i in range(len(seats))]
+    stacks_rolled = []
+    for i in range(len(seats)):
+        offset = (button_index + i) % n_players
+        stacks_rolled.append((f'stack_p{i}', stacks[offset]))
+
+    return dict(stacks_rolled)

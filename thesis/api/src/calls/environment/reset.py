@@ -7,7 +7,7 @@ from starlette.requests import Request
 import numpy as np
 
 from PokerRL import NoLimitHoldem
-from src.calls.environment.utils import get_table_info, get_board_cards, get_player_stats
+from src.calls.environment.utils import get_table_info, get_board_cards, get_player_stats, get_rolled_stack_sizes
 from src.model.environment_state import EnvironmentState, Info, Players
 
 router = APIRouter()
@@ -52,11 +52,13 @@ def set_button_index(request, env_id, n_players):
     else:
         # 2. move button +1 to the left
         request.app.backend.metadata[env_id]['button_index'] += 1
-        if request.app.backend.metadata[env_id]['button_index'] == n_players:
+        if request.app.backend.metadata[env_id]['button_index'] >= n_players:
             request.app.backend.metadata[env_id]['button_index'] = 0
 
 
 def roll_starting_stacks_relative_to_button(request, body, env_id, n_players):
+    """Roll stack sizes back such that button is at position 0.
+    This is required because the frontend always sends the stacks relative to the hero position."""
     button_index = request.app.backend.metadata[env_id]['button_index']
     stack_sizes_rolled = None
     if body.stack_sizes is None:
@@ -89,11 +91,11 @@ async def reset_environment(body: EnvironmentResetRequestBody, request: Request)
     set_button_index(request, env_id, n_players)
 
     # 2. roll stack sizes
-    stack_sizes_rolled = roll_starting_stacks_relative_to_button(request, body, env_id, n_players)
+    starting_stack_sizes_rolled = roll_starting_stacks_relative_to_button(request, body, env_id, n_players)
 
     # set env_args such that new starting stacks are used
     args = NoLimitHoldem.ARGS_CLS(n_seats=n_players,
-                                  starting_stack_sizes_list=stack_sizes_rolled,
+                                  starting_stack_sizes_list=starting_stack_sizes_rolled,
                                   use_simplified_headsup_obs=False)
     request.app.backend.active_ens[env_id].overwrite_args(args)
     obs, _, _, _ = request.app.backend.active_ens[env_id].reset()
@@ -102,27 +104,18 @@ async def reset_environment(body: EnvironmentResetRequestBody, request: Request)
     obs_keys = [k for k in obs_dict.keys()]
 
     button_index = request.app.backend.metadata[env_id]['button_index']
-    table_info = get_table_info(obs_keys, obs, offset=button_index)
-    idx_end_table = obs_keys.index('side_pot_5')
+    # offset relative to hero offset
+    p_acts_next = request.app.backend.active_ens[env_id].env.current_player.seat_id
+    offset = (p_acts_next + button_index) % n_players
+    table_info = get_table_info(obs_keys, obs, offset=offset)
 
+    idx_end_table = obs_keys.index('side_pot_5')
     board_cards = get_board_cards(idx_board_start=obs_keys.index('0th_board_card_rank_0'),
                                   idx_board_end=obs_keys.index('0th_player_card_0_rank_0'),
                                   obs=obs)
-    player_info = get_player_stats(obs_keys, obs, start_idx=idx_end_table + 1, offset=button_index, n_players=n_players)
+    player_info = get_player_stats(obs_keys, obs, start_idx=idx_end_table + 1, offset=offset, n_players=n_players)
 
-    # offset relative to hero offset
-    p_acts_next = request.app.backend.active_ens[env_id].env.current_player.seat_id
-    pid = button_index + p_acts_next
-    p_acts_next = pid if pid < n_players else pid - n_players
-
-    seats = request.app.backend.active_ens[body.env_id].env.seats
-    stack_sizes = dict([(f'stack_p{i}', seats[i].stack) for i in range(len(seats))])
-
-    # move everything relative to hero offset
-    stack_sizes_rolled = np.roll(list(stack_sizes.values()), button_index, axis=0)
-    stack_sizes_rolled = [s.item() for s in stack_sizes_rolled]
-    stack_sizes_rolled = dict(list(zip(stack_sizes.keys(), stack_sizes_rolled)))
-
+    stack_sizes_rolled = get_rolled_stack_sizes(request, body, n_players, button_index)
     result = {'env_id': env_id,
               'n_players': n_players,
               'stack_sizes': stack_sizes_rolled,
@@ -131,7 +124,7 @@ async def reset_environment(body: EnvironmentResetRequestBody, request: Request)
               'players': player_info,
               'board': board_cards,
               'button_index': button_index,
-              'p_acts_next': p_acts_next,
+              'p_acts_next':  (p_acts_next + button_index) % n_players,
               'done': False,
               'info': Info(**{'continue_round': True,
                               'draw_next_stage': False,

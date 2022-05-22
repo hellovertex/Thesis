@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from starlette.requests import Request
 import numpy as np
 from src.model.environment_state import EnvironmentState, EnvironmentState, LastAction, Info, Players
-from .utils import get_table_info, get_board_cards, get_player_stats
+from .utils import get_table_info, get_board_cards, get_player_stats, get_rolled_stack_sizes
 
 router = APIRouter()
 
@@ -19,15 +19,18 @@ class EnvironmentStepRequestBody(BaseModel):
              operation_id="step_environment")
 async def step_environment(body: EnvironmentStepRequestBody, request: Request):
     n_players = request.app.backend.active_ens[body.env_id].env.N_SEATS
-
-    starting_stack_size = request.app.backend.active_ens[body.env_id].env.DEFAULT_STACK_SIZE
     if body.action == -1:  # query ai model
         action = (0, -1)
     else:
         action = (body.action, body.action_how_much)
     # observation is always relative to
     obs, a, done, info = request.app.backend.active_ens[body.env_id].step(action)
-    offset = request.app.backend.metadata[body.env_id]['button_index']
+
+    # offset relative to hero offset
+    button_index = request.app.backend.metadata[body.env_id]['button_index']
+    p_acts_next = request.app.backend.active_ens[body.env_id].env.current_player.seat_id
+    offset = (p_acts_next + button_index) % n_players
+
     # if action was fold, but player could have checked, the environment internally changes the action
     # if that happens, we must overwrite last action accordingly
     action = request.app.backend.active_ens[body.env_id].env.last_action  # [what, how_much, who]
@@ -46,23 +49,13 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
                                   obs=obs)
     # todo debug players using scratch
     player_info = get_player_stats(obs_keys, obs, start_idx=idx_end_table + 1, offset=offset, n_players=n_players)
-    print(f'current_player = {request.app.backend.active_ens[body.env_id].env.current_player.seat_id}')
-    seats = request.app.backend.active_ens[body.env_id].env.seats
-    stack_sizes = dict([(f'stack_p{i}', seats[i].stack) for i in range(len(seats))])
+    stack_sizes_rolled = get_rolled_stack_sizes(request, body, n_players, button_index)
 
-    # move everything relative to hero offset
-    stack_sizes_rolled = np.roll(list(stack_sizes.values()), offset, axis=0)
-    stack_sizes_rolled = [s.item() for s in stack_sizes_rolled]
-    stack_sizes_rolled = dict(list(zip(stack_sizes.keys(), stack_sizes_rolled)))
     payouts_rolled = {}
-    for k,v in info['payouts'].items():
-        pid = offset + k if offset + k < n_players else offset + k - n_players
+    for k, v in info['payouts'].items():
+        pid = (button_index + k) % n_players
         payouts_rolled[pid] = v
 
-    # offset relative to hero
-    p_acts_next = request.app.backend.active_ens[body.env_id].env.current_player.seat_id
-    pid = offset + p_acts_next
-    p_acts_next = pid if pid < n_players else pid - n_players
 
     # players_with_chips_left = [p if not p.is_all_in]
     result = {'env_id': body.env_id,
@@ -75,7 +68,7 @@ async def step_environment(body: EnvironmentStepRequestBody, request: Request):
               'button_index': offset,
               'done': done,
               # todo this jumps from 3 to 1 instead of going from 3 to 4
-              'p_acts_next': p_acts_next,
+              'p_acts_next': (p_acts_next + button_index) % n_players,
               'info': Info(**{'continue_round': info['continue_round'],
                               'draw_next_stage': info['draw_next_stage'],
                               'rundown': info['rundown'],
