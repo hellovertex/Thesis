@@ -157,8 +157,8 @@ def get_rolled_stack_sizes(request, body, n_players, button_index):
     seats = request.app.backend.active_ens[body.env_id].env.seats
     stacks = [seats[i].stack for i in range(len(seats))]
     stacks_rolled = []
+    indices = np.roll(np.arange(n_players), -button_index, axis=0)
     for i in range(len(seats)):
-        offset = (button_index + i) % n_players
-        stacks_rolled.append((f'stack_p{i}', stacks[offset]))
+        stacks_rolled.append((f'stack_p{i}', stacks[indices[i]]))
 
     return dict(stacks_rolled)
