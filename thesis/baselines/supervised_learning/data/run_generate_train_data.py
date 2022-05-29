@@ -3,8 +3,8 @@ import os
 import click
 
 from thesis.baselines.supervised_learning.data.steinberger_encoder import RLStateEncoder
-from thesis.baselines.supervised_learning.data.steinberger_wrapper import AugmentObservationWrapper
-from txt_generator import CsvGenerator
+from PokerRL.game.wrappers import AugmentObservationWrapper
+from txt_generator import CsvTrainingDataGenerator
 from txt_parser import TxtParser
 
 DATA_DIR = "../../../../data/"
@@ -37,13 +37,13 @@ def main(which_data_files, from_gdrive_id):
     encoder = RLStateEncoder(env_wrapper_cls=AugmentObservationWrapper)
 
     # Uses the results of parser and encoder to write training data to disk or cloud
-    with CsvGenerator(data_dir=DATA_DIR,
-                      # out_dir=os.path.join(DATA_DIR + 'train_data'),
-                      parser=parser,
-                      encoder=encoder,
-                      out_filename=f'6MAX_{which_data_files}.txt',
-                      write_azure=False,
-                      logfile=LOGFILE) as generator:
+    with CsvTrainingDataGenerator(data_dir=DATA_DIR,
+                                  # out_dir=os.path.join(DATA_DIR + 'train_data'),
+                                  parser=parser,
+                                  encoder=encoder,
+                                  out_filename=f'6MAX_{which_data_files}.txt',
+                                  write_azure=False,
+                                  logfile=LOGFILE) as generator:
         # Looks for .zip files inside folder derived from "which_data_files"
         # or downloads from gdrive. Extracts found .zip files
         # reads the extracted .txt files for poker hands

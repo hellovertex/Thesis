@@ -1,38 +1,37 @@
 class Wrapper:
 
-  def __init__(self, env):
-    """
-    Args:
-        env:   The environment instance to be wrapped
-    """
-    self.env = env
+    def __init__(self, env):
+        """
+        Args:
+            env:   The environment instance to be wrapped
+        """
+        self.env = env
 
-  def reset(self, config):
-    """Reset the environment with a new config.
-    Signals environment handlers to reset and restart the environment using
-    a config dict.
-    Args:
-      config: dict, specifying the parameters of the environment to be
-        generated. May contain state_dict to generate a deterministic environment.
-    Returns:
-      observation: A dict containing the full observation state.
-    """
-    raise NotImplementedError("Not implemented in Abstract Base class")
+    def reset(self, config):
+        """Reset the environment with a new config.
+        Signals environment handlers to reset and restart the environment using
+        a config dict.
+        Args:
+          config: dict, specifying the parameters of the environment to be
+            generated. May contain state_dict to generate a deterministic environment.
+        Returns:
+          observation: A dict containing the full observation state.
+        """
+        raise NotImplementedError("Not implemented in Abstract Base class")
 
-  def step(self, action):
-    """Take one step in the game.
-    Args:
-      action: object, mapping to an action taken by an agent.
-    Returns:
-      observation: object, Containing full observation state.
-      reward: float, Reward obtained from taking the action.
-      done: bool, Whether the game is done.
-      info: dict, Optional debugging information.
-    Raises:
-      AssertionError: When an illegal action is provided.
-    """
-    raise NotImplementedError("Not implemented in Abstract Base class")
-
+    def step(self, action):
+        """Take one step in the game.
+        Args:
+          action: object, mapping to an action taken by an agent.
+        Returns:
+          observation: object, Containing full observation state.
+          reward: float, Reward obtained from taking the action.
+          done: bool, Whether the game is done.
+          info: dict, Optional debugging information.
+        Raises:
+          AssertionError: When an illegal action is provided.
+        """
+        raise NotImplementedError("Not implemented in Abstract Base class")
 
 
 class WrapperPokerRL(Wrapper):
@@ -62,6 +61,8 @@ class WrapperPokerRL(Wrapper):
         if not self._player_hands:
             for i in range(self.env.N_SEATS):
                 self._player_hands.append(self.env.get_hole_cards_of_player(i))
+        # todo move this to proper location
+        self._after_reset()
 
         return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
 
@@ -79,6 +80,7 @@ class WrapperPokerRL(Wrapper):
         # step environment
         env_obs, rew_for_all_players, done, info = self.env.step(action)
 
+        self._after_step(action)
         # call get_current_obs of derived class
         return self._return_obs(env_obs=env_obs, rew_for_all_players=rew_for_all_players, done=done, info=info)
 
@@ -112,6 +114,12 @@ class WrapperPokerRL(Wrapper):
         raise NotImplementedError
 
     def _before_reset(self, config):
+        raise NotImplementedError
+
+    def _after_step(self, action):
+        raise NotImplementedError
+
+    def _after_reset(self):
         raise NotImplementedError
 
     def get_current_obs(self, env_obs):

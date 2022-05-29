@@ -1,5 +1,5 @@
-class Generator:
-    """ Abstract Generator Interface. All generators should be derived from this base class
+class TrainingDataGenerator:
+    """ Abstract TrainingDataGenerator Interface. All generators should be derived from this base class
     and implement the method "generate_from_file"."""
     def generate_from_file(self, abs_filepath):
         """Invokes a Parser to generate PokerEpisode instances.

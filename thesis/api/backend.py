@@ -1,7 +1,7 @@
 from typing import Optional, List, Dict, Any
 
 from PokerRL import NoLimitHoldem
-from src.env_package_mock.env_wrapper import AugmentObservationWrapper
+from PokerRL.game.wrappers import AugmentObservationWrapper
 
 
 class Backend:

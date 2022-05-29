@@ -10,11 +10,11 @@ from azureml.core import Experiment
 from azureml.core import Workspace
 
 from thesis.baselines.supervised_learning.data.core.encoder import Encoder
-from thesis.baselines.supervised_learning.data.core.generator import Generator
+from thesis.baselines.supervised_learning.data.core.generator import TrainingDataGenerator
 from thesis.baselines.supervised_learning.data.core.parser import Parser
 
 
-class CsvGenerator(Generator):
+class CsvTrainingDataGenerator(TrainingDataGenerator):
     """This handles creation and population of training data folders, containing encoded
     PokerEpisode instances. These encodings can be used for supervised learning. """
 
