@@ -61,30 +61,42 @@ class ActionHistoryWrapper(WrapperPokerRL):
         self._player_hands = []
         self._rounds = ['preflop', 'flop', 'turn', 'river']
         self._actions_per_stage = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
-        self._player_who_acted = None
+
+        self._next_player_who_gets_observation = None
         # experimental
         self._actions_per_stage_discretized = ActionHistory(max_players=6, max_actions_per_player_per_stage=2)
 
     # _______________________________ Overridden ________________________________
     def _before_step(self, action):
         """
-        Steps the environment from an action of the natural action representation to the environment.
-
-        Returns:
-            obs, reward, done, info
         """
+        pass
+
+    def _after_step(self, action):
+        """Called before observation is computed by vectorizer"""
         # store action in history buffer
         self._pushback_action(action,
                               player_who_acted=self.env.current_player.seat_id,
                               in_which_stage=self.env.current_round)
-        self._player_who_acted = self.env.current_player.seat_id
+        self._next_player_who_gets_observation = self.env.current_player.seat_id
 
     def _before_reset(self, config=None):
+        """Called before observation is computed by vectorizer"""
         # for the initial case of the environment reset, we manually put player index to 0
+        # the player index is used to roll the observation bits relative to the acting player, so that each
+        # observation structure is the same for all agents
+        # after resetting, since no agent acted yet, we set `self._next_player_who_gets_observation` to zero,
+        # indicating that we do not want to roll the initial observation of the environment after resetting
+        # todo this should be not 0 but the first player to act
+        # todo above todo is done but docs should be updated
         # so that observation will be rolled relative to self
         if config is not None:
             self._player_hands = config['deck_state_dict']['hand']
-        self._player_who_acted = 0
+
+
+
+    def _after_reset(self):
+        self._next_player_who_gets_observation = self.env.current_player.seat_id
 
     # _______________________________ Action History ________________________________
 
@@ -137,8 +149,7 @@ class AugmentObservationWrapper(ActionHistoryWrapper):
                                                obs_idx_dict=self.env.obs_idx_dict,
                                                # btn pos used to return obs relative to self
                                                btn_pos=self.env.BTN_POS)
-
-    def set_args(self, args):
+    def overwrite_args(self, args):
         self.env.set_args(args)
         self._normalization_sum = float(
             sum([s.starting_stack_this_episode for s in self.env.seats])
@@ -151,7 +162,12 @@ class AugmentObservationWrapper(ActionHistoryWrapper):
                                                btn_pos=self.env.BTN_POS)
 
     def get_current_obs(self, env_obs):
-        obs = self._vectorizer.vectorize(env_obs, self._player_who_acted, action_history=self._actions_per_stage,
+        """
+        Args:
+            env_obs: the observation returned by the base PokerEnv.
+            The len(env_obs) is a function of the number of players.
+        """
+        obs = self._vectorizer.vectorize(env_obs, self._next_player_who_gets_observation, action_history=self._actions_per_stage,
                                          player_hands=self._player_hands, normalization=self._normalization_sum)
         # self.print_augmented_obs(obs)
         return obs
